@@ -1,0 +1,15 @@
+5	3	2	3	3	3	
+triangular	baixa	2.5000002	4.3	6.1000004	
+triangular	media	4.3	6.1000004	7.9000006	
+triangular	alta	6.1000004	7.9000006	9.700001	
+triangular	baixa	-0.4000001	2.0	4.4	
+triangular	alta	2.0	4.4	6.8	
+triangular	baixa	-1.95	1.0	3.95	
+triangular	media	1.0	3.95	6.9	
+triangular	alta	3.95	6.9	9.85	
+triangular	baixa	-1.1	0.1	1.3000001	
+triangular	media	0.100000024	1.3000001	2.5	
+triangular	alta	1.3000001	2.5	3.7	
+triangular	1	1	1	1	
+triangular	2	2	2	2	
+triangular	3	3	3	3	

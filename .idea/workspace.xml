@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ba096b67-f812-4890-a513-1779a500aae4" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="FuzzyProject">
+      <favorite_root url="main.java.FuzzyProject.FuzzyDecisionTree" module="FuzzyProject" type="class" klass="com.intellij.ide.favoritesTreeView.smartPointerPsiNodes.ClassSmartPointerNode" />
+    </favorites_list>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1V452korNJnNg4HItdpmzD80cWC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../weka.jar!/" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/FuzzyProject" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="FuzzyDecisionTree" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="main.java.FuzzyProject.FuzzyDecisionTree" />
+      <module name="FuzzyProject" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="main.java.FuzzyProject.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.FuzzyDecisionTree" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ba096b67-f812-4890-a513-1779a500aae4" name="Default Changelist" comment="" />
+      <created>1576499321366</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1576499321366</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="303" y="58" width="800" height="677" key="#Project_Structure" timestamp="1576499331288">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="303" y="58" width="800" height="677" key="#Project_Structure/51.27.1315.741@51.27.1315.741" timestamp="1576499331288" />
+    <state x="516" y="83" width="374" height="626" key="#com.intellij.ide.util.MemberChooser" timestamp="1576878826713">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="516" y="83" width="374" height="626" key="#com.intellij.ide.util.MemberChooser/51.27.1315.741@51.27.1315.741" timestamp="1576878826713" />
+    <state x="453" y="27" width="489" height="741" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1576876527223">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="453" y="27" width="489" height="741" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/51.27.1315.741@51.27.1315.741" timestamp="1576876527223" />
+    <state width="471" height="466" key="DebuggerActiveHint" timestamp="1576874194652">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="471" height="466" key="DebuggerActiveHint/51.27.1315.741@51.27.1315.741" timestamp="1576874194652" />
+    <state x="486" y="155" width="424" height="484" key="FileChooserDialogImpl" timestamp="1576503344542">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="486" y="155" width="424" height="484" key="FileChooserDialogImpl/51.27.1315.741@51.27.1315.741" timestamp="1576503344542" />
+    <state width="1269" height="175" key="GridCell.Tab.0.bottom" timestamp="1577023158312">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="1269" height="175" key="GridCell.Tab.0.bottom/51.27.1315.741@51.27.1315.741" timestamp="1577023158312" />
+    <state width="1269" height="175" key="GridCell.Tab.0.center" timestamp="1577023158312">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="1269" height="175" key="GridCell.Tab.0.center/51.27.1315.741@51.27.1315.741" timestamp="1577023158312" />
+    <state width="1269" height="175" key="GridCell.Tab.0.left" timestamp="1577023158311">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="1269" height="175" key="GridCell.Tab.0.left/51.27.1315.741@51.27.1315.741" timestamp="1577023158311" />
+    <state width="1269" height="175" key="GridCell.Tab.0.right" timestamp="1577023158312">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="1269" height="175" key="GridCell.Tab.0.right/51.27.1315.741@51.27.1315.741" timestamp="1577023158312" />
+    <state width="612" height="219" key="GridCell.Tab.1.bottom" timestamp="1576948103759">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="612" height="219" key="GridCell.Tab.1.bottom/51.27.1315.741@51.27.1315.741" timestamp="1576948103759" />
+    <state width="612" height="219" key="GridCell.Tab.1.center" timestamp="1576948103758">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="612" height="219" key="GridCell.Tab.1.center/51.27.1315.741@51.27.1315.741" timestamp="1576948103758" />
+    <state width="612" height="219" key="GridCell.Tab.1.left" timestamp="1576948103758">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="612" height="219" key="GridCell.Tab.1.left/51.27.1315.741@51.27.1315.741" timestamp="1576948103758" />
+    <state width="612" height="219" key="GridCell.Tab.1.right" timestamp="1576948103759">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state width="612" height="219" key="GridCell.Tab.1.right/51.27.1315.741@51.27.1315.741" timestamp="1576948103759" />
+    <state x="191" y="27" width="1024" height="741" key="SettingsEditor" timestamp="1576503349646">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="191" y="27" width="1024" height="741" key="SettingsEditor/51.27.1315.741@51.27.1315.741" timestamp="1576503349646" />
+    <state x="678" y="225" key="com.intellij.ide.util.TipDialog" timestamp="1576948447015">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="678" y="225" key="com.intellij.ide.util.TipDialog/51.27.1315.741@51.27.1315.741" timestamp="1576948447015" />
+    <state x="51" y="27" width="869" height="741" key="find.popup" timestamp="1576874608702">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="51" y="27" width="869" height="741" key="find.popup/51.27.1315.741@51.27.1315.741" timestamp="1576874608702" />
+    <state x="51" y="27" width="1305" height="741" key="new project wizard" timestamp="1576500175957">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="51" y="27" width="1305" height="741" key="new project wizard/51.27.1315.741@51.27.1315.741" timestamp="1576500175957" />
+    <state x="372" y="175" key="run.anything.popup" timestamp="1576680768005">
+      <screen x="51" y="27" width="1315" height="741" />
+    </state>
+    <state x="372" y="175" key="run.anything.popup/51.27.1315.741@51.27.1315.741" timestamp="1576680768005" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/FDT.java</url>
+          <line>848</line>
+          <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/FDT.java</url>
+          <line>842</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/FDT.java</url>
+          <line>2023</line>
+          <option name="timeStamp" value="77" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/FDT.java</url>
+          <line>2026</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/FDT.java</url>
+          <line>1957</line>
+          <option name="timeStamp" value="79" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/gera10Folds.java</url>
+          <line>9</line>
+          <option name="timeStamp" value="80" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/wrapperWM.java</url>
+          <line>1331</line>
+          <option name="timeStamp" value="114" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/wrapperWM.java</url>
+          <line>1302</line>
+          <option name="timeStamp" value="115" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/wrapperWM.java</url>
+          <line>1330</line>
+          <option name="timeStamp" value="116" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/FuzzyProject/FuzzyDT/manipulaArquivos.java</url>
+          <line>485</line>
+          <option name="timeStamp" value="117" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

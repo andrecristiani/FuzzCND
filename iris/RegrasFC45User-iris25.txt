@@ -1,0 +1,8 @@
+iris - Total: 5 rules.
+
+IF PetalWidth IS baixa THEN CLASS IS 1
+IF PetalLength IS baixa  AND PetalWidth IS media THEN CLASS IS 3
+IF PetalLength IS media  AND PetalWidth IS media THEN CLASS IS 3
+IF PetalLength IS alta  AND PetalWidth IS media THEN CLASS IS 2
+IF PetalWidth IS alta THEN CLASS IS 2
+

@@ -1,0 +1,8 @@
+5
+5
+dc	dc	dc	baixa	1	
+dc	dc	baixa	media	3	
+dc	dc	media	media	3	
+dc	dc	alta	media	2	
+dc	dc	dc	alta	2	
+
