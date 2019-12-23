@@ -13,18 +13,19 @@ import java.nio.file.Path;
 import java.util.StringTokenizer;
 
 public class ConverteArquivos {
-    static int numExemplos;
-    static String[] exemplos;
+    int numExemplos;
+    String[] exemplos;
     static String[][] atribs;
     static int numAtribs;
-    private static Object path;
+    private Object path;
 
     public ConverteArquivos() {
+        numAtribs = 0;
     }
 
-    public void main(String arquivo) throws FileNotFoundException, IOException {
+    public void main(String arquivo, int numClassificador) throws FileNotFoundException, IOException {
         String current = (new File(".")).getCanonicalPath();
-        String arquivoOriginal = arquivo + ".dat";
+        String arquivoOriginal = arquivo + numClassificador + ".dat";
         String arq = current + "/" + arquivo + "/" + arquivoOriginal;
         new File(current + "/" + arquivo);
         (new File(current + "/" + arquivo)).mkdir();
@@ -54,56 +55,58 @@ public class ConverteArquivos {
         String temp;
         try {
             String line = inReader.readLine();
-            str = new StringTokenizer(line);
-            String nomeBaseDeDados = str.nextToken();
-            nomeBaseDeDados = str.nextToken();
-            atribs = new String[200][2];
-            i = 0;
-            line = inReader.readLine();
-            str = new StringTokenizer(line);
-            ++numAtribs;
-            str.nextToken();
-
             int m;
-            do {
-                atribs[i][0] = str.nextToken();
-                temp = str.nextToken();
-                if (temp.contains("real")) {
-                    atribs[i][1] = "real";
-                } else if (temp.contains("integer")) {
-                    atribs[i][1] = "integer";
-                } else {
-                    int y;
-                    String valoresAtrib;
-                    if (temp.contains("{")) {
-                        y = str.countTokens();
-
-                        for(m = 0; m < y; ++m) {
-                            temp = temp + str.nextToken() + " ";
-                        }
-
-                        valoresAtrib = temp.replaceAll("\\{", "");
-                        temp = valoresAtrib.replaceAll(",", " ");
-                        valoresAtrib = temp.replaceAll("\\}", "");
-                        atribs[i][1] = valoresAtrib;
-                    } else {
-                        y = str.countTokens();
-                        valoresAtrib = temp + " ";
-
-                        for(int h = 0; h < y; ++h) {
-                            valoresAtrib = valoresAtrib + str.nextToken() + " ";
-                        }
-
-                        String temp2 = valoresAtrib.replace(",", " ");
-                        atribs[i][1] = temp2;
-                    }
-                }
-
-                ++i;
+            if(numAtribs == 0) {
+                str = new StringTokenizer(line);
+                String nomeBaseDeDados = str.nextToken();
+                nomeBaseDeDados = str.nextToken();
+                atribs = new String[200][2];
+                i = 0;
                 line = inReader.readLine();
                 str = new StringTokenizer(line);
                 ++numAtribs;
-            } while("@attribute".equals(str.nextToken()));
+                str.nextToken();
+
+                do {
+                    atribs[i][0] = str.nextToken();
+                    temp = str.nextToken();
+                    if (temp.contains("real")) {
+                        atribs[i][1] = "real";
+                    } else if (temp.contains("integer")) {
+                        atribs[i][1] = "integer";
+                    } else {
+                        int y;
+                        String valoresAtrib;
+                        if (temp.contains("{")) {
+                            y = str.countTokens();
+
+                            for(m = 0; m < y; ++m) {
+                                temp = temp + str.nextToken() + " ";
+                            }
+
+                            valoresAtrib = temp.replaceAll("\\{", "");
+                            temp = valoresAtrib.replaceAll(",", " ");
+                            valoresAtrib = temp.replaceAll("\\}", "");
+                            atribs[i][1] = valoresAtrib;
+                        } else {
+                            y = str.countTokens();
+                            valoresAtrib = temp + " ";
+
+                            for(int h = 0; h < y; ++h) {
+                                valoresAtrib = valoresAtrib + str.nextToken() + " ";
+                            }
+
+                            String temp2 = valoresAtrib.replace(",", " ");
+                            atribs[i][1] = temp2;
+                        }
+                    }
+
+                    ++i;
+                    line = inReader.readLine();
+                    str = new StringTokenizer(line);
+                    ++numAtribs;
+                } while("@attribute".equals(str.nextToken()));
+            }
 
             line = inReader.readLine();
             new StringTokenizer(line);
@@ -135,8 +138,6 @@ public class ConverteArquivos {
                 exemplos[m] = lixo;
                 temp = "";
             }
-
-            System.out.println("Database: " + nomeBaseDeDados);
             inReader.close();
         } catch (IOException var26) {
             System.err.println(var26.getMessage());
@@ -147,7 +148,7 @@ public class ConverteArquivos {
         FileWriter writer;
         BufferedWriter buf_writer;
         try {
-            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + ".txt");
+            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".txt");
             buf_writer = new BufferedWriter(writer);
 
             for(i = 0; i < numExemplos; ++i) {
@@ -164,7 +165,7 @@ public class ConverteArquivos {
         str = null;
 
         try {
-            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + ".names");
+            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".names");
             buf_writer = new BufferedWriter(writer);
 
             for(i = 0; i < numAtribs - 1; ++i) {

@@ -24,7 +24,7 @@ public class FDT {
     public FDT() {
     }
 
-    public void geraArvore(String dataset, int rodada, String caminho, boolean imprimeDF, String metodoRaciocinio) {
+    public void geraArvore(String dataset, int rodada, String caminho, String metodoRaciocinio) {
         String particao = caminho + "particao" + dataset + ".txt";
         manipulaArquivos mA = new manipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + rodada + ".txt");
@@ -90,213 +90,9 @@ public class FDT {
             }
 
             dadosFuzzificados[i][nVE] = "" + this.menorGdP(grauPertinenciaRegra, nVE);
-        }
-
-        if (imprimeDF) {
-            System.out.println("\n\nDados fuzzificados");
-
-            for(i = 0; i < numObjetos; ++i) {
-                String temp = "";
-
-                for(b = 0; b < nVE; ++b) {
-                    if (b < nVE - 1) {
-                        temp = temp + dadosFuzzificados[i][b] + ",";
-                    } else {
-                        temp = temp + dadosFuzzificados[i][b];
-                    }
-                }
-
-                System.out.println(temp);
-            }
-
-            System.out.println("terminou");
         }
 
         mA.gravaArquivoARFF(dadosFuzzificados, caminho, dataset, numObjetos, nVE);
-    }
-
-    public void geraArvoreNumTermosFixo(String dataset, int rodada, String caminho, boolean imprimeDF, String metodoRaciocinio, int numTermos) {
-        String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
-        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + rodada + ".txt");
-        int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
-        int numConjuntos = mA.getNumConjuntos(particao);
-        particaoFDT = new String[numConjuntos + 1][nVE + 2];
-        mA.carregaParticao(particaoFDT, particao, nVE, numConjuntos);
-        treinamento = new float[numObjetos][nVE];
-        mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", nVE);
-//        int indice = false;
-        dadosFuzzificados = new String[numObjetos][nVE + 1];
-        calculaGdCobertura cG = new calculaGdCobertura();
-        Vector part = new Vector(1);
-        Vector part1 = new Vector(1);
-        Vector part2 = new Vector(1);
-        boolean flag = true;
-        float[] grauPertinenciaRegra = new float[nVE];
-        String[] resultados = new String[2];
-        String[][] metaDados = new String[nVE][100];
-        mA.getMetaDados(caminho + dataset + ".names", nVE);
-        DecimalFormat formatador = new DecimalFormat();
-        formatador.applyPattern("0.000");
-
-        int i;
-        int b;
-        for(i = 0; i < numObjetos; ++i) {
-            for(int j = 0; j < nVE; ++j) {
-                int indice = 1;
-                if (j != 0) {
-                    for(b = 1; b <= j; ++b) {
-                        indice += Integer.parseInt(particaoFDT[0][b]);
-                    }
-                }
-
-                for(b = 1; b <= Integer.parseInt(particaoFDT[0][j + 1]); ++b) {
-                    part.clear();
-                    int d;
-                    if (particaoFDT[indice][0].equals("triangular")) {
-                        for(d = 2; d < 5; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if (particaoFDT[indice][0].equals("trapezoidal")) {
-                        for(d = 2; d < 6; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if ((double)treinamento[i][j] != -11111.0D) {
-                        float grau = cG.calculaGrauRegra(treinamento[i][j], particaoFDT[indice][0], part);
-                        part1.add(grau);
-                        part2.add(particaoFDT[indice][1]);
-                    }
-
-                    ++indice;
-                }
-
-                resultados = this.maior(part1, part2);
-                dadosFuzzificados[i][j] = resultados[0];
-                grauPertinenciaRegra[j] = Float.parseFloat(resultados[1]);
-                part1.clear();
-                part2.clear();
-            }
-
-            dadosFuzzificados[i][nVE] = "" + this.menorGdP(grauPertinenciaRegra, nVE);
-        }
-
-        if (imprimeDF) {
-            System.out.println("\n\nDados fuzzificados");
-
-            for(i = 0; i < numObjetos; ++i) {
-                String temp = "";
-
-                for(b = 0; b < nVE; ++b) {
-                    if (b < nVE - 1) {
-                        temp = temp + dadosFuzzificados[i][b] + ",";
-                    } else {
-                        temp = temp + dadosFuzzificados[i][b];
-                    }
-                }
-
-                System.out.println(temp);
-            }
-
-            System.out.println("terminou");
-        }
-
-        mA.gravaArquivoARFFComNumCjtosFuzzyFixo(dadosFuzzificados, caminho, dataset, numObjetos, nVE, numTermos);
-    }
-
-    public void geraArvoreNumTermosFixoNFold(String dataset, int rodada, String caminho, boolean imprimeDF, String metodoRaciocinio, int numTermos) {
-        String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
-        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + rodada + ".txt");
-        int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
-        int numConjuntos = mA.getNumConjuntos(particao);
-        particaoFDT = new String[numConjuntos + 1][nVE + 2];
-        mA.carregaParticao(particaoFDT, particao, nVE, numConjuntos);
-        treinamento = new float[numObjetos][nVE];
-        mA.carregaArquivoTreinamento2(treinamento, caminho + dataset + "-treinamento" + rodada + ".txt", nVE);
-//        int indice = false;
-        dadosFuzzificados = new String[numObjetos][nVE + 1];
-        calculaGdCobertura cG = new calculaGdCobertura();
-        Vector part = new Vector(1);
-        Vector part1 = new Vector(1);
-        Vector part2 = new Vector(1);
-        boolean flag = true;
-        float[] grauPertinenciaRegra = new float[nVE];
-        String[] resultados = new String[2];
-        String[][] metaDados = new String[nVE][100];
-        mA.getMetaDados(caminho + dataset + ".names", nVE);
-        DecimalFormat formatador = new DecimalFormat();
-        formatador.applyPattern("0.000");
-
-        int i;
-        int b;
-        for(i = 0; i < numObjetos; ++i) {
-            for(int j = 0; j < nVE; ++j) {
-                int indice = 1;
-                if (j != 0) {
-                    for(b = 1; b <= j; ++b) {
-                        indice += Integer.parseInt(particaoFDT[0][b]);
-                    }
-                }
-
-                for(b = 1; b <= Integer.parseInt(particaoFDT[0][j + 1]); ++b) {
-                    part.clear();
-                    int d;
-                    if (particaoFDT[indice][0].equals("triangular")) {
-                        for(d = 2; d < 5; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if (particaoFDT[indice][0].equals("trapezoidal")) {
-                        for(d = 2; d < 6; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if ((double)treinamento[i][j] != -11111.0D) {
-                        float grau = cG.calculaGrauRegra(treinamento[i][j], particaoFDT[indice][0], part);
-                        part1.add(grau);
-                        part2.add(particaoFDT[indice][1]);
-                    }
-
-                    ++indice;
-                }
-
-                resultados = this.maior(part1, part2);
-                dadosFuzzificados[i][j] = resultados[0];
-                grauPertinenciaRegra[j] = Float.parseFloat(resultados[1]);
-                part1.clear();
-                part2.clear();
-            }
-
-            dadosFuzzificados[i][nVE] = "" + this.menorGdP(grauPertinenciaRegra, nVE);
-        }
-
-        if (imprimeDF) {
-            System.out.println("\n\nDados fuzzificados");
-
-            for(i = 0; i < numObjetos; ++i) {
-                String temp = "";
-
-                for(b = 0; b < nVE; ++b) {
-                    if (b < nVE - 1) {
-                        temp = temp + dadosFuzzificados[i][b] + ",";
-                    } else {
-                        temp = temp + dadosFuzzificados[i][b];
-                    }
-                }
-
-                System.out.println(temp);
-            }
-
-            System.out.println("terminou");
-        }
-
-        mA.gravaArquivoARFFComNumCjtosFuzzyFixo(dadosFuzzificados, caminho, dataset, numObjetos, nVE, numTermos);
     }
 
     public String geraArvore2(Integer[] atribs, String[][] dF, String[][] ter, String[][] particao, int numOb, int nVE, int numClasses, String[] classes, String cabeca, String[][] metaDados) {
@@ -592,31 +388,6 @@ public class FDT {
         return s1;
     }
 
-    public String[] maior2(Vector grausDeCobertura, Vector variaveisLinguisticas) {
-        int indice = 0;
-        String[] s1 = new String[2];
-
-        float v1;
-        for(int i = 1; i < grausDeCobertura.size(); ++i) {
-            v1 = (Float)grausDeCobertura.get(i);
-            float v2 = (Float)grausDeCobertura.get(indice);
-            if (v1 > v2) {
-                indice = i;
-            }
-
-            if ((double)v1 < 0.51D && (double)v1 > 0.49D && (double)v2 < 0.51D && (double)v2 > 0.49D) {
-                s1[1] = "0.5";
-                s1[0] = "duplicado  " + variaveisLinguisticas.get(0) + "  " + variaveisLinguisticas.get(1);
-                return s1;
-            }
-        }
-
-        s1[0] = (String)variaveisLinguisticas.get(indice);
-        v1 = (Float)grausDeCobertura.get(indice);
-        s1[1] = Float.toString(v1);
-        return s1;
-    }
-
     private float menorGdP(float[] grauPertinenciaRegra, int numGraus) {
         int indice = 0;
         if (numGraus < 2) {
@@ -665,8 +436,6 @@ public class FDT {
 
     private String[][] converteRegrasParaRegrasPadrao(String[] regras, int numRegras, int nVE, String[][] metaDados) {
         String[][] regrasPadrao = new String[numRegras][nVE];
-        System.out.println("NumRegras: " + numRegras);
-        System.out.println("nVE: " + nVE);
         int a;
         for(a = 0; a < numRegras; ++a) {
             for(int b = 0; b < nVE - 1; ++b) {
@@ -880,13 +649,13 @@ public class FDT {
         return 1.0F - precisao;
     }
 
-    public void rodaArvore(String dataset, String caminho, int numTermos, boolean imprimeDadosFuzzificados) {
+    public void rodaArvore(String dataset, String caminho, int numTermos) {
         float[] precisao = new float[10];
         int rodadas = 1;
         String metodoRaciocinio = "classico";
 
         for(int a = 0; a < rodadas; ++a) {
-            this.geraArvore(dataset, a, caminho, imprimeDadosFuzzificados, metodoRaciocinio);
+            this.geraArvore(dataset, a, caminho, metodoRaciocinio);
         }
 
         System.out.println("\n\n\n\n\n\n\n\nValores de TCC: \n");
@@ -920,33 +689,20 @@ public class FDT {
         System.out.println("\t" + numRegrasAD + "\t" + mF.format((double)numMedioConjuncoes));
     }
 
-    public void geraFuzzyDecisionTree(String dataset, String funcao, String taxaPoda, int numCjtos, String caminho) throws Exception {
+    public void geraFuzzyDecisionTree(String dataset, String taxaPoda, int numCjtos, String caminho) throws Exception {
         J48 j48 = new J48();
-        boolean imprimeDadosFuzzificados = true;
         manipulaArquivos mA = new manipulaArquivos();
         String metodoRaciocinio = "classico";
         float[] precisao = new float[10];
 
         for(int b = 0; b < 10; ++b) {
             Particoes pt = new Particoes();
-            if (funcao.compareTo("rf") == 0 || funcao.compareTo("infogain") == 0) {
-                this.calculaValorInfoGainRFUmDataset(dataset, funcao, caminho, b);
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            }
 
-            if (funcao.compareTo("wm") == 0) {
-                wrapperWM wWM = new wrapperWM();
-                wWM.classificaAtribsWMUmFold(dataset, caminho, b);
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            }
+            wrapperWM wWM = new wrapperWM();
+            wWM.classificaAtribsWMUmFold(dataset, caminho, b);
+            pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
 
-            if (funcao.compareTo("fixed") == 0) {
-                pt.geraParticao(dataset, numCjtos, caminho);
-                mA.gravaDadosParticao(dataset, numCjtos, caminho);
-            }
-
-//            this.geraArvore(dataset, 0, caminho, imprimeDadosFuzzificados, metodoRaciocinio);
-            this.geraFuzzyDT(dataset, 0, caminho);
+            this.geraArvore(dataset, 0, caminho, metodoRaciocinio);
             DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
             Instances instances = source.getDataSet();
             instances.setClassIndex(instances.numAttributes() - 1);
@@ -965,324 +721,6 @@ public class FDT {
         mF.applyPattern("########0.00");
         System.out.println("Error: \tStandard Deviation: ");
         System.out.println(mF.format((double)(100.0F - 100.0F * res[1])) + "\t" + mF.format((double)res[0]));
-    }
-
-    void geraFuzzyDT(String dataset, String caminho, String funcao) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
-        J48 j48 = new J48();
-        DecimalFormat mF = new DecimalFormat();
-        mF.applyPattern("########0.00");
-        boolean imprimeDadosFuzzificados = false;
-        String metodoRaciocinio = "classico";
-        Particoes pt = new Particoes();
-        if (funcao.compareTo("rf") != 0 && funcao.compareTo("infogain") != 0) {
-            if (funcao.compareTo("wm") == 0) {
-                wrapperWM wWM = new wrapperWM();
-                wWM.classificaPorWM(dataset, caminho, 2);
-                System.out.println("ok inté qui");
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            } else {
-                System.out.println("Particao fixa com " + Integer.parseInt(funcao) + " conjuntos fuzzy");
-                pt.geraParticaoFDT(dataset, Integer.parseInt(funcao), caminho);
-                String dados = "";
-                int numAtribs = mA.getNumeroVariaveisEntradaArqTreinamento2(dataset + ".txt");
-
-                for(int a = 1; a < numAtribs; ++a) {
-                    dados = dados + funcao + "\t";
-                }
-
-                this.gravaDadosParticao(caminho, dataset, dados);
-            }
-        } else {
-            this.calculaINFOGAIN(dataset, funcao, caminho);
-            pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-        }
-
-        this.geraFDT(dataset, 0, caminho, imprimeDadosFuzzificados, metodoRaciocinio);
-        DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
-        Instances instances = source.getDataSet();
-        instances.setClassIndex(instances.numAttributes() - 1);
-        j48.buildClassifier(instances);
-        String arvoreJ48 = j48.toString();
-        String taxaPoda = "";
-        float[] results = new float[2];
-        results = this.inferenciaFDT(dataset, caminho, taxaPoda, arvoreJ48);
-        int regras = (int)results[1];
-        arvoreJ48 = arvoreJ48 + "\nError: " + mF.format((double)(100.0F * results[0])) + " %\nRules: " + regras;
-        mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreFuzzyDT.txt");
-    }
-
-    void geraFuzzyDecisionTreeComFSS(String dataset, String caminho, int a) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
-        J48 j48 = new J48();
-        boolean imprimeDadosFuzzificados = false;
-        String metodoRaciocinio = "classico";
-        float confidence = 0.25F;
-        String funcao = "wm";
-
-        for(int b = 0; b < 10; ++b) {
-            Particoes pt = new Particoes();
-            if (funcao.compareTo("rf") == 0 || funcao.compareTo("infogain") == 0) {
-                this.calculaValorInfoGainRFUmDataset(dataset, funcao, caminho, b);
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            }
-
-            if (funcao.compareTo("wm") == 0) {
-                wrapperWM wWM = new wrapperWM();
-                wWM.classificaAtribsWMUmFold(dataset, caminho, b);
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            }
-
-            if (funcao.compareTo("fixa") == 0) {
-                pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-            }
-
-            this.geraArvore(dataset, 0, caminho, imprimeDadosFuzzificados, metodoRaciocinio);
-            DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
-            Instances instances = source.getDataSet();
-            instances.setClassIndex(instances.numAttributes() - 1);
-            j48.buildClassifier(instances);
-            j48.setConfidenceFactor(confidence);
-            String arvoreJ48 = j48.toString();
-            String taxaPoda = "";
-            this.inferenciaAD(dataset, caminho, taxaPoda, arvoreJ48);
-            mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreFDT.txt");
-        }
-
-    }
-
-    void geraFuzzyDecisionTreeSemDadosParticao(String[] datasets) throws Exception {
-        int numDatasets = datasets.length;
-        manipulaArquivos mA = new manipulaArquivos();
-        J48 j48 = new J48();
-        int numTermos = 3;
-        float confidence = 0.25F;
-
-        for(int a = 0; a < numDatasets; ++a) {
-            String caminho = "c:/users/MARCOS/dropbox/SFuzzySemIG/datasets/" + datasets[a] + "/";
-            boolean imprimeDadosFuzzificados = false;
-            String metodoRaciocinio = "classico";
-            Particoes pt = new Particoes();
-            pt.geraParticao(datasets[a], numTermos, caminho);
-            this.geraArvoreNumTermosFixo(datasets[a], 0, caminho, imprimeDadosFuzzificados, metodoRaciocinio, numTermos);
-            DataSource source = new DataSource(caminho + datasets[a] + "Fuzzy.arff");
-            Instances instances = source.getDataSet();
-            j48.setConfidenceFactor(confidence);
-            instances.setClassIndex(instances.numAttributes() - 1);
-            j48.buildClassifier(instances);
-            String arvoreJ48 = j48.toString();
-            String taxaPoda = "";
-            this.inferenciaAD(datasets[a], caminho, taxaPoda, arvoreJ48);
-            mA.gravaArvore(arvoreJ48, caminho + datasets[a] + "ArvoreJ48.txt");
-        }
-
-    }
-
-    void geraFuzzyDecisionTreeSemDadosParticaoFSS(String dataset, String caminho, int a) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
-        J48 j48 = new J48();
-        int numTermos = 3;
-        boolean imprimeDadosFuzzificados = false;
-        String metodoRaciocinio = "classico";
-        Particoes pt = new Particoes();
-        pt.geraParticao(dataset, numTermos, caminho);
-        float[] erros = new float[10];
-        float confidence = 0.25F;
-
-        for(int b = 0; b < 10; ++b) {
-            this.geraArvoreNumTermosFixoNFold(dataset, b, caminho, imprimeDadosFuzzificados, metodoRaciocinio, numTermos);
-            DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
-            Instances instances = source.getDataSet();
-            instances.setClassIndex(instances.numAttributes() - 1);
-            j48.buildClassifier(instances);
-            j48.setConfidenceFactor(confidence);
-            String arvoreJ48 = j48.toString();
-            String taxaPoda = "";
-            float erro = this.inferenciaADNFolds(dataset, caminho, taxaPoda, arvoreJ48, b);
-            mA.gravaArvore(arvoreJ48, caminho + dataset + "_" + b + "_ArvoreJ48.txt");
-            erros[b] = erro;
-        }
-
-        float[] tccDP = new float[2];
-        tccDP = mA.calculaDesvioPadrao(erros, 10);
-        System.out.println(tccDP[0] * 100.0F + "\t" + tccDP[1] * 100.0F);
-    }
-
-    void geraFuzzyDecisionTreeSemDadosParticaoNFolds(String[] datasets) throws Exception {
-        int numDatasets = datasets.length;
-        int numFolds = 10;
-        manipulaArquivos mA = new manipulaArquivos();
-        J48 j48 = new J48();
-        int numTermos = 3;
-
-        for(int a = 0; a < numDatasets; ++a) {
-            String caminho = "c:/MARCOS/SFuzzySemIG/datasets/" + datasets[a] + "/";
-            boolean imprimeDadosFuzzificados = false;
-            String metodoRaciocinio = "classico";
-            Particoes pt = new Particoes();
-            pt.geraParticao(datasets[a], numTermos, caminho);
-            float[] erros = new float[10];
-            float confidence = 0.25F;
-
-            for(int b = 0; b < numFolds; ++b) {
-                this.geraArvoreNumTermosFixoNFold(datasets[a], b, caminho, imprimeDadosFuzzificados, metodoRaciocinio, numTermos);
-                DataSource source = new DataSource(caminho + datasets[a] + "Fuzzy.arff");
-                Instances instances = source.getDataSet();
-                instances.setClassIndex(instances.numAttributes() - 1);
-                j48.setConfidenceFactor(confidence);
-                j48.buildClassifier(instances);
-                String arvoreJ48 = j48.toString();
-                String taxaPoda = "";
-                float erro = this.inferenciaADNFolds(datasets[a], caminho, taxaPoda, arvoreJ48, b);
-                mA.gravaArvore(arvoreJ48, caminho + datasets[a] + "_" + b + "_ArvoreJ48.txt");
-                erros[b] = erro;
-            }
-
-            float[] tccDP = new float[2];
-            tccDP = mA.calculaDesvioPadrao(erros, 10);
-            System.out.println(tccDP[0] * 100.0F + "\t" + tccDP[1] * 100.0F);
-        }
-
-    }
-
-    void calculaValorInfoGainRF(String[] datasets, String funcao) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
-        int numDatasets = datasets.length;
-        int numMaxFuzzySets = 9;
-        new J48();
-        InfoGainAttributeEval IG = new InfoGainAttributeEval();
-        ReliefFAttributeEval rf = new ReliefFAttributeEval();
-        DecimalFormat formatador = new DecimalFormat();
-        formatador.applyPattern("0.000");
-        double diferenca = 0.0D;
-
-        for(int a = 7; a < 8; ++a) {
-            String caminho = "c:/MARCOS/SFuzzySemIG/datasets/" + datasets[a] + "/";
-            int nve = mA.getNumeroVariaveisEntradaArqTreinamento(caminho + datasets[a] + ".txt");
-            String arqMetaDados = datasets[a] + ".names";
-            String[][] metaDados = new String[nve][100];
-            metaDados = mA.getMetaDados(caminho + arqMetaDados, nve);
-            String[][] resultados = new String[numMaxFuzzySets + 1][nve - 1];
-            int[] tipoAtribs = new int[nve - 1];
-
-            int x;
-            for(int m = 0; m < nve - 1; ++m) {
-                if (metaDados[m][1].compareTo("double") != 0 && metaDados[m][1].compareTo("integer") != 0) {
-                    int temp = 0;
-
-                    for(x = 1; x < 100; ++x) {
-                        if (metaDados[m][x] != null) {
-                            ++temp;
-                        }
-                    }
-
-                    tipoAtribs[m] = temp;
-                } else {
-                    tipoAtribs[m] = 0;
-                }
-            }
-
-            boolean imprimeDadosFuzzificados = false;
-            String metodoRaciocinio = "classico";
-            System.out.println("\n" + datasets[a]);
-
-            for(x = 2; x <= numMaxFuzzySets; ++x) {
-                Particoes pt = new Particoes();
-                pt.geraParticao(datasets[a], x, caminho);
-                this.geraArvoreNumTermosFixo(datasets[a], 0, caminho, imprimeDadosFuzzificados, metodoRaciocinio, x);
-                DataSource source = new DataSource(caminho + datasets[a] + "Fuzzy.arff");
-                Instances instances = source.getDataSet();
-                instances.setClassIndex(instances.numAttributes() - 1);
-                if (funcao.compareTo("infogain") == 0) {
-                    diferenca = 0.005D;
-                    IG.buildEvaluator(instances);
-
-                    for(int v = 0; v < instances.numAttributes() - 1; ++v) {
-                        if (tipoAtribs[v] == 0) {
-                            resultados[x - 2][v] = IG.evaluateAttribute(v) + "";
-                        } else {
-                            resultados[x - 2][v] = tipoAtribs[v] + "";
-                        }
-                    }
-                }
-
-                if (funcao.compareTo("rf") == 0) {
-                    diferenca = 0.005D;
-                    int numRepeticoes = 10;
-                    double[][] results = new double[numRepeticoes][nve - 1];
-
-                    int v;
-                    for(v = 0; v < numRepeticoes; ++v) {
-                        rf.buildEvaluator(instances);
-
-                        for(v = 0; v < instances.numAttributes() - 1; ++v) {
-                            if (tipoAtribs[v] == 0) {
-                                results[v][v] = rf.evaluateAttribute(v);
-                            }
-                        }
-                    }
-
-                    for(v = 0; v < instances.numAttributes() - 1; ++v) {
-                        if (tipoAtribs[v] != 0) {
-                            resultados[x - 2][v] = tipoAtribs[v] + "";
-                        } else {
-                            double temp = 0.0D;
-
-                            for(int z = 0; z < numRepeticoes; ++z) {
-                                temp += results[z][v];
-                            }
-
-                            temp /= (double)numRepeticoes;
-                            resultados[x - 2][v] = temp + "";
-                        }
-                    }
-                }
-            }
-
-            for(x = 0; x < nve - 1; ++x) {
-                float maior = 0.0F;
-                int indice = 0;
-
-                int y;
-                double result;
-                for(y = 0; y < numMaxFuzzySets - 1; ++y) {
-                    result = Double.parseDouble(resultados[y][x]);
-                    if (result > (double)maior) {
-                        maior = Float.parseFloat(resultados[y][x]);
-                        indice = y;
-                    }
-                }
-
-                for(y = numMaxFuzzySets - 2; y >= 0; --y) {
-                    result = Double.parseDouble(resultados[y][x]);
-                    if (result >= (double)maior - diferenca) {
-                        indice = y;
-                    }
-                }
-
-                resultados[numMaxFuzzySets - 1][x] = indice + 2 + "";
-            }
-
-            mA.imprimeMatrizComCabecalho(resultados, numMaxFuzzySets, nve - 1, true);
-            BufferedWriter buf_writer = null;
-
-            try {
-                FileWriter writer = new FileWriter(caminho + datasets[a] + "DadosParticao.txt");
-                buf_writer = new BufferedWriter(writer);
-                String line = "";
-
-                for(int i = 0; i < nve - 1; ++i) {
-                    line = line + resultados[numMaxFuzzySets - 1][i] + "\t";
-                }
-
-                buf_writer.write(line);
-                buf_writer.close();
-            } catch (IOException var32) {
-                System.err.println(var32);
-                System.exit(1);
-            }
-        }
-
     }
 
     void calculaValorInfoGainRFUmDataset(String dataset, String funcao, String caminho, int arqTreino) throws Exception {
@@ -1329,140 +767,6 @@ public class FDT {
             Instances instances = source.getDataSet();
             instances.setClassIndex(instances.numAttributes() - 1);
             if (funcao.compareTo("infogain") == 0) {
-                diferenca = 0.005D;
-                IG.buildEvaluator(instances);
-
-                for(int v = 0; v < instances.numAttributes() - 1; ++v) {
-                    if (tipoAtribs[v] == 0) {
-                        resultados[x - 2][v] = IG.evaluateAttribute(v) + "";
-                    } else {
-                        resultados[x - 2][v] = tipoAtribs[v] + "";
-                    }
-                }
-            }
-
-            if (funcao.compareTo("rf") == 0) {
-                diferenca = 0.005D;
-                int numRepeticoes = 10;
-                double[][] results = new double[numRepeticoes][nve - 1];
-
-                int v;
-                for(v = 0; v < numRepeticoes; ++v) {
-                    rf.buildEvaluator(instances);
-
-                    for(v = 0; v < instances.numAttributes() - 1; ++v) {
-                        if (tipoAtribs[v] == 0) {
-                            results[v][v] = rf.evaluateAttribute(v);
-                        }
-                    }
-                }
-
-                for(v = 0; v < instances.numAttributes() - 1; ++v) {
-                    if (tipoAtribs[v] != 0) {
-                        resultados[x - 2][v] = tipoAtribs[v] + "";
-                    } else {
-                        double temp = 0.0D;
-
-                        for(int z = 0; z < numRepeticoes; ++z) {
-                            temp += results[z][v];
-                        }
-
-                        temp /= (double)numRepeticoes;
-                        resultados[x - 2][v] = temp + "";
-                    }
-                }
-            }
-        }
-
-        for(x = 0; x < nve - 1; ++x) {
-            float maior = 0.0F;
-            int indice = 0;
-
-            int y;
-            double result;
-            for(y = 0; y < numMaxFuzzySets - 1; ++y) {
-                result = Double.parseDouble(resultados[y][x]);
-                if (result > (double)maior) {
-                    maior = Float.parseFloat(resultados[y][x]);
-                    indice = y;
-                }
-            }
-
-            for(y = numMaxFuzzySets - 2; y >= 0; --y) {
-                result = Double.parseDouble(resultados[y][x]);
-                if (result >= (double)maior - diferenca) {
-                    indice = y;
-                }
-            }
-
-            resultados[numMaxFuzzySets - 1][x] = indice + 2 + "";
-        }
-
-        BufferedWriter buf_writer = null;
-
-        try {
-            FileWriter writer = new FileWriter(caminho + dataset + "DadosParticao.txt");
-            buf_writer = new BufferedWriter(writer);
-            String line = "";
-
-            for(int i = 0; i < nve - 1; ++i) {
-                line = line + resultados[numMaxFuzzySets - 1][i] + "\t";
-            }
-
-            buf_writer.write(line);
-            buf_writer.close();
-        } catch (IOException var31) {
-            System.err.println(var31);
-            System.exit(1);
-        }
-
-    }
-
-    void calculaINFOGAIN(String dataset, String funcao, String caminho) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
-        int numMaxFuzzySets = 9;
-        new J48();
-        InfoGainAttributeEval IG = new InfoGainAttributeEval();
-        ReliefFAttributeEval rf = new ReliefFAttributeEval();
-        DecimalFormat formatador = new DecimalFormat();
-        formatador.applyPattern("0.000");
-        double diferenca = 0.0D;
-        int nve = mA.getNumeroVariaveisEntradaArqTreinamento(caminho + dataset + ".txt");
-        String arqMetaDados = dataset + ".names";
-        String[][] metaDados = new String[nve][100];
-        metaDados = mA.getMetaDados(caminho + arqMetaDados, nve);
-        String[][] resultados = new String[numMaxFuzzySets + 1][nve - 1];
-        int[] tipoAtribs = new int[nve - 1];
-
-        int x;
-        for(int m = 0; m < nve - 1; ++m) {
-            if (metaDados[m][1].compareTo("double") != 0 && metaDados[m][1].compareTo("integer") != 0) {
-                int temp = 0;
-
-                for(x = 1; x < 100; ++x) {
-                    if (metaDados[m][x] != null) {
-                        ++temp;
-                    }
-                }
-
-                tipoAtribs[m] = temp;
-            } else {
-                tipoAtribs[m] = 0;
-            }
-        }
-
-        boolean imprimeDadosFuzzificados = false;
-        String metodoRaciocinio = "classico";
-
-        for(x = 2; x <= numMaxFuzzySets; ++x) {
-            Particoes pt = new Particoes();
-            pt.geraParticao(dataset, x, caminho);
-            int arqTreino = -1;
-            this.geraArvoreNumTermosFixoTreinamento(dataset, arqTreino, caminho, imprimeDadosFuzzificados, metodoRaciocinio, x);
-            DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
-            Instances instances = source.getDataSet();
-            instances.setClassIndex(instances.numAttributes() - 1);
-            if (funcao.compareTo("ig") == 0) {
                 diferenca = 0.005D;
                 IG.buildEvaluator(instances);
 
@@ -1649,140 +953,11 @@ public class FDT {
         mA.gravaArquivoARFFComNumCjtosFuzzyFixo(dadosFuzzificados, caminho, dataset, numObjetos, nVE, numTermos);
     }
 
-    public void geraFDT(String dataset, int rodada, String caminho, boolean imprimeDF, String metodoRaciocinio) {
-        String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
-        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
-        int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
-        int numConjuntos = mA.getNumConjuntos(particao);
-        particaoFDT = new String[numConjuntos + 1][nVE + 2];
-        mA.carregaParticao(particaoFDT, particao, nVE, numConjuntos);
-        treinamento = new float[numObjetos][nVE];
-        mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", nVE);
-//        int indice = false;
-        dadosFuzzificados = new String[numObjetos][nVE + 1];
-        calculaGdCobertura cG = new calculaGdCobertura();
-        Vector part = new Vector(1);
-        Vector part1 = new Vector(1);
-        Vector part2 = new Vector(1);
-        boolean flag = true;
-        float[] grauPertinenciaRegra = new float[nVE];
-        String[] resultados = new String[2];
-        String[][] metaDados = new String[nVE][100];
-        mA.getMetaDados(caminho + dataset + ".names", nVE);
-        DecimalFormat formatador = new DecimalFormat();
-        formatador.applyPattern("0.000");
-
-        int i;
-        int b;
-        for(i = 0; i < numObjetos; ++i) {
-            for(int j = 0; j < nVE; ++j) {
-                int indice = 1;
-                if (j != 0) {
-                    for(b = 1; b <= j; ++b) {
-                        indice += Integer.parseInt(particaoFDT[0][b]);
-                    }
-                }
-
-                for(b = 1; b <= Integer.parseInt(particaoFDT[0][j + 1]); ++b) {
-                    part.clear();
-                    int d;
-                    if (particaoFDT[indice][0].equals("triangular")) {
-                        for(d = 2; d < 5; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if (particaoFDT[indice][0].equals("trapezoidal")) {
-                        for(d = 2; d < 6; ++d) {
-                            part.add(particaoFDT[indice][d]);
-                        }
-                    }
-
-                    if ((double)treinamento[i][j] != -11111.0D) {
-                        float grau = cG.calculaGrauRegra(treinamento[i][j], particaoFDT[indice][0], part);
-                        part1.add(grau);
-                        part2.add(particaoFDT[indice][1]);
-                    }
-
-                    ++indice;
-                }
-
-                resultados = this.maior(part1, part2);
-                dadosFuzzificados[i][j] = resultados[0];
-                grauPertinenciaRegra[j] = Float.parseFloat(resultados[1]);
-                part1.clear();
-                part2.clear();
-            }
-
-            dadosFuzzificados[i][nVE] = "" + this.menorGdP(grauPertinenciaRegra, nVE);
-        }
-
-        if (imprimeDF) {
-            System.out.println("\n\nDados fuzzificados");
-
-            for(i = 0; i < numObjetos; ++i) {
-                String temp = "";
-
-                for(b = 0; b < nVE; ++b) {
-                    if (b < nVE - 1) {
-                        temp = temp + dadosFuzzificados[i][b] + ",";
-                    } else {
-                        temp = temp + dadosFuzzificados[i][b];
-                    }
-                }
-
-                System.out.println(temp);
-            }
-        }
-
-        mA.gravaArquivoARFF(dadosFuzzificados, caminho, dataset, numObjetos, nVE);
-    }
-
-    public float[] inferenciaFDT(String dataset, String caminho, String tp, String arvoreJ48) {
-        String arqRegras = caminho + "FuzzyDT-Regras-" + dataset + tp + ".txt";
-        DecimalFormat mF = new DecimalFormat();
-        mF.applyPattern("########0.00");
-        this.converteFDT(dataset, caminho, tp, arvoreJ48);
-        manipulaArquivos mA = new manipulaArquivos();
-        String[] metodoRaciocinio = new String[]{"classico", "geral"};
-        int rodadas = 1;
-        wrapperWM wWM = new wrapperWM();
-        String arqParticao = "particao" + dataset + ".txt";
-        int numConjuntos = mA.getNumConjuntos(caminho + arqParticao);
-        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
-        String[][] particao = new String[numConjuntos + 1][nVE + 2];
-        mA.carregaParticao(particao, caminho + arqParticao, nVE, numConjuntos);
-        int numRegrasAD = mA.getNumRegrasAD(arqRegras);
-        String[][] var10000 = new String[numRegrasAD][nVE];
-        String[][] regrasAD = mA.carregaRegrasAD(arqRegras, nVE, numRegrasAD);
-        float[] precisao = new float[rodadas];
-
-        for(int a = 0; a < rodadas; ++a) {
-            String arqTeste = dataset + ".txt";
-            int numExemplosTeste = mA.getNumRegrasTreinamento2(caminho + arqTeste);
-            float[][] teste = new float[numExemplosTeste][nVE];
-            mA.carregaTreinamento(teste, caminho + arqTeste, nVE, numExemplosTeste);
-            String[] entradasClassificadas = new String[numExemplosTeste];
-            wangMendell wM = new wangMendell();
-            wM.classificaEntradas(entradasClassificadas, teste, numExemplosTeste, nVE, particao);
-            precisao[a] = wWM.calculaFitness(entradasClassificadas, numRegrasAD, nVE, particao, metodoRaciocinio[0], teste, regrasAD, numExemplosTeste);
-        }
-
-        float[] resultados = new float[2];
-        resultados = wWM.calculaDesvioPadrao(precisao, rodadas);
-        System.out.println("Erro: " + mF.format((double)(1.0F - resultados[1])) + "\nNúmero de regras: " + numRegrasAD + "\n");
-        resultados[0] = 1.0F - resultados[1];
-        resultados[1] = (float)numRegrasAD;
-        return resultados;
-    }
-
     public void converteFDT(String dataset, String caminho, String tp, String arvoreJ48) {
         manipulaArquivos mA = new manipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         String[][] metaDados = new String[nVE][100];
         metaDados = mA.getMetaDados(caminho + dataset + ".names", nVE);
-//        int a = false;
         int numRegras = 0;
         StringTokenizer str = new StringTokenizer(arvoreJ48);
         String temp = arvoreJ48.replace("J48 pruned tree", "");
@@ -1798,7 +973,6 @@ public class FDT {
         new StringTokenizer(temp);
         String[] regrasSujas = new String[numRegras];
         StringTokenizer tudo = new StringTokenizer(temp);
-//        int linha = false;
         String token = "";
         String lastToken = "";
 
@@ -1824,7 +998,6 @@ public class FDT {
         String[][] regras = new String[numRegras][nVE * 2];
 
         int aa;
-//        int aa;
         for(aa = 0; aa < numRegras; ++aa) {
             for(aa = 0; aa < nVE * 2; ++aa) {
                 regras[aa][aa] = "dc";
@@ -1855,7 +1028,6 @@ public class FDT {
 
         String[][] regrasPadrao = new String[numRegras][nVE * 2 - 1];
 
-//        int aa;
         for(aa = 0; aa < numRegras; ++aa) {
             for(aa = 0; aa < nVE * 2 - 1; ++aa) {
                 regrasPadrao[aa][aa] = "dc";
@@ -1906,21 +1078,6 @@ public class FDT {
         String[][] regrasFinais = this.converteRegrasParaRegrasPadrao(regraS, numRegras, nVE, metaDados);
         mA.gravaBaseRegras(regrasFinais, caminho + "FuzzyDT-Regras-" + dataset + tp + ".txt", numRegras, nVE);
         mA.gravaBRparaUsuario(regrasFinais, caminho + "FuzzyDT-RegrasUser-" + dataset + tp + ".txt", numRegras, nVE, dataset, caminho);
-    }
-
-    private void gravaDadosParticao(String caminho, String dataset, String dados) {
-        BufferedWriter buf_writer = null;
-
-        try {
-            FileWriter writer = new FileWriter(caminho + dataset + "DadosParticao.txt");
-            buf_writer = new BufferedWriter(writer);
-            buf_writer.write(dados);
-            buf_writer.close();
-        } catch (IOException var6) {
-            System.err.println(var6);
-            System.exit(1);
-        }
-
     }
 
     public void geraFuzzyDecisionTreeAndre(DecisionTree dt, String dataset, String taxaPoda, int numCjtos, String caminho, ArrayList<Exemplo> exemplos) throws Exception {

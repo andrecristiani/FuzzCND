@@ -4,61 +4,74 @@ import main.java.FuzzyProject.FuzzyDT.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class FuzzyDecisionTree {
     public static void main(String[] args) throws IOException, CombinatoricException, Exception {
         DecisionTree dt = new DecisionTree();
-        manipulaArquivos mA = new manipulaArquivos();
-        boolean linhadecomando = false;
-        int numCjtos = 3;
+        int numCjtos = 7;
         String dataset = "iris";
         String metodoGerarParticao = "wm";
         String taxaPoda = "25";
-        if (linhadecomando) {
-            dataset = args[0];
-            metodoGerarParticao = args[1];
-            taxaPoda = args[2];
-            if (metodoGerarParticao.compareTo("fixed") == 0) {
-                numCjtos = Integer.parseInt(args[3]);
-            }
-        }
+        String caminho = "";
+        int numClassificador = 0;
 
         String current = (new File(".")).getCanonicalPath();
-        ConverteArquivos ca = new ConverteArquivos();
-        ArrayList<Exemplo> exemplos = new ArrayList<>();
-        ca.main(dataset);
-        String caminho = current + "/" + dataset + "/";
         FDT fdt;
         gera10Folds GF;
-        String alg;
-        if (metodoGerarParticao.compareTo("infogain") == 0 || metodoGerarParticao.compareTo("wm") == 0 || metodoGerarParticao.compareTo("rf") == 0 || metodoGerarParticao.compareTo("predefined") == 0) {
-            System.out.println("0");
-            fdt = new FDT();
-            GF = new gera10Folds();
-            GF.geraNFolds(dataset, caminho, 10);
-            fdt.geraFuzzyDecisionTree(dataset, metodoGerarParticao, taxaPoda, numCjtos, caminho);
-            alg = "j48";
-            System.out.println("\nRules \t SD \tConjuntions \tSD");
-            mA.regras(dataset, caminho, alg);
-            mA.apagaArqsTemporarios(dataset, caminho);
-        }
+        String alg = "j48";
 
-        if (metodoGerarParticao.compareTo("fixed") == 0) {
-            System.out.println("1");
-            fdt = new FDT();
-            GF = new gera10Folds();
-            GF.geraNFolds(dataset, caminho, 10);
-            fdt.geraFuzzyDecisionTree(dataset, metodoGerarParticao, taxaPoda, numCjtos, caminho);
-            alg = "j48";
-            System.out.println("\nRules \t SD \tConjuntions \tSD");
-            mA.regras(dataset, caminho, alg);
-            mA.apagaArqsTemporarios(dataset, caminho);
-        }
+        ConverteArquivos ca = new ConverteArquivos();
+        fdt = new FDT();
+        GF = new gera10Folds();
+        manipulaArquivos mA1 = new manipulaArquivos();
+        numClassificador = 0;
+        ca.main(dataset, numClassificador);
+        caminho = current + "/" + dataset + "/";
+        System.out.println("Database: " + dataset + numClassificador);
+        GF.geraNFolds(dataset + numClassificador, caminho, 10);
+        fdt.geraFuzzyDecisionTree(dataset + numClassificador, taxaPoda, numCjtos, caminho);
+        System.out.println("\nRules \t SD \tConjuntions \tSD");
+        mA1.regras(dataset + numClassificador, caminho, alg);
+        mA1.apagaArqsTemporarios(dataset + numClassificador, caminho);
 
-        if (metodoGerarParticao.compareTo("infogain") != 0 && metodoGerarParticao.compareTo("wm") != 0 && metodoGerarParticao.compareTo("rf") != 0 && metodoGerarParticao.compareTo("predefined") != 0 && metodoGerarParticao.compareTo("fixed") != 0) {
-            System.out.println("Fuzzy Data Base generation option invalid...");
-        }
+        FDT fdt1 = new FDT();
+        gera10Folds GF1 = new gera10Folds();
+        manipulaArquivos mA = new manipulaArquivos();
+        numClassificador = 1;
+        ca.main(dataset, numClassificador);
+        caminho = current + "/" + dataset + "/";
+        System.out.println("Database: " + dataset + numClassificador);
+        GF1.geraNFolds(dataset + numClassificador, caminho, 10);
+        fdt1.geraFuzzyDecisionTree(dataset + numClassificador, taxaPoda, numCjtos, caminho);
+        System.out.println("\nRules \t SD \tConjuntions \tSD");
+        mA.regras(dataset + numClassificador, caminho, alg);
+        mA.apagaArqsTemporarios(dataset + numClassificador, caminho);
+
+        FDT fdt2 = new FDT();
+        gera10Folds GF2 = new gera10Folds();
+        manipulaArquivos mA2 = new manipulaArquivos();
+        numClassificador = 2;
+        ca.main(dataset, numClassificador);
+        caminho = current + "/" + dataset + "/";
+        System.out.println("Database: " + dataset + numClassificador);
+        GF2.geraNFolds(dataset + numClassificador, caminho, 10);
+        fdt2.geraFuzzyDecisionTree(dataset + numClassificador, taxaPoda, numCjtos, caminho);
+        System.out.println("\nRules \t SD \tConjuntions \tSD");
+        mA2.regras(dataset + numClassificador, caminho, alg);
+        mA2.apagaArqsTemporarios(dataset + numClassificador, caminho);
+
+        FDT fdt3 = new FDT();
+        gera10Folds GF3 = new gera10Folds();
+        manipulaArquivos mA3 = new manipulaArquivos();
+        numClassificador = 3;
+        ca.main(dataset, numClassificador);
+        caminho = current + "/" + dataset + "/";
+        System.out.println("Database: " + dataset + numClassificador);
+        GF3.geraNFolds(dataset + numClassificador, caminho, 10);
+        fdt3.geraFuzzyDecisionTree(dataset + numClassificador, taxaPoda, numCjtos, caminho);
+        System.out.println("\nRules \t SD \tConjuntions \tSD");
+        mA3.regras(dataset + numClassificador, caminho, alg);
+        mA3.apagaArqsTemporarios(dataset + numClassificador, caminho);
     }
 }
 
