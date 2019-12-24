@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Models;
 
 public class Exemplo {
     float[] valores;

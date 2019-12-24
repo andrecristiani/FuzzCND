@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Fuzzy;
 
 import java.util.Vector;
 

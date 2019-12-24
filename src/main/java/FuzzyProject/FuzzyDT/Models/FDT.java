@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Models;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -7,6 +7,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.Particoes;
+import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.calculaGdCobertura;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.wangMendell;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;

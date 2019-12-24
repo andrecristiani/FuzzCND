@@ -1,6 +1,11 @@
 package main.java.FuzzyProject;
 
-import main.java.FuzzyProject.FuzzyDT.*;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
+import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+import main.java.FuzzyProject.FuzzyDT.Models.FDT;
+import main.java.FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
+import main.java.FuzzyProject.FuzzyDT.Utils.gera10Folds;
+import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 
 import java.io.File;
 import java.io.IOException;

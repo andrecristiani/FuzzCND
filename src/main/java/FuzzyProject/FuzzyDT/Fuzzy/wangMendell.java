@@ -1,4 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Fuzzy;
+
+import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 
 import java.text.DecimalFormat;
 import java.util.StringTokenizer;

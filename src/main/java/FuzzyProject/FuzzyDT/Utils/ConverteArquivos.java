@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

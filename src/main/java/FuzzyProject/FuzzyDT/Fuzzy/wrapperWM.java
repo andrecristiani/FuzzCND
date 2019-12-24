@@ -1,4 +1,9 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Fuzzy;
+
+import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+import main.java.FuzzyProject.FuzzyDT.Models.Exemplo;
+import main.java.FuzzyProject.FuzzyDT.Models.Metadata;
+import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

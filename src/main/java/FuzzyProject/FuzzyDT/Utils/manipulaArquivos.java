@@ -1,4 +1,9 @@
-package main.java.FuzzyProject.FuzzyDT;
+package main.java.FuzzyProject.FuzzyDT.Utils;
+
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
+import main.java.FuzzyProject.FuzzyDT.Models.Exemplo;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.Particoes;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
 
 import java.awt.Component;
 import java.io.BufferedReader;
@@ -1896,35 +1901,35 @@ public class manipulaArquivos {
 
     }
 
-    public void carregaTreinamentoAndre(ArrayList<Exemplo> tre, String nomeArquivo, int nVE, int numPadroes) {
-        BufferedReader inReader = null;
-        try {
-            inReader = new BufferedReader(new FileReader(nomeArquivo));
-        } catch (FileNotFoundException var12) {
-            System.err.println("carregaTreinamento - Não foi possível abrir o arquivo " + nomeArquivo);
-            JOptionPane.showMessageDialog((Component)null, "Não foi possível abrir o arquivo: " + nomeArquivo, "Sistema Fuzzy  Classificador", 1);
-            System.exit(1);
-        }
-
-        try {
-            for(int a = 0; a < numPadroes; ++a) {
-                String line = inReader.readLine();
-                StringTokenizer str = new StringTokenizer(line);
-                Exemplo exemplo = new Exemplo(nVE);
-                for(int b = 0; b < nVE; ++b) {
-                    String dado = str.nextToken();
-                    float valor = Float.parseFloat(dado);
-                    exemplo.valores[b] = valor;
-                }
-                tre.add(exemplo);
-            }
-
-            inReader.close();
-        } catch (IOException var13) {
-            System.err.println(var13.getMessage());
-        }
-
-    }
+//    public void carregaTreinamentoAndre(ArrayList<Exemplo> tre, String nomeArquivo, int nVE, int numPadroes) {
+//        BufferedReader inReader = null;
+//        try {
+//            inReader = new BufferedReader(new FileReader(nomeArquivo));
+//        } catch (FileNotFoundException var12) {
+//            System.err.println("carregaTreinamento - Não foi possível abrir o arquivo " + nomeArquivo);
+//            JOptionPane.showMessageDialog((Component)null, "Não foi possível abrir o arquivo: " + nomeArquivo, "Sistema Fuzzy  Classificador", 1);
+//            System.exit(1);
+//        }
+//
+//        try {
+//            for(int a = 0; a < numPadroes; ++a) {
+//                String line = inReader.readLine();
+//                StringTokenizer str = new StringTokenizer(line);
+//                Exemplo exemplo = new Exemplo(nVE);
+//                for(int b = 0; b < nVE; ++b) {
+//                    String dado = str.nextToken();
+//                    float valor = Float.parseFloat(dado);
+//                    exemplo.valores[b] = valor;
+//                }
+//                tre.add(exemplo);
+//            }
+//
+//            inReader.close();
+//        } catch (IOException var13) {
+//            System.err.println(var13.getMessage());
+//        }
+//
+//    }
 
     public void carregaExemplosAG(float[][] tre, String nomeArquivo, int nVE, int numPadroes) {
         BufferedReader inReader = null;
@@ -2292,7 +2297,7 @@ public class manipulaArquivos {
         System.out.println(regrasDP[0] + "\t" + regrasDP[1] + "\t" + conjuncoesDP[0] + "\t" + conjuncoesDP[1]);
     }
 
-    void gravaArquivoARFF(String[][] dadosFuzzificados, String caminho, String dataset, int numObjetos, int nVE) {
+    public void gravaArquivoARFF(String[][] dadosFuzzificados, String caminho, String dataset, int numObjetos, int nVE) {
         BufferedReader inReader = null;
         String linha = "";
 
@@ -3126,7 +3131,7 @@ public class manipulaArquivos {
         return results;
     }
 
-    void gravaArquivoARFFComNumCjtosFuzzyFixo(String[][] dadosFuzzificados, String caminho, String dataset, int numObjetos, int nVE, int numTermos) {
+    public void gravaArquivoARFFComNumCjtosFuzzyFixo(String[][] dadosFuzzificados, String caminho, String dataset, int numObjetos, int nVE, int numTermos) {
         BufferedReader inReader = null;
         String linha = "";
 
