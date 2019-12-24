@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class ConverteArquivos {
@@ -17,6 +18,7 @@ public class ConverteArquivos {
     String[] exemplos;
     static String[][] atribs;
     static int numAtribs;
+    String [][] classes;
     private Object path;
 
     public ConverteArquivos() {
@@ -24,6 +26,10 @@ public class ConverteArquivos {
     }
 
     public void main(String arquivo, int numClassificador) throws FileNotFoundException, IOException {
+        boolean numAtributos = false;
+        if (numAtribs != 0) {
+            numAtributos = true;
+        }
         String current = (new File(".")).getCanonicalPath();
         String arquivoOriginal = arquivo + numClassificador + ".dat";
         String arq = current + "/" + arquivo + "/" + arquivoOriginal;
@@ -108,13 +114,17 @@ public class ConverteArquivos {
                 } while("@attribute".equals(str.nextToken()));
             }
 
-            line = inReader.readLine();
-            new StringTokenizer(line);
-            line = inReader.readLine();
-            new StringTokenizer(line);
-            line = inReader.readLine();
+            if(!numAtributos) {
+                line = inReader.readLine();
+                new StringTokenizer(line);
+                line = inReader.readLine();
+                new StringTokenizer(line);
+                line = inReader.readLine();
+                numExemplos = linhas - numAtribs - 3;
+            } else {
+                numExemplos = linhas;
+            }
             str = new StringTokenizer(line);
-            numExemplos = linhas - numAtribs - 3;
             exemplos = new String[numExemplos];
             temp = "";
 
@@ -147,13 +157,25 @@ public class ConverteArquivos {
 
         FileWriter writer;
         BufferedWriter buf_writer;
+        ArrayList<String> classesDivididas = new ArrayList<>();
         try {
             writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".txt");
             buf_writer = new BufferedWriter(writer);
 
-            for(i = 0; i < numExemplos; ++i) {
-                buf_writer.write(exemplos[i]);
-                buf_writer.newLine();
+            if(numAtributos) {
+                for (i = 0; i < numExemplos; ++i) {
+                    String[] aux = exemplos[i].split("\t");
+                    if (!classesDivididas.contains(aux[aux.length - 1])) {
+                        classesDivididas.add(aux[aux.length - 1]);
+                    }
+                    buf_writer.write(exemplos[i]);
+                    buf_writer.newLine();
+                }
+            } else {
+                for(i = 0; i < numExemplos; ++i) {
+                    buf_writer.write(exemplos[i]);
+                    buf_writer.newLine();
+                }
             }
 
             buf_writer.close();
@@ -169,9 +191,23 @@ public class ConverteArquivos {
             buf_writer = new BufferedWriter(writer);
 
             for(i = 0; i < numAtribs - 1; ++i) {
-                temp = atribs[i][0] + " " + atribs[i][1];
-                buf_writer.write(temp);
-                buf_writer.newLine();
+                if(atribs[i][0].compareTo("Class") == 0 && numAtributos) {
+                    String aux = "";
+                    for (int k=0; k<classesDivididas.size(); k++) {
+                        String classe = classesDivididas.get(k).replace(" ", "");
+                        aux = aux + classe;
+                        if(k < classesDivididas.size()-1) {
+                            aux = aux + " ";
+                        }
+                    }
+                    temp = atribs[i][0] + " " + aux;
+                    buf_writer.write(temp);
+                    buf_writer.newLine();
+                } else {
+                    temp = atribs[i][0] + " " + atribs[i][1];
+                    buf_writer.write(temp);
+                    buf_writer.newLine();
+                }
             }
 
             buf_writer.close();
