@@ -3604,20 +3604,20 @@ public class manipulaArquivos {
                 file.delete();
                 file = new File(caminho + "/" + dataset + "-teste" + a + ".txt");
                 file.delete();
-                file = new File(caminho + "/" + dataset + "ArvoreJ48" + a + ".txt");
-                file.delete();
+//                file = new File(caminho + "/" + dataset + "ArvoreJ48" + a + ".txt");
+//                file.delete();
             } catch (Exception var6) {
             }
         }
 
         try {
-            new File(caminho + "/particao" + dataset + ".txt");
-            File file = new File(caminho + "/" + dataset + "dadosparticao.txt");
-            file.delete();
-            file = new File(caminho + "/" + dataset + ".names");
-            file.delete();
-            file = new File(caminho + "/" + dataset + ".txt");
-            file.delete();
+//            new File(caminho + "/particao" + dataset + ".txt");
+//            File file = new File(caminho + "/" + dataset + "dadosparticao.txt");
+//            file.delete();
+//            file = new File(caminho + "/" + dataset + ".names");
+//            file.delete();
+//            file = new File(caminho + "/" + dataset + ".txt");
+//            file.delete();
         } catch (Exception var5) {
         }
 

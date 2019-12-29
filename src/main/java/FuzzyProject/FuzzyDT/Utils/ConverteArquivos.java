@@ -1,5 +1,7 @@
 package main.java.FuzzyProject.FuzzyDT.Utils;
 
+import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,7 +27,7 @@ public class ConverteArquivos {
         numAtribs = 0;
     }
 
-    public void main(String arquivo, int numClassificador) throws FileNotFoundException, IOException {
+    public void main(String arquivo, int numClassificador, DecisionTree dt) throws FileNotFoundException, IOException {
         boolean numAtributos = false;
         if (numAtribs != 0) {
             numAtributos = true;
@@ -113,6 +115,7 @@ public class ConverteArquivos {
                     ++numAtribs;
                 } while("@attribute".equals(str.nextToken()));
             }
+            dt.numAtributos = numAtribs-1;
 
             if(!numAtributos) {
                 line = inReader.readLine();
@@ -152,6 +155,8 @@ public class ConverteArquivos {
         } catch (IOException var26) {
             System.err.println(var26.getMessage());
         }
+
+        dt.numObjetos = numExemplos;
 
         str = null;
 

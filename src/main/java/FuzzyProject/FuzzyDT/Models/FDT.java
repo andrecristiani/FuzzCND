@@ -4,15 +4,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.Particoes;
+import main.java.FuzzyProject.FuzzyDT.Fuzzy.*;
 import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.calculaGdCobertura;
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.wangMendell;
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;
@@ -30,13 +26,16 @@ public class FDT {
     public FDT() {
     }
 
-    public void geraArvore(String dataset, int rodada, String caminho, String metodoRaciocinio) {
+    public void geraArvore(String dataset, String caminho, String metodoRaciocinio, DecisionTree dt) {
         String particao = caminho + "particao" + dataset + ".txt";
         manipulaArquivos mA = new manipulaArquivos();
-        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + rodada + ".txt");
+        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
         int numConjuntos = mA.getNumConjuntos(particao);
+        dt.numConjuntos = numConjuntos;
         particaoFDT = new String[numConjuntos + 1][nVE + 2];
+        dt.inicializaParticao(nVE, numConjuntos);
+        dt.particao = this.particaoFDT;
         mA.carregaParticao(particaoFDT, particao, nVE, numConjuntos);
         treinamento = new float[numObjetos][nVE];
         mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", nVE);
@@ -500,7 +499,7 @@ public class FDT {
         return numTestes;
     }
 
-    public void converteArvoreEmRegras(String dataset, String caminho, String tp, String arvoreJ48) {
+    public void converteArvoreEmRegras(String dataset, String caminho, String tp, String arvoreJ48, DecisionTree dt) {
         manipulaArquivos mA = new manipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + 0 + ".txt");
         String[][] metaDados = new String[nVE][100];
@@ -591,15 +590,17 @@ public class FDT {
 
         String[][] var10000 = new String[numRegras][nVE];
         String[][] regrasFinais = this.converteRegrasParaRegrasPadrao(regraS, numRegras, nVE, metaDados);
+        dt.regras = regrasFinais;
+        dt.numRegras = numRegras;
         mA.gravaBaseRegras(regrasFinais, caminho + "RegrasFC45-" + dataset + tp + ".txt", numRegras, nVE);
         mA.gravaBRparaUsuario(regrasFinais, caminho + "RegrasFC45User-" + dataset + tp + ".txt", numRegras, nVE, dataset, caminho);
     }
 
-    public float[] inferenciaAD(String dataset, String caminho, String tp, String arvoreJ48) {
+    public float[] inferenciaAD(String dataset, String caminho, String tp, String arvoreJ48, DecisionTree dt) {
         String arqRegras = caminho + "RegrasFC45-" + dataset + tp + ".txt";
         DecimalFormat mF = new DecimalFormat();
         mF.applyPattern("########0.0000");
-        this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48);
+        this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48, dt);
         manipulaArquivos mA = new manipulaArquivos();
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
         int rodadas = 1;
@@ -628,11 +629,36 @@ public class FDT {
         return precisao;
     }
 
+    public String classificaExemplo(String dataset, String caminho, String tp, DecisionTree dt) {
+        String arqRegras = caminho + "RegrasFC45-" + dataset + tp + ".txt";
+//        this.converteArvoreEmRegras(dataset, caminho, tp, dt.arvoreJ48);
+        manipulaArquivos mA = new manipulaArquivos();
+        String arqParticao = "particao" + dataset + ".txt";
+        int numVariaveisEntrada = dt.numAtributos;
+        int numConjuntos = dt.numConjuntos;
+        String[][] particao = new String[numConjuntos + 1][numVariaveisEntrada + 2];
+        String[][] particao2 = dt.particao;
+        mA.carregaParticao(particao, caminho + arqParticao, numVariaveisEntrada, numConjuntos);
+        int numRegrasAD = mA.getNumRegrasAD(arqRegras);
+        String[][] regrasAD = mA.carregaRegrasAD(arqRegras, numVariaveisEntrada, numRegrasAD);
+        sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
+        Vector vec = new Vector();
+        Float f1 = new Float(6.5);
+        Float f2 = new Float(2.8);
+        Float f3 = new Float(4.6);
+        Float f4 = new Float(1.5);
+        vec.add(f1);
+        vec.add(f2);
+        vec.add(f3);
+        vec.add(f4);
+        return sFC.sistemaFuzzyCalculos(numVariaveisEntrada, regrasAD, numRegrasAD, vec, particao2);
+    }
+
     public float inferenciaADNFolds(String dataset, String caminho, String tp, String arvoreJ48, int rodada) {
         String arqRegras = caminho + "RegrasFC45-" + dataset + tp + ".txt";
         DecimalFormat mF = new DecimalFormat();
         mF.applyPattern("########0.00");
-        this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48);
+        //this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48);
         manipulaArquivos mA = new manipulaArquivos();
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
         wrapperWM wWM = new wrapperWM();
@@ -661,7 +687,7 @@ public class FDT {
         String metodoRaciocinio = "classico";
 
         for(int a = 0; a < rodadas; ++a) {
-            this.geraArvore(dataset, a, caminho, metodoRaciocinio);
+            //this.geraArvore(dataset, a, caminho, metodoRaciocinio);
         }
 
         System.out.println("\n\n\n\n\n\n\n\nValores de TCC: \n");
@@ -695,7 +721,28 @@ public class FDT {
         System.out.println("\t" + numRegrasAD + "\t" + mF.format((double)numMedioConjuncoes));
     }
 
-    public void geraFuzzyDecisionTree(String dataset, String taxaPoda, int numCjtos, String caminho) throws Exception {
+    public void geraFuzzyDT(String dataset, String taxaPoda, int numCjtos, String caminho, DecisionTree dt) throws Exception {
+        J48 j48 = new J48();
+        manipulaArquivos mA = new manipulaArquivos();
+        String metodoRaciocinio = "classico";
+
+        Particoes pt = new Particoes();
+
+        wrapperWM wWM = new wrapperWM();
+        wWM.classificaAtribsWMUmFoldNovo(dataset, caminho);
+        pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
+
+        this.geraArvore(dataset, caminho, metodoRaciocinio, dt);
+        DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
+        Instances instances = source.getDataSet();
+        instances.setClassIndex(instances.numAttributes() - 1);
+        j48.buildClassifier(instances);
+        String arvoreJ48 = j48.toString();
+        dt.arvoreJ48 = arvoreJ48;
+//        mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + ".txt");
+    }
+
+    public void geraFuzzyDecisionTree(String dataset, String taxaPoda, int numCjtos, String caminho, DecisionTree dt) throws Exception {
         J48 j48 = new J48();
         manipulaArquivos mA = new manipulaArquivos();
         String metodoRaciocinio = "classico";
@@ -708,14 +755,15 @@ public class FDT {
             wWM.classificaAtribsWMUmFold(dataset, caminho, b);
             pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
 
-            this.geraArvore(dataset, 0, caminho, metodoRaciocinio);
+            this.geraArvore(dataset, caminho, metodoRaciocinio, dt);
             DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
             Instances instances = source.getDataSet();
             instances.setClassIndex(instances.numAttributes() - 1);
             j48.buildClassifier(instances);
             String arvoreJ48 = j48.toString();
+            dt.arvoreJ48 = arvoreJ48;
             float[] r = new float[2];
-            r = this.inferenciaAD(dataset, caminho, taxaPoda, arvoreJ48);
+            r = this.inferenciaAD(dataset, caminho, taxaPoda, arvoreJ48, dt);
             mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + b + ".txt");
             precisao[b] = r[0];
         }
@@ -1084,37 +1132,6 @@ public class FDT {
         String[][] regrasFinais = this.converteRegrasParaRegrasPadrao(regraS, numRegras, nVE, metaDados);
         mA.gravaBaseRegras(regrasFinais, caminho + "FuzzyDT-Regras-" + dataset + tp + ".txt", numRegras, nVE);
         mA.gravaBRparaUsuario(regrasFinais, caminho + "FuzzyDT-RegrasUser-" + dataset + tp + ".txt", numRegras, nVE, dataset, caminho);
-    }
-
-    public void geraFuzzyDecisionTreeAndre(DecisionTree dt, String dataset, String taxaPoda, int numCjtos, String caminho, ArrayList<Exemplo> exemplos) throws Exception {
-        J48 j48 = new J48();
-        Particoes pt = new Particoes();
-        wrapperWM wWM = new wrapperWM();
-        manipulaArquivos mA = new manipulaArquivos();
-        float precisao;
-
-        wWM.classificaAtribsWMUmFoldAndre(dt, dataset, caminho, 0, exemplos);
-//        pt.geraParticaoNumCjtosFuzzyVariavel(dataset, caminho);
-
-        //this.geraFuzzyDT(dataset, 0, caminho);
-        //DataSource source = new DataSource(caminho + dataset + "Fuzzy.arff");
-//        Instances instances = source.getDataSet();
-//        instances.setClassIndex(instances.numAttributes() - 1);
-//        j48.buildClassifier(instances);
-//        String arvoreJ48 = j48.toString();
-//        float[] r = new float[2];
-//        r = this.inferenciaAD(dataset, caminho, taxaPoda, arvoreJ48);
-//        mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + 0 + ".txt");
-//        precisao = r[0];
-//
-//
-//        float[] res = new float[2];
-//        wrapperWM vWM = new wrapperWM();
-////        res = vWM.calculaDesvioPadrao(precisao, 10);
-//        DecimalFormat mF = new DecimalFormat();
-//        mF.applyPattern("########0.00");
-//        System.out.println("Error: \tStandard Deviation: ");
-//        System.out.println(mF.format((double)(100.0F - 100.0F * res[1])) + "\t" + mF.format((double)res[0]));
     }
 
     public void geraFuzzyDT(String dataset, int rodada, String caminho) {

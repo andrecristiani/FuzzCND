@@ -254,6 +254,53 @@ public class wangMendell {
 
     }
 
+    public void classificaEntrada(String[] entradaClassificada, float[] treinamento, int numRegrasTreinamento, int numVarEntrada, String[][] particao) {
+        int j = numVarEntrada - 1;
+        calculaGdCobertura cG = new calculaGdCobertura();
+        Vector part = new Vector(1);
+        Vector part1 = new Vector(1);
+        Vector part2 = new Vector(1);
+        String[] resultados = new String[2];
+        DecimalFormat formatador = new DecimalFormat();
+        formatador.applyPattern("#.###");
+
+        for(int i = 0; i < numRegrasTreinamento; ++i) {
+            int indice = 1;
+
+            int k;
+            for(k = 1; k <= j; ++k) {
+                indice += Integer.parseInt(particao[0][k]);
+            }
+
+            for(k = 1; k <= Integer.parseInt(particao[0][j + 1]); ++k) {
+                part.clear();
+                int d;
+                if (particao[indice][0].equals("triangular")) {
+                    for(d = 2; d < 5; ++d) {
+                        part.add(particao[indice][d]);
+                    }
+                }
+
+                if (particao[indice][0].equals("trapezoidal")) {
+                    for(d = 2; d < 6; ++d) {
+                        part.add(particao[indice][d]);
+                    }
+                }
+
+//                float grau = cG.calculaGrauRegra(treinamento[i][j], particao[indice][0], part);
+//                part1.add(grau);
+                part2.add(particao[indice][1]);
+                ++indice;
+            }
+
+            resultados = this.maior(part1, part2);
+            //entradasClassificadas[i] = resultados[0];
+            part1.clear();
+            part2.clear();
+        }
+
+    }
+
     public String[] maior(Vector grausDeCobertura, Vector variaveisLinguisticas) {
         int indice = 0;
         String[] s1 = new String[2];

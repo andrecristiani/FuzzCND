@@ -618,7 +618,6 @@ public class wrapperWM {
             }
         }
 
-//        int x;
         String line;
         for(atribAtual = 0; atribAtual < numVariaveisEntrada - 1; ++atribAtual) {
             if (tipoAtribs[atribAtual] == 0) {
@@ -1217,7 +1216,6 @@ public class wrapperWM {
 
         int a;
         int b;
-//        int a;
         double temp;
         for(a = 0; a < 100000; ++a) {
             if (resumoRegrasWM[a][0] == null) {
@@ -1272,26 +1270,34 @@ public class wrapperWM {
         return atributos;
     }
 
-    public void classificaAtribsWMUmFoldAndre(DecisionTree dt, String dominio, String caminho, int fold, ArrayList<Exemplo> exemplos) throws CombinatoricException {
+    public void classificaAtribsWMUmFoldNovo(String dominio, String caminho) throws CombinatoricException {
         String metodoRaciocinio = "classico";
         wangMendell wM = new wangMendell();
         manipulaArquivos mA = new manipulaArquivos();
         float fitnessWM = 0.0F;
         double diferenca = 0.05D;
-        int numVariaveisEntrada = dt.getNumAtributos();
+        int numVariaveisEntrada = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dominio + ".txt");
         float[][] erros = new float[9][numVariaveisEntrada - 1];
         DecimalFormat formatador = new DecimalFormat();
         formatador.applyPattern("0.000");
         int numMaxFuzzySets = 9;
         String arqParticao = caminho + "particao" + dominio + ".txt";
         String arqMetaDados = caminho + dominio + ".names";
-        ArrayList<Metadata> metaDados = dt.getAtributos();
+        String[][] metaDados = new String[numVariaveisEntrada][100];
+        metaDados = mA.getMetaDados(arqMetaDados, numVariaveisEntrada);
         int[] tipoAtribs = new int[numVariaveisEntrada - 1];
 
         for(int m = 0; m < numVariaveisEntrada - 1; ++m) {
-            int temp = 0;
-            if (metaDados.get(m).getTipo().compareTo("double") != 0 && metaDados.get(m).getTipo().compareTo("real") != 0 && metaDados.get(m).getTipo().compareTo("integer") != 0) {
-                tipoAtribs[m] = ++temp;
+            if (metaDados[m][1].compareTo("double") != 0 && metaDados[m][1].compareTo("real") != 0 && metaDados[m][1].compareTo("integer") != 0) {
+                int temp = 0;
+
+                for(int n = 1; n < 100; ++n) {
+                    if (metaDados[m][n] != null) {
+                        ++temp;
+                    }
+                }
+
+                tipoAtribs[m] = temp;
             } else {
                 tipoAtribs[m] = 0;
             }
@@ -1299,16 +1305,12 @@ public class wrapperWM {
 
         String arqTreinamento = caminho + dominio + ".txt";
         String arqTeste = caminho + dominio + ".txt";
-        int numRegrasTreinamento = dt.getNumExemplos();
-        //enviou, só apagar depois
+        int numRegrasTreinamento = mA.getNumRegrasTreinamento2(arqTreinamento);
         exemplosWM = new float[numRegrasTreinamento][numVariaveisEntrada];
         mA.carregaTreinamento(exemplosWM, arqTreinamento, numVariaveisEntrada, numRegrasTreinamento);
         int numRegrasTeste = carregaArquivoTeste(arqTeste, numVariaveisEntrada, "");
-//        int numRegrasTeste = dt.getNumExemplos();
         this.regrasWM = new String[numRegrasTreinamento][numVariaveisEntrada];
-        this.regrasWMAndre = new ArrayList<Exemplo>();
         treinamento = new float[numRegrasTreinamento][numVariaveisEntrada];
-        exemplosTreinamento = new ArrayList<Exemplo>();
         String[] entradasClassificadas = new String[numRegrasTeste];
 
         Particoes Pa;
@@ -1334,7 +1336,7 @@ public class wrapperWM {
                     }
 
                     numRegrasTreinamento = carregaArquivosWM(arqTreinamento, arqParticao, numVariaveisEntrada, "");
-                    i = wM.wangMendellWrapper(this.regrasWM, treinamento, numRegrasTreinamento, numVariaveisEntrada, dominio + fold + ".txt", particaoWM, "nao", "nao", metodoRaciocinio);
+                    i = wM.wangMendellWrapper(this.regrasWM, treinamento, numRegrasTreinamento, numVariaveisEntrada, dominio + ".txt", particaoWM, "nao", "nao", metodoRaciocinio);
                     wM.classificaEntradas(entradasClassificadas, testeWM, numRegrasTeste, numVariaveisEntrada, particaoWM);
                     fitnessWM = this.calculaFitness(entradasClassificadas, i, numVariaveisEntrada, particaoWM, metodoRaciocinio, testeWM, this.regrasWM, numRegrasTeste);
                     erros[fs - 2][atribAtual] = fitnessWM;
