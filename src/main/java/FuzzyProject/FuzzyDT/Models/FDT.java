@@ -34,7 +34,6 @@ public class FDT {
         int numConjuntos = mA.getNumConjuntos(particao);
         dt.numConjuntos = numConjuntos;
         particaoFDT = new String[numConjuntos + 1][nVE + 2];
-        dt.inicializaParticao(nVE, numConjuntos);
         dt.particao = this.particaoFDT;
         mA.carregaParticao(particaoFDT, particao, nVE, numConjuntos);
         treinamento = new float[numObjetos][nVE];
@@ -590,8 +589,6 @@ public class FDT {
 
         String[][] var10000 = new String[numRegras][nVE];
         String[][] regrasFinais = this.converteRegrasParaRegrasPadrao(regraS, numRegras, nVE, metaDados);
-        dt.regras = regrasFinais;
-        dt.numRegras = numRegras;
         mA.gravaBaseRegras(regrasFinais, caminho + "RegrasFC45-" + dataset + tp + ".txt", numRegras, nVE);
         mA.gravaBRparaUsuario(regrasFinais, caminho + "RegrasFC45User-" + dataset + tp + ".txt", numRegras, nVE, dataset, caminho);
     }
@@ -629,29 +626,9 @@ public class FDT {
         return precisao;
     }
 
-    public String classificaExemplo(String dataset, String caminho, String tp, DecisionTree dt) {
-        String arqRegras = caminho + "RegrasFC45-" + dataset + tp + ".txt";
-//        this.converteArvoreEmRegras(dataset, caminho, tp, dt.arvoreJ48);
-        manipulaArquivos mA = new manipulaArquivos();
-        String arqParticao = "particao" + dataset + ".txt";
-        int numVariaveisEntrada = dt.numAtributos;
-        int numConjuntos = dt.numConjuntos;
-        String[][] particao = new String[numConjuntos + 1][numVariaveisEntrada + 2];
-        String[][] particao2 = dt.particao;
-        mA.carregaParticao(particao, caminho + arqParticao, numVariaveisEntrada, numConjuntos);
-        int numRegrasAD = mA.getNumRegrasAD(arqRegras);
-        String[][] regrasAD = mA.carregaRegrasAD(arqRegras, numVariaveisEntrada, numRegrasAD);
+    public String classificaExemplo(DecisionTree dt, Vector exemplo) {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
-        Vector vec = new Vector();
-        Float f1 = new Float(6.5);
-        Float f2 = new Float(2.8);
-        Float f3 = new Float(4.6);
-        Float f4 = new Float(1.5);
-        vec.add(f1);
-        vec.add(f2);
-        vec.add(f3);
-        vec.add(f4);
-        return sFC.sistemaFuzzyCalculos(numVariaveisEntrada, regrasAD, numRegrasAD, vec, particao2);
+        return sFC.sistemaFuzzyCalculos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao);
     }
 
     public float inferenciaADNFolds(String dataset, String caminho, String tp, String arvoreJ48, int rodada) {
