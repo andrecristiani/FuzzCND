@@ -18,7 +18,7 @@ public class sistemaFuzzyCalculos {
             compat[i] = 1.0D;
 
             for(int j = 0; j < numVariaveisEntrada - 1; ++j) {
-                float valor = (Float)padrao.get(j);
+                float valor = Float.parseFloat(padrao.get(j).toString());
                 if ((double)valor != -11111.0D && regrasSFC[i][j].compareTo("dc") != 0) {
                     indice = 1;
                     part.clear();
