@@ -625,7 +625,7 @@ public class FDT {
             String[] entradasClassificadas = new String[numExemplosTeste];
             wangMendell wM = new wangMendell();
             wM.classificaEntradas(entradasClassificadas, teste, numExemplosTeste, nVE, particao);
-            precisao[a] = wWM.calculaFitnessTreinamento(entradasClassificadas, numRegrasAD, nVE, particao, metodoRaciocinio[0], teste, regrasAD, numExemplosTeste, dt);
+            precisao[a] = wWM.calculaFitness(entradasClassificadas, numRegrasAD, nVE, particao, metodoRaciocinio[0], teste, regrasAD, numExemplosTeste);
         }
 
         return precisao;
