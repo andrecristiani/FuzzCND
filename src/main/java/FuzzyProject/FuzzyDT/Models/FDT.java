@@ -32,6 +32,7 @@ public class FDT {
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
         int numConjuntos = mA.getNumConjuntos(particao);
+        dt.nVE = nVE;
         dt.numConjuntos = numConjuntos;
         particaoFDT = new String[numConjuntos + 1][nVE + 2];
         dt.particao = this.particaoFDT;
@@ -612,6 +613,10 @@ public class FDT {
         String[][] regrasAD = mA.carregaRegrasAD(arqRegras, nVE, numRegrasAD);
         float[] precisao = new float[rodadas];
 
+        if(dt.inicializada == 0) {
+            dt.inicializaValores();
+        }
+
         for(int a = 0; a < rodadas; ++a) {
             String arqTeste = dataset + "-teste" + a + ".txt";
             int numExemplosTeste = mA.getNumRegrasTreinamento(caminho + arqTeste);
@@ -620,7 +625,7 @@ public class FDT {
             String[] entradasClassificadas = new String[numExemplosTeste];
             wangMendell wM = new wangMendell();
             wM.classificaEntradas(entradasClassificadas, teste, numExemplosTeste, nVE, particao);
-            precisao[a] = wWM.calculaFitness(entradasClassificadas, numRegrasAD, nVE, particao, metodoRaciocinio[0], teste, regrasAD, numExemplosTeste);
+            precisao[a] = wWM.calculaFitnessTreinamento(entradasClassificadas, numRegrasAD, nVE, particao, metodoRaciocinio[0], teste, regrasAD, numExemplosTeste, dt);
         }
 
         return precisao;
@@ -628,7 +633,22 @@ public class FDT {
 
     public String classificaExemplo(DecisionTree dt, Vector exemplo) {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
-        return sFC.sistemaFuzzyCalculos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao);
+        return sFC.sistemaFuzzyCalculos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
+    }
+
+    public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) {
+        sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
+        manipulaArquivos mA = new manipulaArquivos();
+
+        treinamento = new float[dt.numObjetos][dt.nVE];
+        mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", dt.nVE);
+        for(int i=0; i< dt.numObjetos; i++) {
+            Vector vec = new Vector();
+            for(int j=0; j<dt.numAtributos-1; j++) {
+                vec.add(treinamento[i][j]);
+            }
+            sFC.sistemaFuzzyCalculosTreinamento(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, vec, dt.particao, dt);
+        }
     }
 
     public float inferenciaADNFolds(String dataset, String caminho, String tp, String arvoreJ48, int rodada) {
