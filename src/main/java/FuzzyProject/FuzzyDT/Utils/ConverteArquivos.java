@@ -78,6 +78,7 @@ public class ConverteArquivos {
                 do {
                     atribs[i][0] = str.nextToken();
                     temp = str.nextToken();
+                    dt.atributos.add(atribs[i][0]);
                     if (temp.contains("real")) {
                         atribs[i][1] = "real";
                     } else if (temp.contains("integer")) {

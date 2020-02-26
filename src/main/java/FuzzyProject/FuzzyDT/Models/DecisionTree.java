@@ -3,7 +3,6 @@ package main.java.FuzzyProject.FuzzyDT.Models;
 import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
@@ -22,7 +21,7 @@ public class DecisionTree {
     public String[][] particao;
     public String[][] regrasAD;
     public ArrayList<String> rotulos;
-    public ArrayList<Metadata> atributos;
+    public ArrayList<String> atributos;
     public List<List<Vector>> numClassificadosPorRegraClassificacao;
     public Integer[] numClassificadosPorRegraTreinamento;
 
@@ -32,7 +31,7 @@ public class DecisionTree {
         this.numClassificador = numClassificador;
         this.taxaPoda = taxaPoda;
         rotulos = new ArrayList<String>();
-        atributos = new ArrayList<Metadata>();
+        atributos = new ArrayList<String>();
         this.inicializada = 0;
     }
 

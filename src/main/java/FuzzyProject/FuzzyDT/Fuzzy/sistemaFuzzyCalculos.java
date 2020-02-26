@@ -123,7 +123,6 @@ public class sistemaFuzzyCalculos {
         }
 
         indice = this.max(compat, numRegrasSFC);
-        System.err.println("Regra: " + indice);
         dt.numClassificadosPorRegraClassificacao.get(indice).add(padrao);
         return regrasSFC[indice][numVariaveisEntrada - 1];
     }

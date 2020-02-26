@@ -3,7 +3,10 @@ package main.java.FuzzyProject.FuzzyDT.Models;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -12,7 +15,8 @@ import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;
-import weka.core.Instances;
+import weka.clusterers.SimpleKMeans;
+import weka.core.*;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class FDT {
@@ -636,7 +640,7 @@ public class FDT {
         return sFC.sistemaFuzzyCalculos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
     }
 
-    public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) {
+    public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         manipulaArquivos mA = new manipulaArquivos();
 
@@ -648,6 +652,38 @@ public class FDT {
                 vec.add(treinamento[i][j]);
             }
             sFC.sistemaFuzzyCalculosTreinamento(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, vec, dt.particao, dt);
+        }
+
+        for(int i=0; i<dt.numRegrasAD; i++) {
+            List<Vector> exemplos = dt.numClassificadosPorRegraClassificacao.get(i);
+            if(exemplos.size() > 0) {
+                int numAtts = dt.numAtributos - 1;
+                FastVector atts = new FastVector(numAtts);
+                for (int att = 0; att < numAtts; att++) {
+                    atts.addElement(new Attribute(dt.atributos.get(att)));
+                }
+                int numExemplos = dt.numClassificadosPorRegraClassificacao.get(i).size();
+                Instances noFolha = new Instances("NoFolha" + i, atts, numExemplos);
+                for (int inst = 0; inst < numExemplos; inst++) {
+                    Instance exemplo = new DenseInstance(numAtts);
+                    float[][] array = new float[1][4];
+                    array[0][0] = (float) exemplos.get(inst).get(0);
+                    array[0][1] = (float) exemplos.get(inst).get(1);
+                    array[0][2] = (float) exemplos.get(inst).get(2);
+                    array[0][3] = (float) exemplos.get(inst).get(3);
+                    exemplo.setValue(0, array[0][0]);
+                    exemplo.setValue(1, array[0][1]);
+                    exemplo.setValue(2, array[0][2]);
+                    exemplo.setValue(3, array[0][3]);
+                    noFolha.add(exemplo);
+                }
+
+                SimpleKMeans kmeans = new SimpleKMeans();
+                kmeans.setSeed(10);
+                kmeans.setPreserveInstancesOrder(true);
+                kmeans.setNumClusters(2);
+                kmeans.buildClusterer(noFolha);
+            }
         }
     }
 
