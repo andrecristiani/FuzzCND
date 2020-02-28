@@ -3,9 +3,8 @@ package main.java.FuzzyProject.FuzzyDT.Models;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -643,7 +642,7 @@ public class FDT {
     public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         manipulaArquivos mA = new manipulaArquivos();
-
+        System.out.println("Número de regras: " + dt.numRegrasAD);
         treinamento = new float[dt.numObjetos][dt.nVE];
         mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", dt.nVE);
         for(int i=0; i< dt.numObjetos; i++) {
@@ -664,6 +663,8 @@ public class FDT {
                 }
                 int numExemplos = dt.numClassificadosPorRegraClassificacao.get(i).size();
                 Instances noFolha = new Instances("NoFolha" + i, atts, numExemplos);
+                dt.inicializaValoresParaClassificacaoWeka(atts, new Instances("Classificacao", atts, 1));
+                MicroGrupo mc = new MicroGrupo(dt);
                 for (int inst = 0; inst < numExemplos; inst++) {
                     Instance exemplo = new DenseInstance(numAtts);
                     float[][] array = new float[1][4];
@@ -676,6 +677,11 @@ public class FDT {
                     exemplo.setValue(2, array[0][2]);
                     exemplo.setValue(3, array[0][3]);
                     noFolha.add(exemplo);
+                    mc.LS[0] = mc.LS[0] + (float) exemplos.get(inst).get(0);
+                    mc.LS[1] = mc.LS[1] + (float) exemplos.get(inst).get(1);
+                    mc.LS[2] = mc.LS[2] + (float) exemplos.get(inst).get(2);
+                    mc.LS[3] = mc.LS[3] + (float) exemplos.get(inst).get(3);
+                    mc.N++;
                 }
 
                 SimpleKMeans kmeans = new SimpleKMeans();
@@ -683,8 +689,42 @@ public class FDT {
                 kmeans.setPreserveInstancesOrder(true);
                 kmeans.setNumClusters(2);
                 kmeans.buildClusterer(noFolha);
+
+                Instance exemplo = new DenseInstance(numAtts);
+                exemplo.setValue(0,5.1);
+                exemplo.setValue(1,3.5);
+                exemplo.setValue(2,1.4);
+                exemplo.setValue(3,0.2);
+
+                exemplo.setDataset(dt.datasetParaWeka);
+                System.out.println("Classificado como: " + kmeans.clusterInstance(exemplo));
+                System.err.println("Centróide: " + kmeans.getClusterCentroids());
+
+                int[] rotulos = kmeans.getAssignments();
+                int numGrupos = kmeans.getNumClusters();
+                double[] numElementosGrupo = kmeans.getClusterSizes();
+                List<MicroGrupo> microGrupos = this.separaExemplosPorGrupoClassificado(rotulos, numGrupos, exemplos, numElementosGrupo, dt);
+                //TODO: criar método de classificação utiizando os dado do MC, diferente do já implementado no kmeans (linha 699)
             }
         }
+    }
+
+    public List<MicroGrupo> separaExemplosPorGrupoClassificado(int[] rotulosExemplos, int numGrupos, List<Vector> exemplos, double[] numElementosGrupo, DecisionTree dt) {
+        List<MicroGrupo> microGrupos = new ArrayList<>();
+        for(int i=0; i<numGrupos; i++) {
+            MicroGrupo mg = new MicroGrupo(dt);
+            mg.N = numElementosGrupo[i];
+            microGrupos.add(mg);
+        }
+
+        for(int i=0; i<exemplos.size(); i++) {
+            microGrupos.get(rotulosExemplos[i]).LS[0] += (float) exemplos.get(i).get(0);
+            microGrupos.get(rotulosExemplos[i]).LS[1] += (float) exemplos.get(i).get(1);
+            microGrupos.get(rotulosExemplos[i]).LS[2] += (float) exemplos.get(i).get(2);
+            microGrupos.get(rotulosExemplos[i]).LS[3] += (float) exemplos.get(i).get(3);
+        }
+
+        return microGrupos;
     }
 
     public float inferenciaADNFolds(String dataset, String caminho, String tp, String arvoreJ48, int rodada) {
