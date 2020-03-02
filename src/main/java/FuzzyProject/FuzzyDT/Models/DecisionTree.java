@@ -27,6 +27,7 @@ public class DecisionTree {
     public FastVector atributosParaWeka;
     Instances datasetParaWeka;
     public List<List<Vector>> numClassificadosPorRegraClassificacao;
+    public List<List<MicroGrupo>> microGruposPorRegra;
     public Integer[] numClassificadosPorRegraTreinamento;
 
     public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda) {
@@ -47,7 +48,7 @@ public class DecisionTree {
         this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];
         this.numClassificadosPorRegraClassificacao = new ArrayList<>();
         for(int i=0; i<=numRegrasAD; i++) {
-            numClassificadosPorRegraClassificacao.add(new ArrayList<Vector>());
+            microGruposPorRegra.add(new ArrayList<MicroGrupo>());
         }
         this.regrasAD = mA.carregaRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador  + this.taxaPoda + ".txt", this.numAtributos, this.numRegrasAD);
     }
