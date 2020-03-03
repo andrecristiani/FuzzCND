@@ -714,7 +714,7 @@ public class FDT {
         List<MicroGrupo> microGrupos = new ArrayList<>();
         for(int i=0; i<numGrupos; i++) {
             MicroGrupo mg = new MicroGrupo(dt);
-            mg.N = numElementosGrupo[i];
+            mg.N = (float) numElementosGrupo[i];
             microGrupos.add(mg);
         }
 
