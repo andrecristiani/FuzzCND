@@ -704,6 +704,7 @@ public class FDT {
                 int numGrupos = kmeans.getNumClusters();
                 double[] numElementosGrupo = kmeans.getClusterSizes();
                 List<MicroGrupo> microGrupos = this.separaExemplosPorGrupoClassificado(rotulos, numGrupos, exemplos, numElementosGrupo, dt);
+                dt.microGruposPorRegra.get(i).addAll(microGrupos);
                 //TODO: criar método de classificação utiizando os dado do MC, diferente do já implementado no kmeans (linha 699)
             }
         }

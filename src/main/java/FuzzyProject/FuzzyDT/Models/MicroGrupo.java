@@ -23,4 +23,12 @@ public class MicroGrupo {
         }
         return centroide;
     }
+
+    public float[] getRaio() {
+        float raio[] = new float[this.LS.length];
+        for(int i=0; i<this.LS.length; i++) {
+            raio[i] = (float) Math.pow(((SS[i]/N)-Math.pow((LS[i]/N), 2)),(1/2));
+        }
+        return raio;
+    }
 }
