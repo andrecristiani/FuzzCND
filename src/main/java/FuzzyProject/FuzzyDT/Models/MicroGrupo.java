@@ -31,4 +31,12 @@ public class MicroGrupo {
         }
         return raio;
     }
+
+    public double calculaDistanciaEuclidiana(float[] ponto1, float[] ponto2) {
+        double somatorio = 0;
+        for(int i=0; i<ponto1.length; i++) {
+            somatorio = somatorio + Math.pow((ponto1[i]-ponto2[i]),2);
+        }
+        return Math.sqrt(somatorio);
+    }
 }
