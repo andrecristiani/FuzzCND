@@ -47,8 +47,10 @@ public class DecisionTree {
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
         this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];
         this.numClassificadosPorRegraClassificacao = new ArrayList<>();
+        this.microGruposPorRegra = new ArrayList<>();
         for(int i=0; i<=numRegrasAD; i++) {
-            microGruposPorRegra.add(new ArrayList<MicroGrupo>());
+            this.microGruposPorRegra.add(new ArrayList<MicroGrupo>());
+            this.numClassificadosPorRegraClassificacao.add(new ArrayList<>());
         }
         this.regrasAD = mA.carregaRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador  + this.taxaPoda + ".txt", this.numAtributos, this.numRegrasAD);
     }
