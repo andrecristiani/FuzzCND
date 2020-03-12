@@ -34,7 +34,7 @@ public class MicroGrupo {
                 parte3 = parte3 * -1;
             }
             parte3 = (float) Math.sqrt(parte3);
-            raio[i] = (float) Math.pow(((SS[i]/N) - (Math.pow((LS[i]/N), 2))),(1/2));
+            raio[i] = parte3;
         }
         return raio;
     }

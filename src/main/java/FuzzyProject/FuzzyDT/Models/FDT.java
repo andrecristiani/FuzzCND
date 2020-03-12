@@ -804,7 +804,10 @@ public class FDT {
         j48.buildClassifier(instances);
         String arvoreJ48 = j48.toString();
         dt.arvoreJ48 = arvoreJ48;
-//        mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + ".txt");
+        mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + ".txt");
+        if(dt.inicializada == 0) {
+            dt.inicializaValores();
+        }
     }
 
     public void geraFuzzyDecisionTree(String dataset, String taxaPoda, int numCjtos, String caminho, DecisionTree dt) throws Exception {
