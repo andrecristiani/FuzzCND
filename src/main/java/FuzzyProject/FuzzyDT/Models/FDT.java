@@ -642,7 +642,6 @@ public class FDT {
     public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         manipulaArquivos mA = new manipulaArquivos();
-        System.out.println("Número de regras: " + dt.numRegrasAD);
         treinamento = new float[dt.numObjetos][dt.nVE];
         mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", dt.nVE);
         for(int i=0; i< dt.numObjetos; i++) {
@@ -668,19 +667,11 @@ public class FDT {
                 for (int inst = 0; inst < numExemplos; inst++) {
                     Instance exemplo = new DenseInstance(numAtts);
                     float[][] array = new float[1][4];
-                    array[0][0] = (float) exemplos.get(inst).get(0);
-                    array[0][1] = (float) exemplos.get(inst).get(1);
-                    array[0][2] = (float) exemplos.get(inst).get(2);
-                    array[0][3] = (float) exemplos.get(inst).get(3);
-                    exemplo.setValue(0, array[0][0]);
-                    exemplo.setValue(1, array[0][1]);
-                    exemplo.setValue(2, array[0][2]);
-                    exemplo.setValue(3, array[0][3]);
+                    for(int k=0; k < dt.numAtributos-1; k++) {
+                        array[0][k] = (float) exemplos.get(inst).get(k);
+                        exemplo.setValue(k, array[0][k]);
+                    }
                     noFolha.add(exemplo);
-                    mc.LS[0] = mc.LS[0] + (float) exemplos.get(inst).get(0);
-                    mc.LS[1] = mc.LS[1] + (float) exemplos.get(inst).get(1);
-                    mc.LS[2] = mc.LS[2] + (float) exemplos.get(inst).get(2);
-                    mc.LS[3] = mc.LS[3] + (float) exemplos.get(inst).get(3);
                     mc.N++;
                 }
 
@@ -690,22 +681,22 @@ public class FDT {
                 kmeans.setNumClusters(2);
                 kmeans.buildClusterer(noFolha);
 
-                Instance exemplo = new DenseInstance(numAtts);
-                exemplo.setValue(0,5.1);
-                exemplo.setValue(1,3.5);
-                exemplo.setValue(2,1.4);
-                exemplo.setValue(3,0.2);
-
-                exemplo.setDataset(dt.datasetParaWeka);
-                System.out.println("Classificado como: " + kmeans.clusterInstance(exemplo));
-                System.err.println("Centróide: " + kmeans.getClusterCentroids());
+//                Exemplo de como classificar um exemplo
+//                Instance exemplo = new DenseInstance(numAtts);
+//                exemplo.setValue(0,5.1);
+//                exemplo.setValue(1,3.5);
+//                exemplo.setValue(2,1.4);
+//                exemplo.setValue(3,0.2);
+//
+//                exemplo.setDataset(dt.datasetParaWeka);
+////                System.out.println("Classificado como: " + kmeans.clusterInstance(exemplo));
+////                System.err.println("Centróide: " + kmeans.getClusterCentroids());
 
                 int[] rotulos = kmeans.getAssignments();
                 int numGrupos = kmeans.getNumClusters();
                 double[] numElementosGrupo = kmeans.getClusterSizes();
                 List<MicroGrupo> microGrupos = this.separaExemplosPorGrupoClassificado(rotulos, numGrupos, exemplos, numElementosGrupo, dt);
                 dt.microGruposPorRegra.get(i).addAll(microGrupos);
-                //TODO: criar método de classificação utiizando os dado do MC, diferente do já implementado no kmeans (linha 699)
             }
         }
     }
@@ -719,10 +710,10 @@ public class FDT {
         }
 
         for(int i=0; i<exemplos.size(); i++) {
-            microGrupos.get(rotulosExemplos[i]).LS[0] += (float) exemplos.get(i).get(0);
-            microGrupos.get(rotulosExemplos[i]).LS[1] += (float) exemplos.get(i).get(1);
-            microGrupos.get(rotulosExemplos[i]).LS[2] += (float) exemplos.get(i).get(2);
-            microGrupos.get(rotulosExemplos[i]).LS[3] += (float) exemplos.get(i).get(3);
+            for(int k=0; k < dt.numAtributos-1; k++) {
+                microGrupos.get(rotulosExemplos[i]).LS[k] += (float) exemplos.get(i).get(k);
+                microGrupos.get(rotulosExemplos[i]).SS[k] += (float) Math.pow((Double.parseDouble(exemplos.get(i).get(k).toString())), 2);
+            }
         }
 
         return microGrupos;
