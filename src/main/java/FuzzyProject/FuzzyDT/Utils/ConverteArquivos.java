@@ -1,6 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT.Utils;
+package FuzzyProject.FuzzyDT.Utils;
 
-import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyDT.Models.DecisionTree;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

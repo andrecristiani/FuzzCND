@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT.Fuzzy;
+package FuzzyProject.FuzzyDT.Fuzzy;
 
 public class CombinatoricException extends Exception {
     public CombinatoricException(String str) {

@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT.Models;
+package FuzzyProject.FuzzyDT.Models;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.*;
-import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Fuzzy.*;
+import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;
@@ -702,7 +702,7 @@ public class FDT {
     }
 
     public List<MicroGrupo> separaExemplosPorGrupoClassificado(int[] rotulosExemplos, int numGrupos, List<Vector> exemplos, double[] numElementosGrupo, DecisionTree dt) {
-        List<MicroGrupo> microGrupos = new ArrayList<>();
+        List<MicroGrupo> microGrupos = new ArrayList<MicroGrupo>();
         for(int i=0; i<numGrupos; i++) {
             MicroGrupo mg = new MicroGrupo(dt);
             mg.N = (float) numElementosGrupo[i];

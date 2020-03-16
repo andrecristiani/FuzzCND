@@ -1,9 +1,9 @@
-package main.java.FuzzyProject.FuzzyDT.Utils;
+package FuzzyProject.FuzzyDT.Utils;
 
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
-import main.java.FuzzyProject.FuzzyDT.Models.Exemplo;
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.Particoes;
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
+import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
+import FuzzyProject.FuzzyDT.Models.Exemplo;
+import FuzzyProject.FuzzyDT.Fuzzy.Particoes;
+import FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
 
 import java.awt.Component;
 import java.io.BufferedReader;

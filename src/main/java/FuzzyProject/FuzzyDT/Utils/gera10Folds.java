@@ -1,6 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT.Utils;
+package FuzzyProject.FuzzyDT.Utils;
 
-import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 
 public class gera10Folds {
     private static float[][] exemplosAG;

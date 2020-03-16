@@ -1,6 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT.Fuzzy;
+package FuzzyProject.FuzzyDT.Fuzzy;
 
-import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyDT.Models.DecisionTree;
 
 import java.util.Vector;
 

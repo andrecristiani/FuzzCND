@@ -1,4 +1,4 @@
-package main.java.FuzzyProject.FuzzyDT.Fuzzy;
+package FuzzyProject.FuzzyDT.Fuzzy;
 
 import java.util.Enumeration;
 
