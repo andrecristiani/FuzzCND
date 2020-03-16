@@ -163,7 +163,7 @@ public class ConverteArquivos {
 
         FileWriter writer;
         BufferedWriter buf_writer;
-        ArrayList<String> classesDivididas = new ArrayList<>();
+        ArrayList<String> classesDivididas = new ArrayList<String>();
         try {
             writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".txt");
             buf_writer = new BufferedWriter(writer);

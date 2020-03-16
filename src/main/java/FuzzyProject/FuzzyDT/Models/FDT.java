@@ -668,7 +668,7 @@ public class FDT {
                     Instance exemplo = new DenseInstance(numAtts);
                     float[][] array = new float[1][4];
                     for(int k=0; k < dt.numAtributos-1; k++) {
-                        array[0][k] = (float) exemplos.get(inst).get(k);
+                        array[0][k] = Float.parseFloat(exemplos.get(inst).get(k).toString());
                         exemplo.setValue(k, array[0][k]);
                     }
                     noFolha.add(exemplo);
@@ -711,7 +711,7 @@ public class FDT {
 
         for(int i=0; i<exemplos.size(); i++) {
             for(int k=0; k < dt.numAtributos-1; k++) {
-                microGrupos.get(rotulosExemplos[i]).LS[k] += (float) exemplos.get(i).get(k);
+                microGrupos.get(rotulosExemplos[i]).LS[k] += Float.parseFloat(exemplos.get(i).get(k).toString());
                 microGrupos.get(rotulosExemplos[i]).SS[k] += (float) Math.pow((Double.parseDouble(exemplos.get(i).get(k).toString())), 2);
             }
         }

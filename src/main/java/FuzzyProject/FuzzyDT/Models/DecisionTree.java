@@ -46,8 +46,8 @@ public class DecisionTree {
         mA.carregaParticao(this.particao, (this.caminho + "particao" + this.dataset + numClassificador  + ".txt"), this.numAtributos, this.numConjuntos);
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
         this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];
-        this.numClassificadosPorRegraClassificacao = new ArrayList<>();
-        this.microGruposPorRegra = new ArrayList<>();
+        this.numClassificadosPorRegraClassificacao = new ArrayList<ArrayList<Vector>>();
+        this.microGruposPorRegra = new ArrayList<List<MicroGrupo>>();
         for(int i=0; i<=numRegrasAD; i++) {
             this.microGruposPorRegra.add(new ArrayList<MicroGrupo>());
             this.numClassificadosPorRegraClassificacao.add(new ArrayList<Vector>());
