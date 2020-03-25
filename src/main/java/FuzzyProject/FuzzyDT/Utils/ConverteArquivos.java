@@ -1,6 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT.Utils;
+package FuzzyProject.FuzzyDT.Utils;
 
-import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyDT.Models.DecisionTree;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -163,7 +163,7 @@ public class ConverteArquivos {
 
         FileWriter writer;
         BufferedWriter buf_writer;
-        ArrayList<String> classesDivididas = new ArrayList<>();
+        ArrayList<String> classesDivididas = new ArrayList<String>();
         try {
             writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".txt");
             buf_writer = new BufferedWriter(writer);

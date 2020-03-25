@@ -1,6 +1,6 @@
-package main.java.FuzzyProject.FuzzyDT.Models;
+package FuzzyProject.FuzzyDT.Models;
 
-import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
 import weka.core.FastVector;
 import weka.core.Instances;
 
@@ -26,7 +26,7 @@ public class DecisionTree {
     public ArrayList<String> atributos;
     public FastVector atributosParaWeka;
     Instances datasetParaWeka;
-    public List<List<Vector>> numClassificadosPorRegraClassificacao;
+    public List<ArrayList<Vector>> numClassificadosPorRegraClassificacao;
     public List<List<MicroGrupo>> microGruposPorRegra;
     public Integer[] numClassificadosPorRegraTreinamento;
 
@@ -46,11 +46,11 @@ public class DecisionTree {
         mA.carregaParticao(this.particao, (this.caminho + "particao" + this.dataset + numClassificador  + ".txt"), this.numAtributos, this.numConjuntos);
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
         this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];
-        this.numClassificadosPorRegraClassificacao = new ArrayList<>();
-        this.microGruposPorRegra = new ArrayList<>();
+        this.numClassificadosPorRegraClassificacao = new ArrayList<ArrayList<Vector>>();
+        this.microGruposPorRegra = new ArrayList<List<MicroGrupo>>();
         for(int i=0; i<=numRegrasAD; i++) {
             this.microGruposPorRegra.add(new ArrayList<MicroGrupo>());
-            this.numClassificadosPorRegraClassificacao.add(new ArrayList<>());
+            this.numClassificadosPorRegraClassificacao.add(new ArrayList<Vector>());
         }
         this.regrasAD = mA.carregaRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador  + this.taxaPoda + ".txt", this.numAtributos, this.numRegrasAD);
     }
