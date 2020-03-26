@@ -8,6 +8,5 @@ public class FaseOffline {
         ComiteArvores comite = new ComiteArvores(tComite);
         comite.treinaComiteInicial(dataset, caminho, taxaPoda, numCjtos);
         return comite;
-//        mA1.apagaArqsTemporarios(dataset + numClassificador, caminho);
     }
 }
