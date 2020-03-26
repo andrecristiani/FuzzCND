@@ -1,6 +1,6 @@
 package FuzzyProject.FuzzyND;
 
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MicroClassificador;
 import FuzzyProject.FuzzyND.Models.SPFMiC;
@@ -32,7 +32,7 @@ public class FaseOnline {
     public void inicializar(String caminho, String dataset) {
         float[][] treinamento;
         treinamento = new float[150][4];
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         mA.carregaArquivoTreinamento(treinamento, caminho + dataset + "0.txt", 4);
 
         double[][] exemplos2 = new double[treinamento.length][4];

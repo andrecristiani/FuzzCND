@@ -1,5 +1,7 @@
 package FuzzyProject.FuzzyDT.Models;
 
+import java.util.Vector;
+
 public class MicroGrupo {
 
     public float LS[];
@@ -39,6 +41,14 @@ public class MicroGrupo {
         return raio;
     }
 
+    public double calculaDistanciaEuclidiana(Vector ponto1, float[] ponto2) {
+        double somatorio = 0;
+        for(int i=0; i<ponto1.size(); i++) {
+            somatorio = somatorio + Math.pow((Float.parseFloat(ponto1.get(i).toString())-ponto2[i]),2);
+        }
+        return Math.sqrt(somatorio);
+    }
+
     public double calculaDistanciaEuclidiana(float[] ponto1, float[] ponto2) {
         double somatorio = 0;
         for(int i=0; i<ponto1.length; i++) {
@@ -47,7 +57,7 @@ public class MicroGrupo {
         return Math.sqrt(somatorio);
     }
 
-    public boolean verificaSeExemploPertenceAoGrupo(float[] exemplo) {
+    public boolean verificaSeExemploPertenceAoGrupo(Vector exemplo) {
         double distRaioCentroide = calculaDistanciaEuclidiana(this.getRaio(), this.getCentroide());
         double distExemploCentroide = calculaDistanciaEuclidiana(exemplo, this.getCentroide());
         if(distExemploCentroide <= distRaioCentroide) {

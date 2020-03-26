@@ -1,6 +1,6 @@
 package FuzzyProject.FuzzyDT.Models;
 
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import weka.core.FastVector;
 import weka.core.Instances;
 
@@ -22,8 +22,8 @@ public class DecisionTree {
     public String arvoreJ48;
     public String[][] particao;
     public String[][] regrasAD;
-    public ArrayList<String> rotulos;
-    public ArrayList<String> atributos;
+    public List<String> rotulos;
+    public List<String> atributos;
     public FastVector atributosParaWeka;
     Instances datasetParaWeka;
     public List<ArrayList<Vector>> numClassificadosPorRegraClassificacao;
@@ -42,7 +42,7 @@ public class DecisionTree {
 
     public void inicializaValores() {
         this.inicializada = 1;
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         mA.carregaParticao(this.particao, (this.caminho + "particao" + this.dataset + numClassificador  + ".txt"), this.numAtributos, this.numConjuntos);
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
         this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];

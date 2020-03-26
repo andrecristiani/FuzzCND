@@ -186,6 +186,70 @@ public class sistemaFuzzyCalculos {
         return regrasSFC[indice][numVariaveisEntrada - 1];
     }
 
+    public String sistemaFuzzyCalculosParaClassificacao(int numVariaveisEntrada, String[][] regrasSFC, int numRegrasSFC, Vector padrao, String[][] particaoSFC, DecisionTree dt) {
+        compat = new double[numRegrasSFC];
+        double grau = 0.0D;
+        Vector part = new Vector(1);
+
+        int indice;
+        for(int i = 0; i < numRegrasSFC; ++i) {
+            compat[i] = 1.0D;
+
+            for(int j = 0; j < numVariaveisEntrada - 1; ++j) {
+                float valor = Float.parseFloat(padrao.get(j).toString());
+                if ((double)valor != -11111.0D && regrasSFC[i][j].compareTo("dc") != 0) {
+                    indice = 1;
+                    part.clear();
+                    int d;
+                    if (j != 0) {
+                        for(d = 1; d <= j; ++d) {
+                            indice += Integer.parseInt(particaoSFC[0][d]);
+                        }
+                    }
+
+                    for(d = indice; d < indice + Integer.parseInt(particaoSFC[0][j + 1]); ++d) {
+                        if (regrasSFC[i][j].compareTo(particaoSFC[d][1]) == 0) {
+                            indice = d;
+                            d += Integer.parseInt(particaoSFC[0][j + 1]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("triangular")) {
+                        for(d = 2; d < 5; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("gaussian")) {
+                        for(d = 2; d < 4; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("trapezoidal")) {
+                        for(d = 2; d < 6; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    grau = this.calculaGrauRegra((double)valor, particaoSFC[indice][0], part);
+                    if (compat[i] > grau) {
+                        compat[i] = grau;
+                    }
+                }
+            }
+        }
+
+        indice = this.max(compat, numRegrasSFC);
+        dt.numClassificadosPorRegraClassificacao.get(indice).add(padrao);
+        for(int i=0; i< dt.microGruposPorRegra.get(indice).size(); i++) {
+            if(dt.microGruposPorRegra.get(indice).get(i).verificaSeExemploPertenceAoGrupo(padrao)) {
+                return regrasSFC[indice][numVariaveisEntrada - 1];
+            }
+        }
+        return "desconhecido";
+    }
+
     public String geral(int numVariaveisEntrada, String[][] regrasSFC, int numRegrasSFC, Vector padrao, String[][] particaoSFC, int numerodeClasses) {
         int indice = 1;
         double grau = 0.0D;

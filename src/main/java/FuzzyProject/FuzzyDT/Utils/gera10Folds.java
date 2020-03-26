@@ -1,7 +1,5 @@
 package FuzzyProject.FuzzyDT.Utils;
 
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
-
 public class gera10Folds {
     private static float[][] exemplosAG;
 
@@ -10,7 +8,7 @@ public class gera10Folds {
 
     public void geraNFolds(String dataSet, String caminho, int numFolds) {
         boolean flag = false;
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numVarEntrada = mA.getNumeroVariaveisEntradaArqTreinamento(caminho + dataSet + ".txt");
         int numClasses = mA.getNumeroClasses(numVarEntrada, caminho + dataSet + ".names");
         int numExemplos = mA.getNumRegrasTreinamento2(caminho + dataSet + ".txt");
@@ -183,7 +181,7 @@ public class gera10Folds {
     void gera10Folds(String dataSet, int numClasses, String caminho) {
         int cont = 0;
         boolean flag = false;
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numExemplos = mA.getNumRegrasTreinamento2(caminho + dataSet + ".txt");
         System.out.println("Número total de exemplos: " + numExemplos);
         int numVarEntrada = mA.getNumeroVariaveisEntradaArqTreinamento(caminho + dataSet + ".txt");
@@ -585,7 +583,7 @@ public class gera10Folds {
             System.out.println("Separação inválida...\nSeparação será feita usando 25% dos exemplos como reserva.");
         }
 
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numVarEntrada = mA.getNumeroVariaveisEntradaArqTreinamento(caminho + dataSet + "_original.txt");
         System.out.println("Número de atributos: " + numVarEntrada);
         int numClasses = mA.getNumeroClasses(numVarEntrada, caminho + dataSet + ".names");
