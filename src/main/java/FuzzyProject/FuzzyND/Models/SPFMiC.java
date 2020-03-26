@@ -6,20 +6,16 @@ public class SPFMiC {
     public double LSpertinencias[];
     public double LStipicidades[];
     public double somaDasDistancias[];
-    public double t;
     public double N;
-    public double fuzzificacao;
-    public double tipicidade;
+    public double t;
     public String rotulo;
 
-    public SPFMiC(int numAtributos, double fuzzificacao, double tipicidade) {
+    public SPFMiC(int numAtributos) {
         this.LSm = new double[numAtributos];
         this.LSn = new double[numAtributos];
         this.LSpertinencias = new double[numAtributos];
         this.LStipicidades = new double[numAtributos];
         this.somaDasDistancias = new double[numAtributos];
-        this.fuzzificacao = fuzzificacao;
-        this.tipicidade = tipicidade;
 
         for(int i=0; i<numAtributos; i++) {
             this.LSm[i] = 0;
@@ -31,5 +27,15 @@ public class SPFMiC {
 
         this.t = 0;
         this.N = 0;
+    }
+
+    public SPFMiC(int numAtributos, double[] centroide, int N) {
+        this.LSm = centroide;
+        this.LSn = centroide;
+        this.LSpertinencias = centroide;
+        this.LStipicidades = centroide;
+        this.somaDasDistancias = centroide;
+        this.N = N;
+        this.t = 0;
     }
 }
