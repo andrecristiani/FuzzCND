@@ -1,6 +1,6 @@
 package FuzzyProject.FuzzyDT.Fuzzy;
 
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 
 import java.text.DecimalFormat;
 import java.util.StringTokenizer;
@@ -15,7 +15,7 @@ public class wangMendell {
 
     public int wangMendell(String[][] regrasCriadasWM, float[][] treinamento, int numRegrasTreinamento, int numVarEntrada, String nomeArquivo, String[][] particao, String gravarFuzzificado, String metodoRaciocinio) {
         regrasCriadasTemp = new String[numRegrasTreinamento][numVarEntrada + 3];
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         calculaGdCobertura cG = new calculaGdCobertura();
         Vector part = new Vector(1);
         Vector part1 = new Vector(1);
@@ -369,7 +369,7 @@ public class wangMendell {
 
     public int wangMendell2(String[][] regrasCriadasWM, float[][] treinamento, int numRegrasTreinamento, int numVarEntrada, String nomeArquivo, String[][] particao, String cjtosF, String gravaFuzzificados) {
         regrasCriadasTemp = new String[numRegrasTreinamento][numVarEntrada + 3];
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         calculaGdCobertura cG = new calculaGdCobertura();
         Vector part = new Vector(1);
         Vector part1 = new Vector(1);
@@ -561,7 +561,7 @@ public class wangMendell {
 
     public int wangMendellWrapper(String[][] regrasCriadasWM, float[][] treinamento, int numRegrasTreinamento, int numVarEntrada, String nomeArquivo, String[][] particao, String gravarFuzzificado, String gravarBWM, String metodoRaciocinio) {
         regrasCriadasTemp = new String[numRegrasTreinamento][numVarEntrada + 3];
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         calculaGdCobertura cG = new calculaGdCobertura();
         Vector part = new Vector(1);
         Vector part1 = new Vector(1);
@@ -757,7 +757,7 @@ public class wangMendell {
 
     public int wangMendellWrapper2(String[][] regrasCriadasWM, float[][] treinamento, int numRegrasTreinamento, int numVarEntrada, String nomeArquivo, String[][] particao, String gravarFuzzificado, String gravarBWM, String metodoRaciocinio) {
         regrasCriadasTemp = new String[numRegrasTreinamento][numVarEntrada + 3];
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         calculaGdCobertura cG = new calculaGdCobertura();
         Vector part = new Vector(1);
         Vector part1 = new Vector(1);

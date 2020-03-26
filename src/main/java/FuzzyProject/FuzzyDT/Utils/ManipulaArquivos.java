@@ -1,7 +1,6 @@
 package FuzzyProject.FuzzyDT.Utils;
 
 import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
-import FuzzyProject.FuzzyDT.Models.Exemplo;
 import FuzzyProject.FuzzyDT.Fuzzy.Particoes;
 import FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
 
@@ -18,19 +17,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
-public class manipulaArquivos {
+public class ManipulaArquivos {
     String saida;
     private Component componente;
     private static String[][] particaoContexto;
 
-    public manipulaArquivos() {
+    public ManipulaArquivos() {
     }
 
     public int getNumeroVariaveisEntrada(String nomeArquivo) {
@@ -578,7 +576,7 @@ public class manipulaArquivos {
                 System.err.println(var16.getMessage());
             }
         } else {
-            manipulaArquivos mA = new manipulaArquivos();
+            ManipulaArquivos mA = new ManipulaArquivos();
             b = 1;
             particaoContexto = new String[numConjuntos + 1][numVarEntrada + 2];
             mA.carregaParticao(particaoContexto, caminho + "particao" + dataset + ".txt", numVarEntrada, numConjuntos);
@@ -911,6 +909,29 @@ public class manipulaArquivos {
                 ++indice;
             }
 
+            inReader.close();
+        } catch (IOException var6) {
+            System.err.println(var6.getMessage());
+        }
+
+        return indice;
+    }
+
+    public int getNumExemplos(String arquivoTreinamento) {
+        BufferedReader inReader = null;
+        int indice = 0;
+
+        try {
+            inReader = new BufferedReader(new FileReader(arquivoTreinamento));
+        } catch (FileNotFoundException var5) {
+            System.err.println("getNumRegrasTreinamento2 - Não foi possível abrir o arquivo: " + arquivoTreinamento);
+            System.exit(1);
+        }
+
+        try {
+            while(inReader.readLine() != null) {
+                ++indice;
+            }
             inReader.close();
         } catch (IOException var6) {
             System.err.println(var6.getMessage());
@@ -3264,7 +3285,7 @@ public class manipulaArquivos {
     }
 
     void geraArquivoParametros(String caminho, String dataset) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numVariaveisEntrada = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento0.txt");
         wrapperWM wWM = new wrapperWM();
         float[] parametros = new float[2];
@@ -3287,7 +3308,7 @@ public class manipulaArquivos {
     }
 
     void geraArquivoParametrosUmTreino(String caminho, String dataset, int arqTreino, String metodo) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numVariaveisEntrada = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + arqTreino + ".txt");
         wrapperWM wWM = new wrapperWM();
         float[] parametros = new float[2];
@@ -3579,7 +3600,7 @@ public class manipulaArquivos {
             FileWriter writer = new FileWriter(caminho + dataset + "DadosParticao.txt");
             buf_writer = new BufferedWriter(writer);
             String line = "";
-            manipulaArquivos mA = new manipulaArquivos();
+            ManipulaArquivos mA = new ManipulaArquivos();
             mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
             Vector dadosParticao = new Vector();
             this.carregaDadosParticao(caminho + "particao" + dataset + ".txt", dadosParticao);

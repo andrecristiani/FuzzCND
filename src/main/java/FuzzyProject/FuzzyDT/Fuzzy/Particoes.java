@@ -1,6 +1,6 @@
 package FuzzyProject.FuzzyDT.Fuzzy;
 
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 
 public class Particoes {
     private static String metodoRaciocinioAG;
@@ -79,7 +79,7 @@ public class Particoes {
             }
         }
 
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String arqTreinamento = arqTrein + ".txt";
         String arqMetaDados = arqTrein + ".names";
         String arqParticao = "particao" + arqTreinamento;
@@ -212,7 +212,7 @@ public class Particoes {
             }
         }
 
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String arqTreinamento = arqTrein + ".txt";
         String arqMetaDados = arqTrein + ".names";
         String arqParticao = "particao" + arqTreinamento;
@@ -282,7 +282,7 @@ public class Particoes {
     }
 
     public void geraParticaoNumCjtosFuzzyVariavel(String arqTrein, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String arqDados = arqTrein + "DadosParticao.txt";
         String arqTreinamento = arqTrein + ".txt";
         String arqMetaDados = arqTrein + ".names";

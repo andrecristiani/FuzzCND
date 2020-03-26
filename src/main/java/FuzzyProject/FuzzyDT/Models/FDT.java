@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import FuzzyProject.FuzzyDT.Fuzzy.*;
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;
@@ -31,7 +31,7 @@ public class FDT {
 
     public void geraArvore(String dataset, String caminho, String metodoRaciocinio, DecisionTree dt) {
         String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         int numObjetos = mA.getNumRegrasTreinamento2(caminho + dataset + ".txt");
         int numConjuntos = mA.getNumConjuntos(particao);
@@ -477,7 +477,7 @@ public class FDT {
             }
         }
 
-        new manipulaArquivos();
+        new ManipulaArquivos();
         return regrasPadrao;
     }
 
@@ -495,7 +495,7 @@ public class FDT {
     }
 
     private static int carregaArquivoTeste(String arqTeste, int numVariaveisEntrada, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numTestes = mA.getNumRegrasTreinamento(caminho + arqTeste);
         exemplosTeste = new float[numTestes][numVariaveisEntrada];
         mA.carregaPadroesAG(exemplosTeste, caminho + arqTeste, numVariaveisEntrada, numTestes);
@@ -503,8 +503,103 @@ public class FDT {
     }
 
     public void converteArvoreEmRegras(String dataset, String caminho, String tp, String arvoreJ48, DecisionTree dt) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + 0 + ".txt");
+        String[][] metaDados = new String[nVE][100];
+        metaDados = mA.getMetaDados(caminho + dataset + ".names", nVE);
+        int numRegras = 0;
+        StringTokenizer str = new StringTokenizer(arvoreJ48);
+        String temp = arvoreJ48.replace("J48 pruned tree", "");
+        arvoreJ48 = temp.replace("------------------", "");
+        temp = arvoreJ48.replace("=", "");
+
+        while(str.hasMoreElements()) {
+            if (str.nextToken().contains("(")) {
+                ++numRegras;
+            }
+        }
+
+        new StringTokenizer(temp);
+        String[] regrasSujas = new String[numRegras];
+        StringTokenizer tudo = new StringTokenizer(temp);
+        String token = "";
+        String lastToken = "";
+
+        for(int aa = 0; aa < numRegras; ++aa) {
+            regrasSujas[aa] = "";
+            lastToken = token;
+            token = tudo.nextToken();
+
+            do {
+                if (!token.contains("|")) {
+                    regrasSujas[aa] = regrasSujas[aa] + token + "\t";
+                    lastToken = token;
+                }
+
+                if (token.compareTo("|") == 0 && (lastToken.contains("|") || lastToken.contains(")"))) {
+                    regrasSujas[aa] = regrasSujas[aa] + "|\t|\t";
+                }
+
+                token = tudo.nextToken();
+            } while(!token.contains(")"));
+        }
+
+        String[][] regras = new String[numRegras][nVE * 2];
+
+        int aa;
+        for(aa = 0; aa < numRegras; ++aa) {
+            for(int bb = 0; bb < nVE * 2; ++bb) {
+                regras[aa][bb] = "dc";
+            }
+        }
+        String regraTemp;
+        int b;
+        for(aa = 0; aa < numRegras; ++aa) {
+            StringTokenizer lin = new StringTokenizer(regrasSujas[aa]);
+            b = 0;
+
+            while(lin.hasMoreElements()) {
+                regraTemp = lin.nextToken();
+                if (regraTemp.compareTo("|") == 0) {
+                    regras[aa][b] = regras[aa - 1][b];
+                    ++b;
+                } else {
+                    if (regraTemp.contains(":")) {
+                        regraTemp = regraTemp.replace(":", "");
+                    }
+
+                    regras[aa][b] = regraTemp;
+                    ++b;
+                }
+            }
+        }
+
+        String[] regraS = new String[numRegras];
+
+        for(aa = 0; aa < numRegras; ++aa) {
+            regraS[aa] = "";
+        }
+
+        for(aa = 0; aa < numRegras; ++aa) {
+            for(b = 0; b < nVE * 2 - 1; ++b) {
+                String lixo = regras[aa][b];
+                if (lixo.compareTo("dc") != 0) {
+                    regraS[aa] = regraS[aa] + regras[aa][b] + "\t";
+                } else {
+                    b = nVE * 2;
+                }
+            }
+        }
+
+        String[][] var10000 = new String[numRegras][nVE];
+        String[][] regrasFinais = this.converteRegrasParaRegrasPadrao(regraS, numRegras, nVE, metaDados);
+        mA.gravaBaseRegras(regrasFinais, caminho + "RegrasFC45-" + dataset + tp + ".txt", numRegras, nVE);
+        mA.gravaBRparaUsuario(regrasFinais, caminho + "RegrasFC45User-" + dataset + tp + ".txt", numRegras, nVE, dataset, caminho);
+    }
+
+    public void converteArvoreEmRegras(String dataset, String caminho, String tp, String arvoreJ48) {
+        ManipulaArquivos mA = new ManipulaArquivos();
+        int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         String[][] metaDados = new String[nVE][100];
         metaDados = mA.getMetaDados(caminho + dataset + ".names", nVE);
         int numRegras = 0;
@@ -602,7 +697,7 @@ public class FDT {
         DecimalFormat mF = new DecimalFormat();
         mF.applyPattern("########0.0000");
         this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48, dt);
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
         int rodadas = 1;
         wrapperWM wWM = new wrapperWM();
@@ -636,12 +731,12 @@ public class FDT {
 
     public String classificaExemplo(DecisionTree dt, Vector exemplo) {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
-        return sFC.sistemaFuzzyCalculos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
+        return sFC.sistemaFuzzyCalculosParaClassificacao(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
     }
 
     public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         treinamento = new float[dt.numObjetos][dt.nVE];
         mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", dt.nVE);
         for(int i=0; i< dt.numObjetos; i++) {
@@ -681,17 +776,6 @@ public class FDT {
                 kmeans.setNumClusters(2);
                 kmeans.buildClusterer(noFolha);
 
-//                Exemplo de como classificar um exemplo
-//                Instance exemplo = new DenseInstance(numAtts);
-//                exemplo.setValue(0,5.1);
-//                exemplo.setValue(1,3.5);
-//                exemplo.setValue(2,1.4);
-//                exemplo.setValue(3,0.2);
-//
-//                exemplo.setDataset(dt.datasetParaWeka);
-////                System.out.println("Classificado como: " + kmeans.clusterInstance(exemplo));
-////                System.err.println("Centróide: " + kmeans.getClusterCentroids());
-
                 int[] rotulos = kmeans.getAssignments();
                 int numGrupos = kmeans.getNumClusters();
                 double[] numElementosGrupo = kmeans.getClusterSizes();
@@ -724,7 +808,7 @@ public class FDT {
         DecimalFormat mF = new DecimalFormat();
         mF.applyPattern("########0.00");
         //this.converteArvoreEmRegras(dataset, caminho, tp, arvoreJ48);
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
         wrapperWM wWM = new wrapperWM();
         String arqParticao = "particao" + dataset + ".txt";
@@ -766,7 +850,7 @@ public class FDT {
     void resumoDasRegras(String dataset, String caminho, String tp) {
         DecimalFormat mF = new DecimalFormat();
         mF.applyPattern("########0.00");
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         int numRegrasAD = mA.getNumRegrasAD(caminho + "RegrasFC45-" + dataset + tp + ".txt");
         String[][] var10000 = new String[numRegrasAD][nVE];
@@ -788,7 +872,7 @@ public class FDT {
 
     public void geraFuzzyDT(String dataset, String taxaPoda, int numCjtos, String caminho, DecisionTree dt) throws Exception {
         J48 j48 = new J48();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String metodoRaciocinio = "classico";
 
         Particoes pt = new Particoes();
@@ -805,6 +889,7 @@ public class FDT {
         String arvoreJ48 = j48.toString();
         dt.arvoreJ48 = arvoreJ48;
         mA.gravaArvore(arvoreJ48, caminho + dataset + "ArvoreJ48" + ".txt");
+        this.converteArvoreEmRegras(dataset, caminho, taxaPoda, arvoreJ48);
         if(dt.inicializada == 0) {
             dt.inicializaValores();
         }
@@ -812,7 +897,7 @@ public class FDT {
 
     public void geraFuzzyDecisionTree(String dataset, String taxaPoda, int numCjtos, String caminho, DecisionTree dt) throws Exception {
         J48 j48 = new J48();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String metodoRaciocinio = "classico";
         float[] precisao = new float[10];
 
@@ -846,7 +931,7 @@ public class FDT {
     }
 
     void calculaValorInfoGainRFUmDataset(String dataset, String funcao, String caminho, int arqTreino) throws Exception {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numMaxFuzzySets = 9;
         new J48();
         InfoGainAttributeEval IG = new InfoGainAttributeEval();
@@ -980,7 +1065,7 @@ public class FDT {
 
     public void geraArvoreNumTermosFixoTreinamento(String dataset, int rodada, String caminho, boolean imprimeDF, String metodoRaciocinio, int numTermos) {
         String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String rod = rodada + "";
         if (rodada == -1) {
             rod = "";
@@ -1076,7 +1161,7 @@ public class FDT {
     }
 
     public void converteFDT(String dataset, String caminho, String tp, String arvoreJ48) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + ".txt");
         String[][] metaDados = new String[nVE][100];
         metaDados = mA.getMetaDados(caminho + dataset + ".names", nVE);
@@ -1204,7 +1289,7 @@ public class FDT {
 
     public void geraFuzzyDT(String dataset, int rodada, String caminho) {
         String particao = caminho + "particao" + dataset + ".txt";
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         //número de "colunas" que um dataset contém, contando também o rótulo
         int nVE = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento" + rodada + ".txt");
         //número de exemplos no dataset original

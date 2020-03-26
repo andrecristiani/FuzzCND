@@ -1,5 +1,6 @@
 package FuzzyProject.FuzzyDT.Utils;
 
+import FuzzyProject.FuzzyDT.Models.ComiteArvores;
 import FuzzyProject.FuzzyDT.Models.DecisionTree;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.io.LineNumberReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class ConverteArquivos {
@@ -27,13 +29,13 @@ public class ConverteArquivos {
         numAtribs = 0;
     }
 
-    public void main(String arquivo, int numClassificador, DecisionTree dt) throws FileNotFoundException, IOException {
+    public int main(String arquivo, ComiteArvores comite, int tComite) throws FileNotFoundException, IOException {
         boolean numAtributos = false;
         if (numAtribs != 0) {
             numAtributos = true;
         }
         String current = (new File(".")).getCanonicalPath();
-        String arquivoOriginal = arquivo + numClassificador + ".dat";
+        String arquivoOriginal = arquivo + ".dat";
         String arq = current + "/" + arquivo + "/" + arquivoOriginal;
         new File(current + "/" + arquivo);
         (new File(current + "/" + arquivo)).mkdir();
@@ -78,7 +80,7 @@ public class ConverteArquivos {
                 do {
                     atribs[i][0] = str.nextToken();
                     temp = str.nextToken();
-                    dt.atributos.add(atribs[i][0]);
+                    comite.atributos.add(atribs[i][0]);
                     if (temp.contains("real")) {
                         atribs[i][1] = "real";
                     } else if (temp.contains("integer")) {
@@ -116,7 +118,7 @@ public class ConverteArquivos {
                     ++numAtribs;
                 } while("@attribute".equals(str.nextToken()));
             }
-            dt.numAtributos = numAtribs-1;
+            comite.numAtributos = numAtribs-1;
 
             if(!numAtributos) {
                 line = inReader.readLine();
@@ -157,34 +159,85 @@ public class ConverteArquivos {
             System.err.println(var26.getMessage());
         }
 
-        dt.numObjetos = numExemplos;
+        int numClassificadores = numExemplos/tComite;
+
+        int numExemplosPorClassificador = numExemplos/numClassificadores;
 
         str = null;
 
         FileWriter writer;
         BufferedWriter buf_writer;
+        FileWriter writerNames;
+        BufferedWriter buf_writerNames;
         ArrayList<String> classesDivididas = new ArrayList<String>();
-        try {
-            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".txt");
-            buf_writer = new BufferedWriter(writer);
 
-            if(numAtributos) {
-                for (i = 0; i < numExemplos; ++i) {
-                    String[] aux = exemplos[i].split("\t");
-                    if (!classesDivididas.contains(aux[aux.length - 1])) {
-                        classesDivididas.add(aux[aux.length - 1]);
+        try {
+            int countClassificadores = 0;
+            if (numAtributos) {
+                for (i = 0; i < numExemplos;) {
+                    writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".txt");
+                    buf_writer = new BufferedWriter(writer);
+                    writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
+                    buf_writerNames = new BufferedWriter(writerNames);
+                    List<String> classes = new ArrayList<>();
+                    for(int j = 0; j<numExemplosPorClassificador; j++, i++) {
+                        String[] aux = exemplos[i].split("\t");
+                        if (!classesDivididas.contains(aux[aux.length - 1])) {
+                            classesDivididas.add(aux[aux.length - 1]);
+                        }
+                        buf_writer.write(exemplos[i]);
+                        buf_writer.newLine();
                     }
-                    buf_writer.write(exemplos[i]);
-                    buf_writer.newLine();
+                    for(i = 0; i < numAtribs - 1; ++i) {
+                        if(atribs[i][0] != "Class") {
+                            temp = atribs[i][0] + " " + atribs[i][1];
+                            buf_writer.write(temp);
+                            buf_writer.newLine();
+                        }
+                    }
+                    countClassificadores++;
+                    buf_writer.close();
                 }
             } else {
-                for(i = 0; i < numExemplos; ++i) {
-                    buf_writer.write(exemplos[i]);
-                    buf_writer.newLine();
+                for (i = 0; i < numExemplos;) {
+                    writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".txt");
+                    buf_writer = new BufferedWriter(writer);
+                    writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
+                    buf_writerNames = new BufferedWriter(writerNames);
+                    List<String> classes = new ArrayList<>();
+                    for(int j = 0; j<numExemplosPorClassificador && i<numExemplos; j++, i++) {
+                        String[] aux = exemplos[i].split("\t");
+                        if(!classes.contains(aux[aux.length-1])) {
+                            classes.add(aux[aux.length-1]);
+                        }
+                        buf_writer.write(exemplos[i]);
+                        buf_writer.newLine();
+                    }
+
+                    for(int k = 0; k < numAtribs - 1; ++k) {
+                        if(atribs[k][0].compareTo("Class") != 0) {
+                            temp = atribs[k][0] + " " + atribs[k][1];
+                            buf_writerNames.write(temp);
+                            buf_writerNames.newLine();
+                        }
+                    }
+
+                    String classesConcatenadas = new String();
+                    classesConcatenadas = classes.get(0).replace(" ","");
+                    for(int j=1; j<classes.size(); j++) {
+                        String classe = classes.get(j).replace(" ", "");
+                        classesConcatenadas = classesConcatenadas + " " + classe;
+                    }
+
+                    temp = "Class " + classesConcatenadas;
+                    buf_writerNames.write(temp);
+                    buf_writerNames.newLine();
+
+                    countClassificadores++;
+                    buf_writer.close();
+                    buf_writerNames.close();
                 }
             }
-
-            buf_writer.close();
         } catch (IOException var25) {
             System.err.println(var25);
             System.exit(1);
@@ -192,36 +245,36 @@ public class ConverteArquivos {
 
         str = null;
 
-        try {
-            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".names");
-            buf_writer = new BufferedWriter(writer);
-
-            for(i = 0; i < numAtribs - 1; ++i) {
-                if(atribs[i][0].compareTo("Class") == 0 && numAtributos) {
-                    String aux = "";
-                    for (int k=0; k<classesDivididas.size(); k++) {
-                        String classe = classesDivididas.get(k).replace(" ", "");
-                        aux = aux + classe;
-                        if(k < classesDivididas.size()-1) {
-                            aux = aux + " ";
-                        }
-                    }
-                    temp = atribs[i][0] + " " + aux;
-                    buf_writer.write(temp);
-                    buf_writer.newLine();
-                } else {
-                    temp = atribs[i][0] + " " + atribs[i][1];
-                    buf_writer.write(temp);
-                    buf_writer.newLine();
-                }
-            }
-
-            buf_writer.close();
-        } catch (IOException var24) {
-            System.err.println(var24);
-            System.exit(1);
-        }
-
+//        try {
+//            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".names");
+//            buf_writer = new BufferedWriter(writer);
+//
+//            for(i = 0; i < numAtribs - 1; ++i) {
+//                if(atribs[i][0].compareTo("Class") == 0 && numAtributos) {
+//                    String aux = "";
+//                    for (int k=0; k<classesDivididas.size(); k++) {
+//                        String classe = classesDivididas.get(k).replace(" ", "");
+//                        aux = aux + classe;
+//                        if(k < classesDivididas.size()-1) {
+//                            aux = aux + " ";
+//                        }
+//                    }
+//                    temp = atribs[i][0] + " " + aux;
+//                    buf_writer.write(temp);
+//                    buf_writer.newLine();
+//                } else {
+//                    temp = atribs[i][0] + " " + atribs[i][1];
+//                    buf_writer.write(temp);
+//                    buf_writer.newLine();
+//                }
+//            }
+//
+//            buf_writer.close();
+//        } catch (IOException var24) {
+//            System.err.println(var24);
+//            System.exit(1);
+//        }
+        return numClassificadores;
     }
 }
 

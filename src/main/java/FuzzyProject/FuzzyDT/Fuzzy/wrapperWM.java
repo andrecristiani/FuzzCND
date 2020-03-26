@@ -1,9 +1,7 @@
 package FuzzyProject.FuzzyDT.Fuzzy;
 
-import FuzzyProject.FuzzyDT.Models.DecisionTree;
 import FuzzyProject.FuzzyDT.Models.Exemplo;
-import FuzzyProject.FuzzyDT.Models.Metadata;
-import FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -34,7 +32,7 @@ public class wrapperWM {
     public String[][] wrapperWMBestFirst(String dominio, int numVariaveisEntrada, String metodoRaciocinio, String caminho) throws CombinatoricException {
         System.out.println("dominio:" + dominio);
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         float fitnessWM = 0.0F;
         int contadorIteracoes = 0;
         int numMaxAtributosDescartados = numVariaveisEntrada - 2;
@@ -185,7 +183,7 @@ public class wrapperWM {
 
     public void wrapperWMForcaBruta(String dominio, int numVariaveisEntrada, String metodoRaciocinio, String caminho) throws CombinatoricException {
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int contadorIteracoes = 0;
         int numMaxAtributosDescartados = numVariaveisEntrada - 2;
         String[] atributos = new String[numVariaveisEntrada - 1];
@@ -407,7 +405,7 @@ public class wrapperWM {
     }
 
     private static int carregaArquivosWM(String arqTreinamento, String arqParticao, int numVariaveisEntrada, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         numExemplosWM = mA.getNumRegrasTreinamento2(caminho + arqTreinamento);
         exemplosWM = new float[numExemplosWM][numVariaveisEntrada];
         mA.carregaTreinamento(exemplosWM, caminho + arqTreinamento, numVariaveisEntrada, numExemplosWM);
@@ -418,7 +416,7 @@ public class wrapperWM {
     }
 
     private static int carregaTreino(String arqTreinamento, int numVariaveisEntrada, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         numExemplosWM = mA.getNumRegrasTreinamento2(caminho + arqTreinamento);
         exemplosWM = new float[numExemplosWM][numVariaveisEntrada];
         mA.carregaTreinamento(exemplosWM, caminho + arqTreinamento, numVariaveisEntrada, numExemplosWM);
@@ -426,7 +424,7 @@ public class wrapperWM {
     }
 
     private static int carregaParticao(String arqParticao, int numVariaveisEntrada, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numConjuntos = mA.getNumConjuntos(caminho + arqParticao);
         particaoWM = new String[numConjuntos + 1][numVariaveisEntrada + 2];
         mA.carregaParticao(particaoWM, caminho + arqParticao, numVariaveisEntrada, numConjuntos);
@@ -434,7 +432,7 @@ public class wrapperWM {
     }
 
     private static int carregaArquivoTeste(String arqTeste, int numVariaveisEntrada, String caminho) {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numTestes = mA.getNumRegrasTreinamento2(caminho + arqTeste);
         testeWM = new float[numTestes][numVariaveisEntrada];
         mA.carregaTreinamento(testeWM, caminho + arqTeste, numVariaveisEntrada, numTestes);
@@ -586,7 +584,7 @@ public class wrapperWM {
 
     public void classificaAtribsWM(String dominio, int numVariaveisEntrada, String metodoRaciocinio, String caminho) throws CombinatoricException {
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         float fitnessWM = 0.0F;
         double diferenca = 0.05D;
         float[][] erros = new float[9][numVariaveisEntrada - 1];
@@ -741,7 +739,7 @@ public class wrapperWM {
     }
 
     void rodaWMVariosDatasets(String caminho) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numDominios = 10;
         String[] dominio = new String[numDominios];
         dominio[0] = "credit";
@@ -766,7 +764,7 @@ public class wrapperWM {
     }
 
     void calculaFitnessCadaAtribComWM(String caminho, String[] datasets) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         int numDatasets = datasets.length;
         int[] numVariaveisEntrada2 = new int[4];
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
@@ -781,7 +779,7 @@ public class wrapperWM {
     }
 
     String rodaWrapperBestFirst(String caminho, String dominio) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String atribs = "";
         String[] metodoRaciocinio = new String[]{"classico", "geral"};
 
@@ -797,7 +795,7 @@ public class wrapperWM {
     }
 
     void rodaWMcomSelecaoDeAtributos(String caminho) throws CombinatoricException {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String dataset = "iris";
         caminho = caminho + dataset + "/";
         int numVars = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dataset + "-treinamento0.txt");
@@ -816,7 +814,7 @@ public class wrapperWM {
     }
 
     public static void ranker() {
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         String arquivoDeRankings = "rankwine.txt";
         System.out.println("Arquivo de entrada: " + arquivoDeRankings);
         int numColunas = mA.getNumeroVariaveisEntradaArqTreinamento2(arquivoDeRankings);
@@ -965,7 +963,7 @@ public class wrapperWM {
     public void classificaPorWM(String dominio, String caminho, int fold) throws CombinatoricException {
         String metodoRaciocinio = "classico";
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         float fitnessWM = 0.0F;
         double diferenca = 0.05D;
         System.out.println("ok inté qui");
@@ -1089,7 +1087,7 @@ public class wrapperWM {
     public void classificaAtribsWMUmFold(String dominio, String caminho, int fold) throws CombinatoricException {
         String metodoRaciocinio = "classico";
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         float fitnessWM = 0.0F;
         double diferenca = 0.05D;
         int numVariaveisEntrada = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dominio + ".txt");
@@ -1264,7 +1262,7 @@ public class wrapperWM {
             }
         }
 
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         mA.gravaListaAtribs(atributos, "Atribs-" + dominio + ".txt", b);
         System.out.println("Atributos selecionados: " + atributos);
         return atributos;
@@ -1273,7 +1271,7 @@ public class wrapperWM {
     public void classificaAtribsWMUmFoldNovo(String dominio, String caminho) throws CombinatoricException {
         String metodoRaciocinio = "classico";
         wangMendell wM = new wangMendell();
-        manipulaArquivos mA = new manipulaArquivos();
+        ManipulaArquivos mA = new ManipulaArquivos();
         float fitnessWM = 0.0F;
         double diferenca = 0.05D;
         int numVariaveisEntrada = mA.getNumeroVariaveisEntradaArqTreinamento2(caminho + dominio + ".txt");
