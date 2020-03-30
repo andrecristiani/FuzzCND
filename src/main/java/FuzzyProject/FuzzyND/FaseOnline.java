@@ -3,12 +3,15 @@ package FuzzyProject.FuzzyND;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MicroClassificador;
+import FuzzyProject.FuzzyND.Models.ModeloNS;
 import FuzzyProject.FuzzyND.Models.SPFMiC;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FaseOnline {
 
@@ -18,7 +21,7 @@ public class FaseOnline {
     public double tipicidade;
     public List<Exemplo> memTempRotulados;
     public List<Exemplo> memTempDesconhecidos;
-    public List<MicroClassificador> microClassificadores;
+    ModeloNS modeloNS;
 
     public FaseOnline(double fuzzificacao, double tipicidade, int K) {
         this.K = K;
@@ -26,7 +29,7 @@ public class FaseOnline {
         this.tipicidade = tipicidade;
         memTempRotulados = new ArrayList<>();
         memTempDesconhecidos = new ArrayList<>();
-        microClassificadores = new ArrayList<>();
+        modeloNS = new ModeloNS();
     }
 
     public void inicializar(String caminho, String dataset) {
@@ -45,7 +48,7 @@ public class FaseOnline {
             exemplos.add(new Exemplo(exemplos2[i]));
         }
 
-        this.microClassificadores = criarFuzzyMicroGruposComFCMDadosSemRotulos(exemplos);
+        this.modeloNS.addAllMicroClassificadores(criarFuzzyMicroGruposComFCMDadosSemRotulos(exemplos));
         System.out.println("teste");
     }
 
@@ -95,5 +98,102 @@ public class FaseOnline {
             microClassificadores.get(index).getMicroGrupos().get(0).N++;
         }
         return microClassificadores;
+    }
+
+    private double silhuetaFuzzy(MicroClassificador microClassificador, List<Exemplo> desconhecidos, int k, double m, double alpha) {
+        double silhuetaFuzzy = 0;
+        double numerador = 0;
+        double denominador = 0;
+        int n = desconhecidos.size();
+
+        for (int j=0; j < n; j++) {
+            double a = 0;
+            for (int i=0; i < n; i++) {
+                if (i != j) {
+                    a = a + this.distancia(desconhecidos.get(j), desconhecidos.get(i));
+                }
+            }
+            a = a / (double)desconhecidos.size();
+
+            double b = Double.MAX_VALUE;
+            List<Exemplo> microGrupos = modeloNS.getSFMiCExemplos();
+            Map<String, Double> distanciasMedias = new HashMap<>();
+            Map<String, Integer> quantidadeMicroGrupos = new HashMap<>();
+            for (int i=0; i<modeloNS.getMicroClassificadores().size(); i++) {
+                distanciasMedias.put(Integer.toString(i), 0.0);
+                quantidadeMicroGrupos.put(Integer.toString(i), 0);
+            }
+            for (int i=0; i < microGrupos.size(); i++) {
+                String classe = microGrupos.get(i).getRotulo();
+                distanciasMedias.replace(classe, distanciasMedias.get(classe) + this.distancia(desconhecidos.get(j), microGrupos.get(i)));
+                quantidadeMicroGrupos.put(classe, quantidadeMicroGrupos.get(classe) + 1);
+            }
+            for (int i=0; i < microGrupos.size(); i++) {
+                distanciasMedias.replace(Integer.toString(i), distanciasMedias.get(i) / (double)quantidadeMicroGrupos.get(i));
+            }
+
+            for (int i=0; i < microGrupos.size(); i++) {
+                if (distanciasMedias.get(i) < b) {
+                    b = distanciasMedias.get(i);
+                }
+            }
+
+            double[] pertinencias = this.maioresPertinencia(desconhecidos.get(j), microClassificador.getMicroGrupos(), k, m);
+            double silhueta = (b - a) / Math.max(b, a);
+            numerador = numerador + (Math.pow(pertinencias[0] - pertinencias[1], alpha) * silhueta);
+            denominador = denominador + Math.pow(pertinencias[0] - pertinencias[1], alpha);
+        }
+
+        silhuetaFuzzy = numerador / denominador;
+
+        return silhuetaFuzzy;
+    }
+
+    private double distancia(Exemplo x1, Exemplo x2) {
+        double distancia = Math.sqrt((Math.pow(x1.getPoint()[0]-x2.getPoint()[0],2) + Math.pow(x1.getPoint()[1]-x2.getPoint()[1],2)));
+        return distancia;
+    }
+
+    private double[] maioresPertinencia(Exemplo x, List<SPFMiC> microGrupos, int k, double m) {
+        double[] max = new double[2];
+        max[0] = Double.MIN_VALUE;
+        List<Exemplo> centroides = new ArrayList<>();
+
+        // Agrupa todos os centroides
+        for (int i=0; i < microGrupos.size(); i++) {
+            Exemplo centroide = new Exemplo(microGrupos.get(i).getCentroide(), microGrupos.get(i).getRotulo());
+            centroides.add(centroide);
+        }
+
+        // Calcula pertin�ncias de 'x' para todos os centroides e guarda a maior pertin�cia
+        for (int i=0; i < centroides.size(); i++) {
+            double pertinencia = this.calculoPertinencia(x, centroides, i, k, m);
+            if (pertinencia > max[0]) {
+                max[1] = max[0];
+                max[0] = pertinencia;
+            }
+            else {
+                if (pertinencia > max[1]) {
+                    max[1] = pertinencia;
+                }
+            }
+        }
+
+        return max;
+    }
+
+    private double calculoPertinencia (Exemplo x, List<Exemplo> centroides, int indiceCentroide, int k, double m) {
+        double pertinencia, somatorio = 0;
+
+        for (int i=0; i < centroides.size(); i++) {
+            double numerador = distancia(x, centroides.get(indiceCentroide));
+            double denominador = distancia(x, centroides.get(i));
+            double potencia = 2.0 / (m - 1.0);
+            somatorio = somatorio + Math.pow(numerador / denominador, potencia);
+        }
+
+        pertinencia = 1.0 / somatorio;
+
+        return pertinencia;
     }
 }

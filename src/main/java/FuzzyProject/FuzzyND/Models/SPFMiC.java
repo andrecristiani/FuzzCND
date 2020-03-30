@@ -38,4 +38,13 @@ public class SPFMiC {
         this.N = N;
         this.t = 0;
     }
+
+    public double[] getCentroide() {
+        double[] d = new double[1];
+        return d;
+    }
+
+    public String getRotulo() {
+        return this.rotulo;
+    }
 }
