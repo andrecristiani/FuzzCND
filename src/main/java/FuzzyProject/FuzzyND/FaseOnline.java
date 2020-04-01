@@ -5,6 +5,7 @@ import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MicroClassificador;
 import FuzzyProject.FuzzyND.Models.ModeloNS;
 import FuzzyProject.FuzzyND.Models.SPFMiC;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
 
@@ -17,8 +18,12 @@ public class FaseOnline {
 
     public int K; //numero de clusters por chunk
     public int T; //tamanho do chunk
+    public int m;
+    public int n;
     public double fuzzificacao;
     public double tipicidade;
+    public double alpha;
+    public double theta;
     public List<Exemplo> memTempRotulados;
     public List<Exemplo> memTempDesconhecidos;
     ModeloNS modeloNS;
@@ -49,6 +54,17 @@ public class FaseOnline {
         }
 
         this.modeloNS.addAllMicroClassificadores(criarFuzzyMicroGruposComFCMDadosSemRotulos(exemplos));
+
+        double[] t = new double[4];
+        t[0] = 5.0;
+        t[1] = 2.0;
+        t[2] = 3.5;
+        t[3] = 1.0;
+
+        Exemplo vector = new Exemplo(t);
+
+        List<Double> l = this.modeloNS.calculaPertinencia(vector, this.m);
+
         System.out.println("teste");
     }
 
@@ -62,7 +78,8 @@ public class FaseOnline {
             MicroClassificador microClassificador = new MicroClassificador();
             double[] centroide = clusters.get(i).getCenter().getPoint();
             int nExemplos = clusters.get(i).getPoints().size();
-            SPFMiC microGrupo = new SPFMiC(ex.getPoint().length, centroide, nExemplos);
+            RealMatrix r = fuzzyClusterer.getMembershipMatrix();
+            SPFMiC microGrupo = new SPFMiC(centroide, nExemplos, this.alpha, this.theta);
             microClassificador.addMicroGrupo(microGrupo);
             microClassificadores.add(microClassificador);
         }
@@ -89,13 +106,13 @@ public class FaseOnline {
             //TODO: verificar o n de microGrupo que vai ser pego no 3 get (default 0 temporariamente)
             for (int l = 0; l < ex.getPoint().length; l++) { //TODO: ver como pegar o n de atributos automaticamente
                 double[] exemplo = exemplos.get(i).getPoint();
-                microClassificadores.get(index).getMicroGrupos().get(0).LSm[l] = 0;
-                microClassificadores.get(index).getMicroGrupos().get(0).LSn[l] = 0;
-//                microClassificadores.get(index).getMicroGrupos().get(0).LSpertinencias[l] += Math.pow(dadosMatriz[i][index], microClassificadores.get(index).getMicroGrupos().get(0));
-//                microClassificadores.get(index).getMicroGrupos().get(0).LStipicidades[l] += Math.pow(exemplo[l], microClassificadores.get(index).getMicroGrupos().get(0).);
-                microClassificadores.get(index).getMicroGrupos().get(0).somaDasDistancias[l] = 0;
+//                microClassificadores.get(index).getMicroGrupos().get(0).setLSm[l] = 0;
+//                microClassificadores.get(index).getMicroGrupos().get(0).LSn[l] = 0;
+////                microClassificadores.get(index).getMicroGrupos().get(0).LSpertinencias[l] += Math.pow(dadosMatriz[i][index], microClassificadores.get(index).getMicroGrupos().get(0));
+////                microClassificadores.get(index).getMicroGrupos().get(0).LStipicidades[l] += Math.pow(exemplo[l], microClassificadores.get(index).getMicroGrupos().get(0).);
+//                microClassificadores.get(index).getMicroGrupos().get(0).somaDasDistancias[l] = 0;
             }
-            microClassificadores.get(index).getMicroGrupos().get(0).N++;
+//            microClassificadores.get(index).getMicroGrupos().get(0).N++;
         }
         return microClassificadores;
     }
@@ -159,13 +176,11 @@ public class FaseOnline {
         max[0] = Double.MIN_VALUE;
         List<Exemplo> centroides = new ArrayList<>();
 
-        // Agrupa todos os centroides
         for (int i=0; i < microGrupos.size(); i++) {
             Exemplo centroide = new Exemplo(microGrupos.get(i).getCentroide(), microGrupos.get(i).getRotulo());
             centroides.add(centroide);
         }
 
-        // Calcula pertin�ncias de 'x' para todos os centroides e guarda a maior pertin�cia
         for (int i=0; i < centroides.size(); i++) {
             double pertinencia = this.calculoPertinencia(x, centroides, i, k, m);
             if (pertinencia > max[0]) {
