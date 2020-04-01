@@ -31,6 +31,7 @@ public class ComiteArvores {
             dt.atributos = this.atributos;
             fdt.geraFuzzyDT(dataset + i, taxaPoda, numCjtos, caminho, dt);
             fdt.criaGruposEmNosFolhas(dataset+i, caminho, dt);
+            ma.apagaArqsTemporarios(dataset + i, caminho);
             this.modelos.add(dt);
         }
     }
