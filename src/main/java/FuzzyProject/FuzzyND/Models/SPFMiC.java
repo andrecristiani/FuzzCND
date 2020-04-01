@@ -15,38 +15,17 @@ public class SPFMiC {
     private double alpha;
     private double theta;
 
-    public SPFMiC(int numAtributos, double[] centroide, double alpha, double theta) {
-        this.CF1pertinencias = new double[numAtributos];
-        this.CF1tipicidades = new double[numAtributos];
-        this.SSDe = 0; //TODO: verificar como inicializa essa variável e as de baixo
-        this.Mm = 0;
-        this.Tn = 0;
-
-        for(int i=0; i<numAtributos; i++) {
-            this.CF1pertinencias[i] = 0;
-            this.CF1tipicidades[i] = 0;
-        }
-        this.SSDe = 0; //TODO: verificar como inicializa essa variável e as de baixo
-        this.Mm = 0;
-        this.Tn = 0;
-        this.alpha = alpha;
-        this.theta = theta;
-        this.t = 0;
-        this.N = 0;
-        this.centroide = centroide;
-    }
-
     public SPFMiC(double[] centroide, int N, double alpha, double theta) {
         this.CF1pertinencias = centroide;
         this.CF1tipicidades = centroide;
-        this.SSDe = 0; //TODO: verificar como inicializa essa variável e as de baixo
-        this.Mm = 0;
-        this.Tn = 0;
+        this.centroide = centroide;
+        this.N = N;
         this.alpha = alpha;
         this.theta = theta;
-        this.N = N;
+        this.Mm = 1;
+        this.Tn = 1;
+        this.SSDe = 1; //TODO: verificar como inicializa essa variável e as de baixo
         this.t = 0;
-        this.centroide = centroide;
     }
 
     public double getLSm() {
@@ -124,7 +103,7 @@ public class SPFMiC {
     /***
      * Updates the center position.
      */
-    private void updateCenter(){
+    private void atualizaCentroide(){
         int nAtributos = this.CF1pertinencias.length;
         this.centroide = new double[nAtributos];
         for(int i=0; i<nAtributos; i++) {
@@ -133,6 +112,23 @@ public class SPFMiC {
                     (this.alpha * this.Tn + this.theta * Mm)
             );
         }
+
+    }
+
+    /***
+     * Function used to assign an exemple to SPFMiC
+     */
+    public void atribuiExemplo(Exemplo exemplo, double pertinencia, double tipicidade, double m, double n) {
+        double dist = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo.getPoint(), this.centroide);
+        this.N++;
+        this.Mm += Math.pow(pertinencia, m);
+        this.Tn += Math.pow(tipicidade, n);
+        this.SSDe += Math.pow(dist, m) * pertinencia;
+        for(int i=0; i<this.centroide.length; i++) {
+            this.CF1pertinencias[i] += exemplo.getPontoPorPosicao(i) * pertinencia;
+            this.CF1tipicidades[i] = exemplo.getPontoPorPosicao(i) * tipicidade;
+        }
+        this.atualizaCentroide();
     }
 
     /***
