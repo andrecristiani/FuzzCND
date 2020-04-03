@@ -26,6 +26,7 @@ public class SPFMiC {
         this.Tn = 1;
         this.SSDe = 1; //TODO: verificar como inicializa essa variável e as de baixo
         this.t = 0;
+        this.rotulo = "Teste";
     }
 
     public double getLSm() {

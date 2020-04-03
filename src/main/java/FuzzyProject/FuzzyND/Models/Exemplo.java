@@ -24,6 +24,10 @@ public class Exemplo implements Clusterable {
         return this.rotulo;
     }
 
+    public void setRotulo(String rotulo) {
+        this.rotulo = rotulo;
+    }
+
     public double getPontoPorPosicao(int i) {
         return this.ponto[i];
     }
