@@ -761,7 +761,7 @@ public class FDT {
                 MicroGrupo mc = new MicroGrupo(dt);
                 for (int inst = 0; inst < numExemplos; inst++) {
                     Instance exemplo = new DenseInstance(numAtts);
-                    float[][] array = new float[1][4];
+                    float[][] array = new float[1][dt.nVE-1];
                     for(int k=0; k < dt.numAtributos-1; k++) {
                         array[0][k] = Float.parseFloat(exemplos.get(inst).get(k).toString());
                         exemplo.setValue(k, array[0][k]);

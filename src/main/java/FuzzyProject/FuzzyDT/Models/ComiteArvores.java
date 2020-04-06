@@ -13,6 +13,7 @@ public class ComiteArvores {
     public List<String> atributos = new ArrayList<>();
     public List<DecisionTree> modelos = new ArrayList<>();
     public List<String> rotulosConhecidos = new ArrayList<>();
+    public Map<String, Integer> hashmapRotulos = new HashMap<>(); //para converter String para Integer
 
     public FDT fdt = new FDT();
     public ConverteArquivos ca = new ConverteArquivos();
@@ -22,8 +23,8 @@ public class ComiteArvores {
         this.tamanhoMaximo = tamanhoMaximo;
     }
 
-    public void treinaComiteInicial(String dataset, String caminho, String taxaPoda, int numCjtos) throws Exception {
-        int qtdClassificadores = ca.main(dataset, this, this.tamanhoMaximo);
+    public void treinaComiteInicial(String dataset, String caminho, String taxaPoda, int numCjtos, int tChunk) throws Exception {
+        int qtdClassificadores = ca.main(dataset, this, tChunk);
         for(int i=0; i<qtdClassificadores; i++) {
             DecisionTree dt = new DecisionTree(caminho, dataset, i, taxaPoda);
             dt.numObjetos = ma.getNumExemplos(caminho+dataset + i + ".txt");
