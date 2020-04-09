@@ -1,6 +1,6 @@
 package FuzzyProject.FuzzyND;
 
-import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
+import FuzzyProject.FuzzyDT.Models.ComiteArvores;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MicroClassificador;
 import FuzzyProject.FuzzyND.Models.ModeloNS;
@@ -8,6 +8,9 @@ import FuzzyProject.FuzzyND.Models.SPFMiC;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
 
 import java.util.*;
 
@@ -17,6 +20,7 @@ public class FaseOnline {
     public int T; //tamanho do chunk
     public int m;
     public int n;
+    public int tChunk;
     public double fuzzificacao;
     public double tipicidade;
     public double alpha;
@@ -26,12 +30,13 @@ public class FaseOnline {
     public List<Exemplo> memTempDesconhecidos;
     ModeloNS modeloNS;
 
-    public FaseOnline(double fuzzificacao, double tipicidade, int K, int m, int n, double alpha, double betha, int pesoMinimoGrupo) {
+    public FaseOnline(double fuzzificacao, double tipicidade, int K, int m, int n, double alpha, double betha, int pesoMinimoGrupo, int tChunk) {
         this.fuzzificacao = fuzzificacao;
         this.tipicidade = tipicidade;
         this.K = K;
         this.m = m;
         this.n = n;
+        this.tChunk = tChunk;
         memTempRotulados = new ArrayList<>();
         memTempDesconhecidos = new ArrayList<>();
         modeloNS = new ModeloNS();
@@ -40,25 +45,51 @@ public class FaseOnline {
         this.pesoMinimoGrupo = pesoMinimoGrupo;
     }
 
-    public void inicializar(String caminho, String dataset) {
-        float[][] treinamento;
-        treinamento = new float[150][4];
-        ManipulaArquivos mA = new ManipulaArquivos();
-        mA.carregaArquivoTreinamento(treinamento, caminho + dataset + ".txt", 4);
+    public void inicializar(String caminho, String dataset, ComiteArvores comite) {
+        DataSource source;
+        Instances data;
+        try {
+            source = new DataSource(caminho + dataset + "-instances.arff");
+            data = source.getDataSet();
+            int acertou = 0;
+            int errou = 0;
+            int desconhecido = 0;
+            for(int i=0; i<data.size(); i++) {
+                Instance ins = data.get(i);
+                Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
+                String rotulo = comite.classificaExemploVotoMajoritario(exemplo.getPoint());
 
-        double[][] exemplos2 = new double[treinamento.length][4];
-        List<Exemplo> exemplos = new ArrayList<>();
-        for(int i=0; i<treinamento.length; i++) {
-            exemplos2[i][0] = treinamento[i][0];
-            exemplos2[i][1] = treinamento[i][1];
-            exemplos2[i][2] = treinamento[i][2];
-            exemplos2[i][3] = treinamento[i][3];
-            exemplos.add(new Exemplo(exemplos2[i]));
+                if(rotulo.equals("desconhecido")) {
+                    desconhecido++;
+                    this.memTempDesconhecidos.add(exemplo);
+                    if(this.memTempDesconhecidos.size() >= tChunk) {
+//                        this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos);
+                    }
+                } else {
+                    exemplo.setRotuloClassificado(rotulo);
+                }
+                System.out.println("EXemplo " + i + ": " + rotulo);
+                if(rotulo.equals(exemplo.getRotuloVerdadeiro())) {
+                    System.out.println("Acertou");
+                    acertou++;
+                } else {
+                    System.out.println("Errou");
+                    errou++;
+                }
+                System.err.println("Desconhecidos: " + desconhecido);
+            }
+            System.err.println("Acertou " + acertou + " exemplos");
+            System.err.println("Errou " + errou + " exemplos");
+            System.err.println("Desconhecidos = " + desconhecido);
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
 
+//        comite.removeClassificadorComMenorDesempenho(exemplos);
 //        utilizado para setar os SFMiC no modeloNS
 //        this.modeloNS.addAllMicroClassificadores(this.criarFuzzyMicroGruposComFCMDadosSemRotulos(exemplos));
     }
+
 
     private FuzzyKMeansClusterer fuzzyCMeans(List<Exemplo> exemplos) {
         FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(this.K, this.fuzzificacao);
@@ -133,7 +164,7 @@ public class FaseOnline {
 
         for(int i=0; i<listaDesconhecidos.size(); i++) {
             if(silhuetasValidas.contains(this.getIndiceDoMaiorValor(matrizPertinencia[i]))) {
-                listaDesconhecidos.get(i).setRotulo("Novidade");
+                listaDesconhecidos.get(i).setRotuloVerdadeiro("Novidade");
                 listaDesconhecidos.remove(i);
             }
         }
@@ -257,7 +288,7 @@ public class FaseOnline {
                 quantidadeMicroGrupos.put(Integer.toString(i), 0);
             }
             for (int i=0; i < microGrupos.size(); i++) {
-                String classe = microGrupos.get(i).getRotulo();
+                String classe = microGrupos.get(i).getRotuloVerdadeiro();
                 distanciasMedias.replace(Integer.toString(i), distanciasMedias.get(Integer.toString(i)) + this.distancia(desconhecidos.get(j), microGrupos.get(i)));
                 quantidadeMicroGrupos.put(Integer.toString(i), quantidadeMicroGrupos.get(Integer.toString(i)) + 1);
             }

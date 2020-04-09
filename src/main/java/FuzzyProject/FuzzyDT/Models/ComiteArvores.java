@@ -4,38 +4,47 @@ import FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ComiteArvores {
 
     public int tamanhoMaximo;
     public int numAtributos;
+    public String dataset;
+    public String caminho;
+    public String taxaPoda;
+    public int numCjtos;
     public List<String> atributos = new ArrayList<>();
     public List<DecisionTree> modelos = new ArrayList<>();
     public List<String> rotulosConhecidos = new ArrayList<>();
+    public List<Integer> numeroClassificadores = new ArrayList<>();
     public Map<String, Integer> hashmapRotulos = new HashMap<>(); //para converter String para Integer
 
     public FDT fdt = new FDT();
     public ConverteArquivos ca = new ConverteArquivos();
     public ManipulaArquivos ma = new ManipulaArquivos();
 
-    public ComiteArvores(int tamanhoMaximo) {
+    public ComiteArvores(String dataset, String caminho, String taxaPoda, int numCjtos, int tamanhoMaximo) {
+        this.dataset = dataset;
+        this.caminho = caminho;
+        this.taxaPoda = taxaPoda;
+        this.numCjtos = numCjtos;
         this.tamanhoMaximo = tamanhoMaximo;
     }
 
-    public void treinaComiteInicial(String dataset, String caminho, String taxaPoda, int numCjtos, int tChunk) throws Exception {
-        int qtdClassificadores = ca.main(dataset, this, tChunk);
+    public void treinaComiteInicial(int tChunk, int K) throws Exception {
+        int qtdClassificadores = ca.main(this.dataset, this, tChunk);
         for(int i=0; i<qtdClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(caminho, dataset, i, taxaPoda);
-            dt.numObjetos = ma.getNumExemplos(caminho+dataset + i + ".txt");
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
+            dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
-            fdt.geraFuzzyDT(dataset + i, taxaPoda, numCjtos, caminho, dt);
-            fdt.criaGruposEmNosFolhas(dataset+i, caminho, dt);
-//            ma.apagaArqsTemporarios(dataset + i, caminho);
+            fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
+            fdt.criaGruposEmNosFolhas(this.dataset+i, this.caminho, dt, tChunk, K);
+            ma.apagaArqsTemporarios(dataset + i, caminho);
             this.modelos.add(dt);
         }
-//        this.atualizaRotulosConhecidos();
     }
 
     public String classificaExemploVotoMajoritario(double[] exemplo) {
@@ -55,7 +64,7 @@ public class ComiteArvores {
             numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
         }
 
-        if(numeroVotos.get("desconhecido") == numeroVotos.size()) {
+        if(numeroVotos.get("desconhecido") == this.modelos.size()) {
             return "desconhecido";
         } else {
             numeroVotos.remove("desconhecido");
@@ -87,7 +96,7 @@ public class ComiteArvores {
             }
             for(int k=0; k<this.modelos.size(); k++) {
                 String rotuloClassificado = this.fdt.classificaExemplo(this.modelos.get(k), v);
-                String rotuloVerdadeiro = exemplosRotulados.get(i).getRotulo();
+                String rotuloVerdadeiro = exemplosRotulados.get(i).getRotuloVerdadeiro();
 
                 if(rotuloClassificado.equals(rotuloVerdadeiro)) {
                     pontuacaoArvores[k]++;
@@ -113,5 +122,17 @@ public class ComiteArvores {
                 }
             }
         }
+    }
+
+    public void treinaNovaArvore(List<Exemplo> exemplosRotulados, int tChunk, int K) throws Exception {
+        int nClassificador = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
+        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, nClassificador, this.taxaPoda);
+        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + nClassificador + ".txt");
+        dt.numAtributos = this.numAtributos;
+        dt.atributos = this.atributos;
+        fdt.geraFuzzyDT(this.dataset + nClassificador, this.taxaPoda, this.numCjtos, this.caminho, dt);
+        fdt.criaGruposEmNosFolhas(this.dataset+nClassificador, this.caminho, dt, tChunk, K);
+        ma.apagaArqsTemporarios(dataset + nClassificador, caminho);
+        this.modelos.add(dt);
     }
 }

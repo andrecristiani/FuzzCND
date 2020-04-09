@@ -7,6 +7,7 @@ public class MicroGrupo {
     public float LS[];
     public float SS[];
     public float N;
+    public double raio;
 
     public MicroGrupo(DecisionTree dt) {
         this.LS = new float[dt.numAtributos-1];
@@ -16,6 +17,7 @@ public class MicroGrupo {
             this.SS[i] = 0;
         }
         this.N = 0;
+        this.raio = 0;
     }
 
     public float[] getCentroide() {

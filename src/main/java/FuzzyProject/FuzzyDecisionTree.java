@@ -1,15 +1,18 @@
-package main.java.FuzzyProject;
+package FuzzyProject;
 
-import main.java.FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
-import main.java.FuzzyProject.FuzzyDT.Models.DecisionTree;
-import main.java.FuzzyProject.FuzzyDT.Models.FDT;
-import main.java.FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
-import main.java.FuzzyProject.FuzzyDT.Utils.gera10Folds;
-import main.java.FuzzyProject.FuzzyDT.Utils.manipulaArquivos;
+import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
+import FuzzyProject.FuzzyDT.Models.ComiteArvores;
+import FuzzyProject.FuzzyND.FaseOffline;
+import FuzzyProject.FuzzyND.FaseOnline;
+import FuzzyProject.FuzzyND.Models.Exemplo;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FuzzyDecisionTree {
     public static void main(String[] args) throws IOException, CombinatoricException, Exception {
@@ -17,43 +20,34 @@ public class FuzzyDecisionTree {
         String dataset = "iris";
         String taxaPoda = "25";
         String caminho = "";
-        int numClassificador = 0;
-
         String current = (new File(".")).getCanonicalPath();
-        FDT fdt;
-        gera10Folds GF;
-        String alg = "j48";
-
         caminho = current + "/" + dataset + "/";
-        numClassificador = 0;
+        int tComite = 8;
+        int tChunk = 50;
+        int K = 50;
 
-        DecisionTree dt = new DecisionTree(caminho, dataset, numClassificador = 0, taxaPoda);
+        FaseOffline faseOffline = new FaseOffline();
+        ComiteArvores comite = faseOffline.inicializar(dataset, caminho, taxaPoda, numCjtos, tComite, tChunk, K);
 
-        ConverteArquivos ca = new ConverteArquivos();
-        fdt = new FDT();
-        GF = new gera10Folds();
-        manipulaArquivos mA1 = new manipulaArquivos();
-        ca.main(dataset, numClassificador, dt);
-        System.out.println("Database: " + dataset + numClassificador);
-        GF.geraNFolds(dataset + numClassificador, caminho, 10);
-        fdt.geraFuzzyDecisionTree(dataset + numClassificador, taxaPoda, numCjtos, caminho, dt);
-        System.out.println("\nRules \t SD \tConjuntions \tSD");
-        mA1.regras(dataset + numClassificador, caminho, alg);
-        fdt.criaGruposEmNosFolhas(dataset+numClassificador, caminho, dt);
-//        Vector vector = new Vector();
-//        vector.add(5.0);
-//        vector.add(2.0);
-//        vector.add(3.5);
-//        vector.add(1.0);
-//        System.out.println(fdt.classificaExemplo(dt, vector));
-//        System.out.println(fdt.classificaExemplo(dt, vector));
-//        System.out.println(fdt.classificaExemplo(dt, vector));
-//        System.out.println(fdt.classificaExemplo(dt, vector));
-//        System.out.println(fdt.classificaExemplo(dt, vector));
-        for(int i=0; i<dt.numRegrasAD; i++) {
-//            System.out.println("Regra " + i + ": " + dt.numClassificadosPorRegraClassificacao[i]);
+//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializar(caminho, dataset, comite);
+
+        ConverterUtils.DataSource source;
+        Instances data;
+        try {
+            source = new ConverterUtils.DataSource(caminho + dataset + "-test.arff");
+            data = source.getDataSet();
+            List<Exemplo> exemplosRotulados = new ArrayList<>();
+            for(int i=0; i<data.size(); i++) {
+                Instance ins = data.get(i);
+                Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
+                exemplosRotulados.add(exemplo);
+            }
+            comite.treinaNovaArvore(exemplosRotulados, tChunk, K);
+            System.out.println("Terminou");
+        } catch (Exception ex) {
+            System.err.println("Erro:" + ex);
         }
-        mA1.apagaArqsTemporarios(dataset + numClassificador, caminho);
     }
 }
 

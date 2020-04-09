@@ -2,6 +2,7 @@ package FuzzyProject.FuzzyDT.Utils;
 
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
 import FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyND.Models.Exemplo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +36,7 @@ public class ConverteArquivos {
             numAtributos = true;
         }
         String current = (new File(".")).getCanonicalPath();
-        String arquivoOriginal = arquivo + ".dat";
+        String arquivoOriginal = arquivo + "-train.dat";
         String arq = current + "/" + arquivo + "/" + arquivoOriginal;
         new File(current + "/" + arquivo);
         (new File(current + "/" + arquivo)).mkdir();
@@ -182,7 +183,7 @@ public class ConverteArquivos {
         if(numExemplos % tChunk == 0) {
             numClassificadores = numExemplos/tChunk;
         } else {
-            numClassificadores = (int) Math.round(((double)numExemplos/tChunk) + 0.5d);
+            numClassificadores = (int) Math.round((double)numExemplos/tChunk);
         }
 
         str = null;
@@ -217,6 +218,7 @@ public class ConverteArquivos {
                             buf_writer.newLine();
                         }
                     }
+                    comite.numeroClassificadores.add(countClassificadores);
                     countClassificadores++;
                     buf_writer.close();
                 }
@@ -258,6 +260,7 @@ public class ConverteArquivos {
                     buf_writerNames.write(temp);
                     buf_writerNames.newLine();
 
+                    comite.numeroClassificadores.add(countClassificadores);
                     countClassificadores++;
                     buf_writer.close();
                     buf_writerNames.close();
@@ -300,6 +303,61 @@ public class ConverteArquivos {
 //            System.exit(1);
 //        }
         return numClassificadores;
+    }
+
+    public int mainParaExemplosRotulados(String arquivo, List<Exemplo> exemplosRotulados, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
+        FileWriter writer;
+        BufferedWriter buf_writer;
+        FileWriter writerNames;
+        BufferedWriter buf_writerNames;
+        ArrayList<String> classesDivididas = new ArrayList<String>();
+        String temp = "";
+        int countClassificadores = comite.numeroClassificadores.get(comite.numeroClassificadores.size()-1) + 1;
+        String current = (new File(".")).getCanonicalPath();
+        writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".txt");
+        buf_writer = new BufferedWriter(writer);
+        writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
+        buf_writerNames = new BufferedWriter(writerNames);
+        List<String> classes = new ArrayList<>();
+
+        for(int i = 0; i<exemplosRotulados.size(); i++) {
+            String ex = exemplosRotulados.get(i).arrayToString();
+            String[] aux = ex.split("\t");
+            if(!classes.contains(aux[aux.length-1])) {
+                classes.add(aux[aux.length-1]);
+            }
+            buf_writer.write(ex);
+            buf_writer.newLine();
+        }
+
+        for(int k = 0; k < numAtribs - 1; ++k) {
+            if(atribs[k][0].compareTo("Class") != 0) {
+                temp = atribs[k][0] + " " + atribs[k][1];
+                buf_writerNames.write(temp);
+                buf_writerNames.newLine();
+            }
+        }
+
+        String classesConcatenadas = new String();
+        classesConcatenadas = classes.get(0).replace(" ","");
+        for(int j=1; j<classes.size(); j++) {
+            String classe = classes.get(j).replace(" ", "");
+            if(!comite.rotulosConhecidos.contains(classe)) {
+                comite.rotulosConhecidos.add(classe);
+            }
+            classesConcatenadas = classesConcatenadas + " " + classe;
+        }
+
+        temp = "Class " + classesConcatenadas;
+        buf_writerNames.write(temp);
+        buf_writerNames.newLine();
+
+        comite.numeroClassificadores.add(countClassificadores);
+        countClassificadores++;
+        buf_writer.close();
+        buf_writerNames.close();
+
+        return countClassificadores;
     }
 }
 
