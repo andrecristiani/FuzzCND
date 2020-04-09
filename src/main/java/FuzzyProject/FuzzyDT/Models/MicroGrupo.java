@@ -28,21 +28,6 @@ public class MicroGrupo {
         return centroide;
     }
 
-    public float[] getRaio() {
-        float raio[] = new float[this.LS.length];
-        for(int i=0; i<this.LS.length; i++) {
-            float parte1 = (SS[i]/N);
-            float parte2 = (float) Math.pow((LS[i]/N), 2);
-            float parte3 = parte1-parte2;
-            if(parte3 < 0) {
-                parte3 = parte3 * -1;
-            }
-            parte3 = (float) Math.sqrt(parte3);
-            raio[i] = parte3;
-        }
-        return raio;
-    }
-
     public double calculaDistanciaEuclidiana(Vector ponto1, float[] ponto2) {
         double somatorio = 0;
         for(int i=0; i<ponto1.size(); i++) {
@@ -60,9 +45,8 @@ public class MicroGrupo {
     }
 
     public boolean verificaSeExemploPertenceAoGrupo(Vector exemplo) {
-        double distRaioCentroide = calculaDistanciaEuclidiana(this.getRaio(), this.getCentroide());
         double distExemploCentroide = calculaDistanciaEuclidiana(exemplo, this.getCentroide());
-        if(distExemploCentroide <= distRaioCentroide) {
+        if(distExemploCentroide <= this.raio) {
             return true;
         }
         return false;
