@@ -22,8 +22,8 @@ public class DecisionTree {
     public String arvoreJ48;
     public String[][] particao;
     public String[][] regrasAD;
-    public List<String> rotulos;
-    public List<String> atributos;
+    public List<String> rotulos = new ArrayList<String>();
+    public List<String> atributos = new ArrayList<String>();
     public FastVector atributosParaWeka;
     Instances datasetParaWeka;
     public List<ArrayList<Vector>> numClassificadosPorRegraClassificacao;
@@ -35,8 +35,6 @@ public class DecisionTree {
         this.dataset = dataset;
         this.numClassificador = numClassificador;
         this.taxaPoda = taxaPoda;
-        rotulos = new ArrayList<String>();
-        atributos = new ArrayList<String>();
         this.inicializada = 0;
     }
 

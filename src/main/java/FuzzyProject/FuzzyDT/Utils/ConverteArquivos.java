@@ -2,6 +2,7 @@ package FuzzyProject.FuzzyDT.Utils;
 
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
 import FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyND.Models.Exemplo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -29,13 +30,13 @@ public class ConverteArquivos {
         numAtribs = 0;
     }
 
-    public int main(String arquivo, ComiteArvores comite, int tComite) throws FileNotFoundException, IOException {
+    public int main(String arquivo, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
         boolean numAtributos = false;
         if (numAtribs != 0) {
             numAtributos = true;
         }
         String current = (new File(".")).getCanonicalPath();
-        String arquivoOriginal = arquivo + ".dat";
+        String arquivoOriginal = arquivo + "-train.dat";
         String arq = current + "/" + arquivo + "/" + arquivoOriginal;
         new File(current + "/" + arquivo);
         (new File(current + "/" + arquivo)).mkdir();
@@ -98,7 +99,16 @@ public class ConverteArquivos {
                             valoresAtrib = temp.replaceAll("\\{", "");
                             temp = valoresAtrib.replaceAll(",", " ");
                             valoresAtrib = temp.replaceAll("\\}", "");
-                            atribs[i][1] = valoresAtrib;
+                            String[] vetorAtributos = valoresAtrib.split(" ");
+                            String valoresAtribNovo = "";
+                            for(int k=0; k<vetorAtributos.length; k++) {
+                                comite.hashmapRotulos.put(vetorAtributos[k], k);
+                                valoresAtribNovo += k;
+                                if(k<(vetorAtributos.length-1)) {
+                                    valoresAtribNovo += " ";
+                                }
+                            }
+                            atribs[i][1] = valoresAtribNovo;
                         } else {
                             y = str.countTokens();
                             valoresAtrib = temp + " ";
@@ -138,7 +148,12 @@ public class ConverteArquivos {
                 temp = temp + str.nextToken() + " ";
             } while(str.hasMoreTokens());
 
-            String lixo = temp.replaceAll(",", "\t");
+            String lixo = "";
+            String[] lixoQuebrado = temp.split(",");
+            int ultimoElemento = lixoQuebrado.length-1;
+            Integer t = comite.hashmapRotulos.get(lixoQuebrado[ultimoElemento].replace(" ",""));
+            lixoQuebrado[ultimoElemento] = String.valueOf(t);
+            lixo = String.join("\t", lixoQuebrado);
             exemplos[0] = lixo;
             temp = "";
 
@@ -150,7 +165,12 @@ public class ConverteArquivos {
                     temp = temp + str.nextToken() + " ";
                 } while(str.hasMoreTokens());
 
-                lixo = temp.replaceAll(",", "\t");
+                lixo = "";
+                lixoQuebrado = temp.split(",");
+                ultimoElemento = lixoQuebrado.length-1;
+                t = comite.hashmapRotulos.get(lixoQuebrado[ultimoElemento].replace(" ",""));
+                lixoQuebrado[ultimoElemento] = String.valueOf(t);
+                lixo = String.join("\t", lixoQuebrado);
                 exemplos[m] = lixo;
                 temp = "";
             }
@@ -159,9 +179,12 @@ public class ConverteArquivos {
             System.err.println(var26.getMessage());
         }
 
-        int numClassificadores = numExemplos/tComite;
-
-        int numExemplosPorClassificador = numExemplos/numClassificadores;
+        int numClassificadores = 0;
+        if(numExemplos % tChunk == 0) {
+            numClassificadores = numExemplos/tChunk;
+        } else {
+            numClassificadores = (int) Math.round((double)numExemplos/tChunk);
+        }
 
         str = null;
 
@@ -180,7 +203,7 @@ public class ConverteArquivos {
                     writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
                     buf_writerNames = new BufferedWriter(writerNames);
                     List<String> classes = new ArrayList<>();
-                    for(int j = 0; j<numExemplosPorClassificador; j++, i++) {
+                    for(int j = 0; j<tChunk; j++, i++) {
                         String[] aux = exemplos[i].split("\t");
                         if (!classesDivididas.contains(aux[aux.length - 1])) {
                             classesDivididas.add(aux[aux.length - 1]);
@@ -195,6 +218,7 @@ public class ConverteArquivos {
                             buf_writer.newLine();
                         }
                     }
+                    comite.numeroClassificadores.add(countClassificadores);
                     countClassificadores++;
                     buf_writer.close();
                 }
@@ -205,7 +229,7 @@ public class ConverteArquivos {
                     writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
                     buf_writerNames = new BufferedWriter(writerNames);
                     List<String> classes = new ArrayList<>();
-                    for(int j = 0; j<numExemplosPorClassificador && i<numExemplos; j++, i++) {
+                    for(int j = 0; j<tChunk && i<numExemplos; j++, i++) {
                         String[] aux = exemplos[i].split("\t");
                         if(!classes.contains(aux[aux.length-1])) {
                             classes.add(aux[aux.length-1]);
@@ -226,6 +250,9 @@ public class ConverteArquivos {
                     classesConcatenadas = classes.get(0).replace(" ","");
                     for(int j=1; j<classes.size(); j++) {
                         String classe = classes.get(j).replace(" ", "");
+                        if(!comite.rotulosConhecidos.contains(classe)) {
+                            comite.rotulosConhecidos.add(classe);
+                        }
                         classesConcatenadas = classesConcatenadas + " " + classe;
                     }
 
@@ -233,6 +260,7 @@ public class ConverteArquivos {
                     buf_writerNames.write(temp);
                     buf_writerNames.newLine();
 
+                    comite.numeroClassificadores.add(countClassificadores);
                     countClassificadores++;
                     buf_writer.close();
                     buf_writerNames.close();
@@ -275,6 +303,61 @@ public class ConverteArquivos {
 //            System.exit(1);
 //        }
         return numClassificadores;
+    }
+
+    public int mainParaExemplosRotulados(String arquivo, List<Exemplo> exemplosRotulados, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
+        FileWriter writer;
+        BufferedWriter buf_writer;
+        FileWriter writerNames;
+        BufferedWriter buf_writerNames;
+        ArrayList<String> classesDivididas = new ArrayList<String>();
+        String temp = "";
+        int countClassificadores = comite.numeroClassificadores.get(comite.numeroClassificadores.size()-1) + 1;
+        String current = (new File(".")).getCanonicalPath();
+        writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".txt");
+        buf_writer = new BufferedWriter(writer);
+        writerNames = new FileWriter(current + "/" + arquivo + "/" + arquivo + countClassificadores + ".names");
+        buf_writerNames = new BufferedWriter(writerNames);
+        List<String> classes = new ArrayList<>();
+
+        for(int i = 0; i<exemplosRotulados.size(); i++) {
+            String ex = exemplosRotulados.get(i).arrayToString();
+            String[] aux = ex.split("\t");
+            if(!classes.contains(aux[aux.length-1])) {
+                classes.add(aux[aux.length-1]);
+            }
+            buf_writer.write(ex);
+            buf_writer.newLine();
+        }
+
+        for(int k = 0; k < numAtribs - 1; ++k) {
+            if(atribs[k][0].compareTo("Class") != 0) {
+                temp = atribs[k][0] + " " + atribs[k][1];
+                buf_writerNames.write(temp);
+                buf_writerNames.newLine();
+            }
+        }
+
+        String classesConcatenadas = new String();
+        classesConcatenadas = classes.get(0).replace(" ","");
+        for(int j=1; j<classes.size(); j++) {
+            String classe = classes.get(j).replace(" ", "");
+            if(!comite.rotulosConhecidos.contains(classe)) {
+                comite.rotulosConhecidos.add(classe);
+            }
+            classesConcatenadas = classesConcatenadas + " " + classe;
+        }
+
+        temp = "Class " + classesConcatenadas;
+        buf_writerNames.write(temp);
+        buf_writerNames.newLine();
+
+        comite.numeroClassificadores.add(countClassificadores);
+        countClassificadores++;
+        buf_writer.close();
+        buf_writerNames.close();
+
+        return countClassificadores;
     }
 }
 

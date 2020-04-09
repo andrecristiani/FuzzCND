@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import FuzzyProject.FuzzyDT.Fuzzy.*;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
+import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.trees.J48;
@@ -734,7 +735,7 @@ public class FDT {
         return sFC.sistemaFuzzyCalculosParaClassificacao(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
     }
 
-    public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt) throws Exception {
+    public void criaGruposEmNosFolhas(String dataset, String caminho, DecisionTree dt, int tChunk, int K) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         ManipulaArquivos mA = new ManipulaArquivos();
         treinamento = new float[dt.numObjetos][dt.nVE];
@@ -761,7 +762,7 @@ public class FDT {
                 MicroGrupo mc = new MicroGrupo(dt);
                 for (int inst = 0; inst < numExemplos; inst++) {
                     Instance exemplo = new DenseInstance(numAtts);
-                    float[][] array = new float[1][4];
+                    float[][] array = new float[1][dt.nVE-1];
                     for(int k=0; k < dt.numAtributos-1; k++) {
                         array[0][k] = Float.parseFloat(exemplos.get(inst).get(k).toString());
                         exemplo.setValue(k, array[0][k]);
@@ -770,27 +771,32 @@ public class FDT {
                     mc.N++;
                 }
 
+                int Ki = (int) Math.round((noFolha.size()/tChunk) + 0.5d) * K;
+
                 SimpleKMeans kmeans = new SimpleKMeans();
-                kmeans.setSeed(10);
                 kmeans.setPreserveInstancesOrder(true);
-                kmeans.setNumClusters(2);
+                kmeans.setNumClusters(Ki);
                 kmeans.buildClusterer(noFolha);
 
                 int[] rotulos = kmeans.getAssignments();
                 int numGrupos = kmeans.getNumClusters();
                 double[] numElementosGrupo = kmeans.getClusterSizes();
-                List<MicroGrupo> microGrupos = this.separaExemplosPorGrupoClassificado(rotulos, numGrupos, exemplos, numElementosGrupo, dt);
+                Instances centroides = kmeans.getClusterCentroids();
+                List<MicroGrupo> microGrupos = this.separaExemplosPorGrupoClassificado(rotulos, numGrupos, exemplos, numElementosGrupo, dt, centroides);
                 dt.microGruposPorRegra.get(i).addAll(microGrupos);
             }
         }
     }
 
-    public List<MicroGrupo> separaExemplosPorGrupoClassificado(int[] rotulosExemplos, int numGrupos, List<Vector> exemplos, double[] numElementosGrupo, DecisionTree dt) {
+    public List<MicroGrupo> separaExemplosPorGrupoClassificado(int[] rotulosExemplos, int numGrupos, List<Vector> exemplos, double[] numElementosGrupo, DecisionTree dt, Instances centroidesKmeans) {
         List<MicroGrupo> microGrupos = new ArrayList<MicroGrupo>();
+        List<MicroGrupo> microGruposAux = new ArrayList<MicroGrupo>();
+        double[][] centroides = new double[numGrupos][dt.numAtributos];
         for(int i=0; i<numGrupos; i++) {
             MicroGrupo mg = new MicroGrupo(dt);
             mg.N = (float) numElementosGrupo[i];
             microGrupos.add(mg);
+            centroides[i] = centroidesKmeans.get(i).toDoubleArray();
         }
 
         for(int i=0; i<exemplos.size(); i++) {
@@ -798,9 +804,19 @@ public class FDT {
                 microGrupos.get(rotulosExemplos[i]).LS[k] += Float.parseFloat(exemplos.get(i).get(k).toString());
                 microGrupos.get(rotulosExemplos[i]).SS[k] += (float) Math.pow((Double.parseDouble(exemplos.get(i).get(k).toString())), 2);
             }
+            double distPontoAoCentoride = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplos.get(i), centroides[rotulosExemplos[i]]);
+            if(distPontoAoCentoride > microGrupos.get(rotulosExemplos[i]).raio) {
+                microGrupos.get(rotulosExemplos[i]).raio = distPontoAoCentoride;
+            }
         }
 
-        return microGrupos;
+        for(int i=0; i<microGrupos.size(); i++) {
+            if(microGrupos.get(i).N > 3) {
+                microGruposAux.add(microGrupos.get(i));
+            }
+        }
+
+        return microGruposAux;
     }
 
     public float inferenciaADNFolds(String dataset, String caminho, String tp, String arvoreJ48, int rodada) {
