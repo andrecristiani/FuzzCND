@@ -7,16 +7,20 @@ public class MicroGrupo {
     public float LS[];
     public float SS[];
     public float N;
+    public double[] centroidKmeans;
+    public double mediaDistancias;
     public double raio;
 
     public MicroGrupo(DecisionTree dt) {
         this.LS = new float[dt.numAtributos-1];
         this.SS = new float[dt.numAtributos-1];
+        this.centroidKmeans = new double[dt.numAtributos-1];
         for(int i=0; i<dt.numAtributos-1; i++) {
             this.LS[i] = 0;
             this.SS[i] = 0;
         }
         this.N = 0;
+        this.mediaDistancias = 0;
         this.raio = 0;
     }
 

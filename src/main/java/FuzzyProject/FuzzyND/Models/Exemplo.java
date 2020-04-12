@@ -7,6 +7,12 @@ public class Exemplo implements Clusterable {
     private String rotuloVerdadeiro;
     private String rotuloClassificado;
 
+    public Exemplo(double[] ponto) {
+        this.ponto = ponto;
+        this.rotuloVerdadeiro = null;
+        this.rotuloClassificado = null;
+    }
+
     public Exemplo(double[] ponto, boolean comRotulo) {
         if(comRotulo) {
             double[] novoPonto = new double[ponto.length-1];

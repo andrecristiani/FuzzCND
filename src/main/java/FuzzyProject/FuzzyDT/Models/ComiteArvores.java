@@ -33,7 +33,7 @@ public class ComiteArvores {
         this.tamanhoMaximo = tamanhoMaximo;
     }
 
-    public void treinaComiteInicial(int tChunk, int K) throws Exception {
+    public void treinaComiteInicial(int tChunk, int K, double fuzzificacao) throws Exception {
         int qtdClassificadores = ca.main(this.dataset, this, tChunk);
         for(int i=0; i<qtdClassificadores; i++) {
             DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
@@ -41,7 +41,7 @@ public class ComiteArvores {
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
             fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
-            fdt.criaGruposEmNosFolhas(this.dataset+i, this.caminho, dt, tChunk, K);
+            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+i, this.caminho, dt, tChunk, K, fuzzificacao);
             ma.apagaArqsTemporarios(dataset + i, caminho);
             this.modelos.add(dt);
         }
@@ -82,7 +82,7 @@ public class ComiteArvores {
         }
     }
 
-    public void removeClassificadorComMenorDesempenho(List<Exemplo> exemplosRotulados) {
+    private void removeClassificadorComMenorDesempenho(List<Exemplo> exemplosRotulados) {
         double[] pontuacaoArvores = new double[this.modelos.size()];
         for(int i=0; i<this.modelos.size(); i++) {
             pontuacaoArvores[i] = 0;
@@ -105,12 +105,17 @@ public class ComiteArvores {
         }
 
         List<Double> acuraciaArvores = new ArrayList<>();
+        double acuraciaMinima = 100;
+        int index = 0;
         for(int i=0; i<this.modelos.size(); i++) {
-            acuraciaArvores.add(((pontuacaoArvores[i]/exemplosRotulados.size())*100));
+            double acuracia = ((pontuacaoArvores[i]/exemplosRotulados.size())*100);
+            acuraciaArvores.add(acuracia);
+            if(acuracia < acuraciaMinima) {
+                acuraciaMinima = acuracia;
+                index = i;
+            }
         }
-
-        System.out.println("TESTE DE NOVO");
-
+        this.modelos.remove(index);
     }
 
     private void atualizaRotulosConhecidos() {
@@ -125,13 +130,16 @@ public class ComiteArvores {
     }
 
     public void treinaNovaArvore(List<Exemplo> exemplosRotulados, int tChunk, int K) throws Exception {
+        if(this.modelos.size() >= tamanhoMaximo) {
+            this.removeClassificadorComMenorDesempenho(exemplosRotulados);
+        }
         int nClassificador = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
         DecisionTree dt = new DecisionTree(this.caminho, this.dataset, nClassificador, this.taxaPoda);
         dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + nClassificador + ".txt");
         dt.numAtributos = this.numAtributos;
         dt.atributos = this.atributos;
         fdt.geraFuzzyDT(this.dataset + nClassificador, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhas(this.dataset+nClassificador, this.caminho, dt, tChunk, K);
+        fdt.criaGruposEmNosFolhasKMeans(this.dataset+nClassificador, this.caminho, dt, tChunk, K);
         ma.apagaArqsTemporarios(dataset + nClassificador, caminho);
         this.modelos.add(dt);
     }

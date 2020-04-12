@@ -24,7 +24,7 @@ public class SPFMiC {
         this.theta = theta;
         this.Mm = 1;
         this.Tn = 1;
-        this.SSDe = 1; //TODO: verificar como inicializa essa variável e as de baixo
+        this.SSDe = 1; //TODO: verificar como inicializa essa variável
         this.t = 0;
         this.rotulo = "Teste";
     }

@@ -26,8 +26,9 @@ public class FaseOnline {
     public double alpha;
     public double betha;
     public double pesoMinimoGrupo;
-    public List<Exemplo> memTempRotulados;
-    public List<Exemplo> memTempDesconhecidos;
+    public List<Exemplo> memTempRotulados = new ArrayList<>();
+    public List<Exemplo> memTempDesconhecidos = new ArrayList<>();
+    public List<Exemplo> exemplosEsperandoTempo = new ArrayList<>();
     ModeloNS modeloNS;
 
     public FaseOnline(double fuzzificacao, double tipicidade, int K, int m, int n, double alpha, double betha, int pesoMinimoGrupo, int tChunk) {
@@ -37,15 +38,13 @@ public class FaseOnline {
         this.m = m;
         this.n = n;
         this.tChunk = tChunk;
-        memTempRotulados = new ArrayList<>();
-        memTempDesconhecidos = new ArrayList<>();
         modeloNS = new ModeloNS();
         this.alpha = alpha;
         this.betha = betha;
         this.pesoMinimoGrupo = pesoMinimoGrupo;
     }
 
-    public void inicializar(String caminho, String dataset, ComiteArvores comite) {
+    public void inicializar(String caminho, String dataset, ComiteArvores comite, int latencia, int T) {
         DataSource source;
         Instances data;
         try {
@@ -54,45 +53,70 @@ public class FaseOnline {
             int acertou = 0;
             int errou = 0;
             int desconhecido = 0;
-            for(int i=0; i<data.size(); i++) {
+            int zero = 0;
+            int um = 0;
+            int dois = 0;
+            int tres = 0;
+            int j = 0;
+            for(int i=0; i<data.size(); i++, j++) {
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
                 String rotulo = comite.classificaExemploVotoMajoritario(exemplo.getPoint());
-
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
                     this.memTempDesconhecidos.add(exemplo);
-                    if(this.memTempDesconhecidos.size() >= tChunk) {
+//                    if(this.memTempDesconhecidos.size() >= T) {
+//                        System.err.println("Iniciou o proceso de DN");
 //                        this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos);
-                    }
+//                    }
                 } else {
                     exemplo.setRotuloClassificado(rotulo);
                 }
-                System.out.println("EXemplo " + i + ": " + rotulo);
                 if(rotulo.equals(exemplo.getRotuloVerdadeiro())) {
-                    System.out.println("Acertou");
                     acertou++;
+                    if(rotulo.equals("0")){
+                        zero++;
+                    }
+                    if(rotulo.equals("1")){
+                        um++;
+                    }
+                    if(rotulo.equals("2")){
+                        dois++;
+                    }
+                    if(rotulo.equals("3")){
+                        tres++;
+                    }
                 } else {
-                    System.out.println("Errou");
                     errou++;
                 }
-                System.err.println("Desconhecidos: " + desconhecido);
+                this.exemplosEsperandoTempo.add(exemplo);
+                if(j >= latencia) {
+                    Exemplo exemploRotulado = this.exemplosEsperandoTempo.get(0);
+                    this.exemplosEsperandoTempo.remove(0);
+                    this.memTempRotulados.add(exemploRotulado);
+
+                    if(this.memTempRotulados.size() >= tChunk) {
+                        comite.treinaNovaArvore(memTempRotulados, tChunk, K);
+                        this.memTempRotulados.clear();
+                    }
+                }
             }
-            System.err.println("Acertou " + acertou + " exemplos");
+            System.out.println("Acertou " + acertou + " exemplos");
+            System.out.println("Zero " + zero + " exemplos");
+            System.out.println("Um " + um + " exemplos");
+            System.out.println("Dois " + dois + " exemplos");
+            System.out.println("Tres " + tres + " exemplos");
             System.err.println("Errou " + errou + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
         } catch (Exception ex) {
             System.out.println(ex);
         }
-
-//        comite.removeClassificadorComMenorDesempenho(exemplos);
-//        utilizado para setar os SFMiC no modeloNS
-//        this.modeloNS.addAllMicroClassificadores(this.criarFuzzyMicroGruposComFCMDadosSemRotulos(exemplos));
     }
 
 
     private FuzzyKMeansClusterer fuzzyCMeans(List<Exemplo> exemplos) {
-        FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(this.K, this.fuzzificacao);
+        int k0 = this.K * exemplos.size()/this.tChunk;
+        FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(k0, this.fuzzificacao);
         fuzzyClusterer.cluster(exemplos);
         return fuzzyClusterer;
     }

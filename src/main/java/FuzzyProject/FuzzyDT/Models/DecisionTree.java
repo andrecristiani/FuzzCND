@@ -1,6 +1,8 @@
 package FuzzyProject.FuzzyDT.Models;
 
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
+import FuzzyProject.FuzzyND.Models.Exemplo;
+import FuzzyProject.FuzzyND.Models.SFMiC;
 import weka.core.FastVector;
 import weka.core.Instances;
 
@@ -26,9 +28,10 @@ public class DecisionTree {
     public List<String> atributos = new ArrayList<String>();
     public FastVector atributosParaWeka;
     Instances datasetParaWeka;
-    public List<ArrayList<Vector>> numClassificadosPorRegraClassificacao;
+    public List<ArrayList<Vector>> elementosPorRegraKMeans;
+    public List<ArrayList<Exemplo>> elementosPorRegraFuzzyCMeans;
     public List<List<MicroGrupo>> microGruposPorRegra;
-    public Integer[] numClassificadosPorRegraTreinamento;
+    public List<List<SFMiC>> sfMicPorRegra;
 
     public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda) {
         this.caminho = caminho;
@@ -43,12 +46,15 @@ public class DecisionTree {
         ManipulaArquivos mA = new ManipulaArquivos();
         mA.carregaParticao(this.particao, (this.caminho + "particao" + this.dataset + numClassificador  + ".txt"), this.numAtributos, this.numConjuntos);
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
-        this.numClassificadosPorRegraTreinamento = new Integer[this.numRegrasAD];
-        this.numClassificadosPorRegraClassificacao = new ArrayList<ArrayList<Vector>>();
+        this.elementosPorRegraKMeans = new ArrayList<ArrayList<Vector>>();
+        this.elementosPorRegraFuzzyCMeans = new ArrayList<ArrayList<Exemplo>>();
         this.microGruposPorRegra = new ArrayList<List<MicroGrupo>>();
+        this.sfMicPorRegra = new ArrayList<List<SFMiC>>();
         for(int i=0; i<=numRegrasAD; i++) {
             this.microGruposPorRegra.add(new ArrayList<MicroGrupo>());
-            this.numClassificadosPorRegraClassificacao.add(new ArrayList<Vector>());
+            this.sfMicPorRegra.add(new ArrayList<SFMiC>());
+            this.elementosPorRegraKMeans.add(new ArrayList<Vector>());
+            this.elementosPorRegraFuzzyCMeans.add(new ArrayList<Exemplo>());
         }
         this.regrasAD = mA.carregaRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador  + this.taxaPoda + ".txt", this.numAtributos, this.numRegrasAD);
     }
