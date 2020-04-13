@@ -13,7 +13,6 @@ import FuzzyProject.FuzzyDT.Fuzzy.*;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.SFMiC;
-import FuzzyProject.FuzzyND.Models.SPFMiC;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
@@ -735,9 +734,14 @@ public class FDT {
         return precisao;
     }
 
-    public String classificaExemplo(DecisionTree dt, Vector exemplo) {
+    public String classificaExemploKMeans(DecisionTree dt, Vector exemplo) {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
-        return sFC.sistemaFuzzyCalculosParaClassificacao(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
+        return sFC.sistemaFuzzyCalculosParaClassificacaoKMeans(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
+    }
+
+    public String classificaExemploFuzzyCMeans(DecisionTree dt, Vector exemplo) {
+        sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
+        return sFC.sistemaFuzzyCalculosParaClassificacaoKMeans(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
     }
 
     public void criaGruposEmNosFolhasKMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K) throws Exception {
@@ -869,10 +873,15 @@ public class FDT {
                 if(indiceMaior == j) {
                     if (sfMiC == null) {
                         sfMiC = new SFMiC(exemplos.get(k).getPoint());
+                        sfMiC.setCentroideAlgoritmo(centroides.get(indiceMaior).getCenter().getPoint());
                     } else {
                         double valorPertinencia = matriz[k][indiceMaior];
                         double[] ex = exemplos.get(k).getPoint();
                         double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(sfMiC.getCentroide(), ex);
+                        double raio = MedidasDeDistancia.calculaDistanciaEuclidiana(centroides.get(indiceMaior).getCenter().getPoint(), ex);
+                        if(raio > sfMiC.getRaio()) {
+                            sfMiC.setRaio(raio);
+                        }
                         sfMiC.adicionaNovoPonto(ex, valorPertinencia, distancia, fuzzificacao);
                     }
                 }

@@ -4,7 +4,6 @@ import FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ComiteArvores {
@@ -60,7 +59,7 @@ public class ComiteArvores {
         }
 
         for(int i=0; i<modelos.size(); i++) {
-            String rotuloVotado = fdt.classificaExemplo(modelos.get(0), v);
+            String rotuloVotado = fdt.classificaExemploFuzzyCMeans(modelos.get(0), v);
             numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
         }
 
@@ -95,7 +94,7 @@ public class ComiteArvores {
                 v.add(exemplo[j]);
             }
             for(int k=0; k<this.modelos.size(); k++) {
-                String rotuloClassificado = this.fdt.classificaExemplo(this.modelos.get(k), v);
+                String rotuloClassificado = this.fdt.classificaExemploKMeans(this.modelos.get(k), v);
                 String rotuloVerdadeiro = exemplosRotulados.get(i).getRotuloVerdadeiro();
 
                 if(rotuloClassificado.equals(rotuloVerdadeiro)) {

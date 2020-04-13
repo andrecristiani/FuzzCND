@@ -1,6 +1,9 @@
 package FuzzyProject.FuzzyND.Models;
 
+import java.util.Vector;
 import java.util.function.DoubleBinaryOperator;
+
+import static FuzzyProject.FuzzyND.Utils.MedidasDeDistancia.calculaDistanciaEuclidiana;
 
 public class SFMiC {
     private double M;
@@ -9,6 +12,7 @@ public class SFMiC {
     private double SSD;
     private double[] centroide;
     private int t;
+    private double raio;
 
     public SFMiC(double M, double[] CF1, double SSD, int t, int n) {
         this.M = M;
@@ -25,6 +29,7 @@ public class SFMiC {
         this.SSD = Double.MIN_VALUE;
         this.centroide = centroide;
         this.t = 0;
+        this.raio = Double.MIN_VALUE;
     }
 
     public SFMiC(int numAtributos) {
@@ -86,6 +91,14 @@ public class SFMiC {
         this.centroide = centroide;
     }
 
+    public double getRaio() {
+        return raio;
+    }
+
+    public void setRaio(double raio) {
+        this.raio = raio;
+    }
+
     public void adicionaNovoPonto(double[] exemplo, double pertinencia, double distancia, double fuzzificacao) {
         this.M += pertinencia;
         this.n++;
@@ -103,5 +116,13 @@ public class SFMiC {
         for(int i=0; i<centroide.length; i++) {
             this.centroide[i] = this.CF1[i]/this.M;
         }
+    }
+
+    public boolean verificaSeExemploPertenceAoGrupo(Vector exemplo) {
+        double distExemploCentroide = calculaDistanciaEuclidiana(exemplo, this.getCentroide());
+        if(distExemploCentroide <= this.raio) {
+            return true;
+        }
+        return false;
     }
 }
