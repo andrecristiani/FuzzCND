@@ -148,6 +148,7 @@ public class ConverteArquivos {
                 temp = temp + str.nextToken() + " ";
             } while(str.hasMoreTokens());
 
+
             String lixo = "";
             String[] lixoQuebrado = temp.split(",");
             int ultimoElemento = lixoQuebrado.length-1;
@@ -353,7 +354,6 @@ public class ConverteArquivos {
         buf_writerNames.newLine();
 
         comite.numeroClassificadores.add(countClassificadores);
-        countClassificadores++;
         buf_writer.close();
         buf_writerNames.close();
 
