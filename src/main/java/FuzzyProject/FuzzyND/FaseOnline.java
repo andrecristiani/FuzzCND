@@ -30,6 +30,9 @@ public class FaseOnline {
     public List<Exemplo> memTempDesconhecidos = new ArrayList<>();
     public List<Exemplo> exemplosEsperandoTempo = new ArrayList<>();
     ModeloNS modeloNS;
+    public int novidadesClassificadas;
+    public int novidadesConhecidas;
+    public int classificacoesQueEramNovidades;
 
     public FaseOnline(double fuzzificacao, double tipicidade, int K, int m, int n, double alpha, double betha, int pesoMinimoGrupo, int tChunk) {
         this.fuzzificacao = fuzzificacao;
@@ -47,6 +50,9 @@ public class FaseOnline {
     public void inicializar(String caminho, String dataset, ComiteArvores comite, int latencia, int T) {
         DataSource source;
         Instances data;
+        this.novidadesClassificadas = 0;
+        this.novidadesConhecidas = 0;
+        this.classificacoesQueEramNovidades = 0;
         try {
             source = new DataSource(caminho + dataset + "-instances.arff");
             data = source.getDataSet();
@@ -58,17 +64,18 @@ public class FaseOnline {
             int dois = 0;
             int tres = 0;
             int j = 0;
+            int kCurto = 4;
             for(int i=0; i<data.size(); i++, j++) {
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
-                String rotulo = comite.classificaExemploVotoMajoritario(exemplo.getPoint());
+                String rotulo = comite.classificaExemploAgrupamentoExterno(exemplo.getPoint());
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
                     this.memTempDesconhecidos.add(exemplo);
-//                    if(this.memTempDesconhecidos.size() >= T) {
-//                        System.err.println("Iniciou o proceso de DN");
-//                        this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos);
-//                    }
+                    if(this.memTempDesconhecidos.size() >= T) {
+//                        System.err.println("índice que iniciou dn: " + i);
+                        this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos, kCurto, comite);
+                    }
                 } else {
                     exemplo.setRotuloClassificado(rotulo);
                 }
@@ -87,7 +94,11 @@ public class FaseOnline {
                         tres++;
                     }
                 } else {
-                    errou++;
+                    if(comite.rotulosConhecidos.contains(exemplo.getRotuloVerdadeiro())) {
+                        errou++;
+                    } else {
+                        this.classificacoesQueEramNovidades++;
+                    }
                 }
                 this.exemplosEsperandoTempo.add(exemplo);
                 if(j >= latencia) {
@@ -102,21 +113,23 @@ public class FaseOnline {
                 }
             }
             System.out.println("Acertou " + acertou + " exemplos");
-            System.out.println("Zero " + zero + " exemplos");
-            System.out.println("Um " + um + " exemplos");
-            System.out.println("Dois " + dois + " exemplos");
-            System.out.println("Tres " + tres + " exemplos");
+//            System.out.println("Zero " + zero + " exemplos");
+//            System.out.println("Um " + um + " exemplos");
+//            System.out.println("Dois " + dois + " exemplos");
+//            System.out.println("Tres " + tres + " exemplos");
             System.err.println("Errou " + errou + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
+            System.out.println("Novidades classificadas = " + novidadesClassificadas);
+            System.err.println("Novidades que eram conhecidas = " + novidadesConhecidas);
+            System.err.println("Classificações que eram novidades = " + classificacoesQueEramNovidades);
         } catch (Exception ex) {
             System.out.println(ex);
         }
     }
 
 
-    private FuzzyKMeansClusterer fuzzyCMeans(List<Exemplo> exemplos) {
-        int k0 = this.K * exemplos.size()/this.tChunk;
-        FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(k0, this.fuzzificacao);
+    private FuzzyKMeansClusterer fuzzyCMeans(List<Exemplo> exemplos, int kCurto) {
+        FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(kCurto, this.fuzzificacao);
         fuzzyClusterer.cluster(exemplos);
         return fuzzyClusterer;
     }
@@ -152,8 +165,8 @@ public class FaseOnline {
         return microClassificadores;
     }
 
-    private void detectaNovidadesMultiRotulo(List<Exemplo> listaDesconhecidos) {
-        FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos);
+    private void detectaNovidadesMultiRotulo(List<Exemplo> listaDesconhecidos, int kCurto) {
+        FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos, kCurto);
         List<CentroidCluster> centroides = clusters.getClusters();
         List<Double> silhuetas = this.calculaSilhuetaFuzzy2(clusters, listaDesconhecidos);
 
@@ -173,8 +186,8 @@ public class FaseOnline {
         }
     }
 
-    private List<Exemplo> detectaNovidadesBinario(List<Exemplo> listaDesconhecidos) {
-        FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos);
+    private List<Exemplo> detectaNovidadesBinario(List<Exemplo> listaDesconhecidos, int kCurto, ComiteArvores comite) {
+        FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos, kCurto);
         List<CentroidCluster> centroides = clusters.getClusters();
         List<Double> silhuetas = this.calculaSilhuetaFuzzy2(clusters, listaDesconhecidos);
         List<Integer> silhuetasValidas = new ArrayList<>();
@@ -188,7 +201,11 @@ public class FaseOnline {
 
         for(int i=0; i<listaDesconhecidos.size(); i++) {
             if(silhuetasValidas.contains(this.getIndiceDoMaiorValor(matrizPertinencia[i]))) {
-                listaDesconhecidos.get(i).setRotuloVerdadeiro("Novidade");
+                listaDesconhecidos.get(i).setRotuloClassificado("Novidade");
+                novidadesClassificadas++;
+                if(comite.rotulosConhecidos.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
+                    novidadesConhecidas++;
+                }
                 listaDesconhecidos.remove(i);
             }
         }

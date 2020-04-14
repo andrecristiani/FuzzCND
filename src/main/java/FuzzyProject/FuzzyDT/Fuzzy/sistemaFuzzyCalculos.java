@@ -316,6 +316,64 @@ public class sistemaFuzzyCalculos {
         return "desconhecido";
     }
 
+    public String sistemaFuzzyCalculosParaClassificacaoSemGrupos(int numVariaveisEntrada, String[][] regrasSFC, int numRegrasSFC, Vector padrao, String[][] particaoSFC, DecisionTree dt) {
+        compat = new double[numRegrasSFC];
+        double grau = 0.0D;
+        Vector part = new Vector(1);
+
+        int indice;
+        for(int i = 0; i < numRegrasSFC; ++i) {
+            compat[i] = 1.0D;
+
+            for(int j = 0; j < numVariaveisEntrada - 1; ++j) {
+                float valor = Float.parseFloat(padrao.get(j).toString());
+                if ((double)valor != -11111.0D && regrasSFC[i][j].compareTo("dc") != 0) {
+                    indice = 1;
+                    part.clear();
+                    int d;
+                    if (j != 0) {
+                        for(d = 1; d <= j; ++d) {
+                            indice += Integer.parseInt(particaoSFC[0][d]);
+                        }
+                    }
+
+                    for(d = indice; d < indice + Integer.parseInt(particaoSFC[0][j + 1]); ++d) {
+                        if (regrasSFC[i][j].compareTo(particaoSFC[d][1]) == 0) {
+                            indice = d;
+                            d += Integer.parseInt(particaoSFC[0][j + 1]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("triangular")) {
+                        for(d = 2; d < 5; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("gaussian")) {
+                        for(d = 2; d < 4; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    if (particaoSFC[indice][0].equals("trapezoidal")) {
+                        for(d = 2; d < 6; ++d) {
+                            part.add(particaoSFC[indice][d]);
+                        }
+                    }
+
+                    grau = this.calculaGrauRegra((double)valor, particaoSFC[indice][0], part);
+                    if (compat[i] > grau) {
+                        compat[i] = grau;
+                    }
+                }
+            }
+        }
+
+        indice = this.max(compat, numRegrasSFC);
+        return regrasSFC[indice][numVariaveisEntrada - 1];
+    }
+
     public String sistemaFuzzyCalculosParaClassificacaoFuzzyCMeans(int numVariaveisEntrada, String[][] regrasSFC, int numRegrasSFC, Vector padrao, String[][] particaoSFC, DecisionTree dt) {
         compat = new double[numRegrasSFC];
         double grau = 0.0D;
