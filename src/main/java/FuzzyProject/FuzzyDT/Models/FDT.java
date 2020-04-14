@@ -744,6 +744,11 @@ public class FDT {
         return sFC.sistemaFuzzyCalculosParaClassificacaoKMeans(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
     }
 
+    public String classificaExemploSemGruposNosFolhas(DecisionTree dt, Vector exemplo) {
+        sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
+        return sFC.sistemaFuzzyCalculosParaClassificacaoSemGrupos(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, exemplo, dt.particao, dt);
+    }
+
     public void criaGruposEmNosFolhasKMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         ManipulaArquivos mA = new ManipulaArquivos();
@@ -828,6 +833,7 @@ public class FDT {
                 dt.sfMicPorRegra.get(i).addAll(sfMiCS);
             }
         }
+        dt.elementosPorRegraFuzzyCMeans.clear();
     }
 
     public List<MicroGrupo> separaExemplosPorGrupoClassificadoKMeans(int[] rotulosExemplos, int numGrupos, List<Vector> exemplos, double[] numElementosGrupo, DecisionTree dt, Instances centroidesKmeans) {
@@ -873,7 +879,6 @@ public class FDT {
                 if(indiceMaior == j) {
                     if (sfMiC == null) {
                         sfMiC = new SFMiC(exemplos.get(k).getPoint());
-                        sfMiC.setCentroideAlgoritmo(centroides.get(indiceMaior).getCenter().getPoint());
                     } else {
                         double valorPertinencia = matriz[k][indiceMaior];
                         double[] ex = exemplos.get(k).getPoint();

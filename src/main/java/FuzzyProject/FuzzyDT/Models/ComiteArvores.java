@@ -3,6 +3,7 @@ package FuzzyProject.FuzzyDT.Models;
 import FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
+import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 
 import java.util.*;
 
@@ -32,7 +33,21 @@ public class ComiteArvores {
         this.tamanhoMaximo = tamanhoMaximo;
     }
 
-    public void treinaComiteInicial(int tChunk, int K, double fuzzificacao) throws Exception {
+    public void treinaComiteInicialKMeans(int tChunk, int K) throws Exception {
+        int qtdClassificadores = ca.main(this.dataset, this, tChunk);
+        for(int i=0; i<qtdClassificadores; i++) {
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
+            dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
+            dt.numAtributos = this.numAtributos;
+            dt.atributos = this.atributos;
+            fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
+            fdt.criaGruposEmNosFolhasKMeans(this.dataset+i, this.caminho, dt, tChunk, K);
+            ma.apagaArqsTemporarios(dataset + i, caminho);
+            this.modelos.add(dt);
+        }
+    }
+
+    public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao) throws Exception {
         int qtdClassificadores = ca.main(this.dataset, this, tChunk);
         for(int i=0; i<qtdClassificadores; i++) {
             DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
@@ -46,7 +61,40 @@ public class ComiteArvores {
         }
     }
 
-    public String classificaExemploVotoMajoritario(double[] exemplo) {
+    public String classificaExemploAgrupamentoExterno(double[] exemplo) {
+        if(this.calculaFoutlier(exemplo)) {
+            return "desconhecido";
+        } else {
+            Map<String, Integer> numeroVotos = new HashMap<>();
+            for (int i = 0; i < rotulosConhecidos.size(); i++) {
+                numeroVotos.put(rotulosConhecidos.get(i), 0);
+            }
+
+            Vector v = new Vector<>();
+            for (int i = 0; i < exemplo.length; i++) {
+                v.add(exemplo[i]);
+            }
+
+            for (int i = 0; i < modelos.size(); i++) {
+                String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(0), v);
+                numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+            }
+
+            int valorMaior = -1;
+            String indiceMaior = null;
+
+            for(int i=0; i<numeroVotos.size(); i++) {
+                String rotulo = rotulosConhecidos.get(i);
+                if(valorMaior < numeroVotos.get(rotulo)) {
+                    valorMaior = numeroVotos.get(rotulo);
+                    indiceMaior = rotulo;
+                }
+            }
+            return indiceMaior;
+        }
+    }
+
+    public String classificaExemploAgrupamentoNoFolha(double[] exemplo) {
         Map<String, Integer> numeroVotos = new HashMap<>();
         for(int i=0; i<rotulosConhecidos.size(); i++) {
             numeroVotos.put(rotulosConhecidos.get(i), 0);
@@ -94,7 +142,7 @@ public class ComiteArvores {
                 v.add(exemplo[j]);
             }
             for(int k=0; k<this.modelos.size(); k++) {
-                String rotuloClassificado = this.fdt.classificaExemploKMeans(this.modelos.get(k), v);
+                String rotuloClassificado = this.fdt.classificaExemploSemGruposNosFolhas(this.modelos.get(k), v);
                 String rotuloVerdadeiro = exemplosRotulados.get(i).getRotuloVerdadeiro();
 
                 if(rotuloClassificado.equals(rotuloVerdadeiro)) {
@@ -141,5 +189,24 @@ public class ComiteArvores {
         fdt.criaGruposEmNosFolhasKMeans(this.dataset+nClassificador, this.caminho, dt, tChunk, K);
         ma.apagaArqsTemporarios(dataset + nClassificador, caminho);
         this.modelos.add(dt);
+        dt.elementosPorRegraKMeans.clear();
+    }
+
+    public boolean calculaFoutlier(double[] exemplo) {
+        double distExemploCentroide = 0;
+        for(int i=0; i<this.modelos.size(); i++) {
+            List<List<MicroGrupo>> microGruposPorRegra = this.modelos.get(i).microGruposPorRegra;
+            for(int j=0; j<microGruposPorRegra.size(); j++) {
+                List<MicroGrupo> regras = microGruposPorRegra.get(j);
+                for(int k=0; k<regras.size(); k++) {
+                    distExemploCentroide = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, regras.get(k).getCentroide());
+                    if (distExemploCentroide <= regras.get(k).raio) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }
