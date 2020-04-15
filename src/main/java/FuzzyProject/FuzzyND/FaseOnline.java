@@ -1,13 +1,13 @@
 package FuzzyProject.FuzzyND;
 
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
-import FuzzyProject.FuzzyND.Models.Exemplo;
-import FuzzyProject.FuzzyND.Models.MicroClassificador;
-import FuzzyProject.FuzzyND.Models.ModeloNS;
-import FuzzyProject.FuzzyND.Models.SPFMiC;
+import FuzzyProject.FuzzyND.Models.*;
+import FuzzyProject.FuzzyND.Utils.Avaliacao;
+import FuzzyProject.FuzzyND.Utils.LineChart_AWT;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+import org.jfree.ui.RefineryUtilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -29,10 +29,13 @@ public class FaseOnline {
     public List<Exemplo> memTempRotulados = new ArrayList<>();
     public List<Exemplo> memTempDesconhecidos = new ArrayList<>();
     public List<Exemplo> exemplosEsperandoTempo = new ArrayList<>();
+    public List<MedidasClassicas> desempenho = new ArrayList<>();
     ModeloNS modeloNS;
     public int novidadesClassificadas;
-    public int novidadesConhecidas;
-    public int classificacoesQueEramNovidades;
+    public int fp;
+    public int fn;
+    public int nInstances = 90000;
+    public int nc = 28169;
 
     public FaseOnline(double fuzzificacao, double tipicidade, int K, int m, int n, double alpha, double betha, int pesoMinimoGrupo, int tChunk) {
         this.fuzzificacao = fuzzificacao;
@@ -51,21 +54,16 @@ public class FaseOnline {
         DataSource source;
         Instances data;
         this.novidadesClassificadas = 0;
-        this.novidadesConhecidas = 0;
-        this.classificacoesQueEramNovidades = 0;
+        this.fp = 0;
+        this.fn = 0;
         try {
             source = new DataSource(caminho + dataset + "-instances.arff");
             data = source.getDataSet();
             int acertou = 0;
-            int errou = 0;
+            int fe = 0;
             int desconhecido = 0;
-            int zero = 0;
-            int um = 0;
-            int dois = 0;
-            int tres = 0;
-            int j = 0;
             int kCurto = 4;
-            for(int i=0; i<data.size(); i++, j++) {
+            for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
                 String rotulo = comite.classificaExemploAgrupamentoExterno(exemplo.getPoint());
@@ -73,7 +71,6 @@ public class FaseOnline {
                     desconhecido++;
                     this.memTempDesconhecidos.add(exemplo);
                     if(this.memTempDesconhecidos.size() >= T) {
-//                        System.err.println("índice que iniciou dn: " + i);
                         this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos, kCurto, comite);
                     }
                 } else {
@@ -81,23 +78,11 @@ public class FaseOnline {
                 }
                 if(rotulo.equals(exemplo.getRotuloVerdadeiro())) {
                     acertou++;
-                    if(rotulo.equals("0")){
-                        zero++;
-                    }
-                    if(rotulo.equals("1")){
-                        um++;
-                    }
-                    if(rotulo.equals("2")){
-                        dois++;
-                    }
-                    if(rotulo.equals("3")){
-                        tres++;
-                    }
                 } else {
                     if(comite.rotulosConhecidos.contains(exemplo.getRotuloVerdadeiro())) {
-                        errou++;
+                        fe++;
                     } else {
-                        this.classificacoesQueEramNovidades++;
+                        this.fn++;
                     }
                 }
                 this.exemplosEsperandoTempo.add(exemplo);
@@ -111,17 +96,51 @@ public class FaseOnline {
                         this.memTempRotulados.clear();
                     }
                 }
+
+                if(h == 999) {
+                    h=0;
+                    MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
+                    System.out.println("FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
+                    desempenho.add(mc);
+                    fp = 0;
+                    fn = 0;
+                    fe = 0;
+                }
             }
             System.out.println("Acertou " + acertou + " exemplos");
 //            System.out.println("Zero " + zero + " exemplos");
 //            System.out.println("Um " + um + " exemplos");
 //            System.out.println("Dois " + dois + " exemplos");
 //            System.out.println("Tres " + tres + " exemplos");
-            System.err.println("Errou " + errou + " exemplos");
+            System.err.println("Errou " + fe + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
             System.out.println("Novidades classificadas = " + novidadesClassificadas);
-            System.err.println("Novidades que eram conhecidas = " + novidadesConhecidas);
-            System.err.println("Classificações que eram novidades = " + classificacoesQueEramNovidades);
+            System.err.println("Novidades que eram conhecidas = " + fp);
+            System.err.println("Classificações que eram novidades = " + fn);
+
+            LineChart_AWT chart = new LineChart_AWT(
+                    "Avaliação Fnew" ,
+                    "", this.desempenho, "fnew");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+
+            chart = new LineChart_AWT(
+                    "Avaliação Mnew" ,
+                    "", this.desempenho, "mnew");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+
+            chart = new LineChart_AWT(
+                    "Avaliação Err" ,
+                    "", this.desempenho, "err");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
         } catch (Exception ex) {
             System.out.println(ex);
         }
@@ -204,7 +223,7 @@ public class FaseOnline {
                 listaDesconhecidos.get(i).setRotuloClassificado("Novidade");
                 novidadesClassificadas++;
                 if(comite.rotulosConhecidos.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
-                    novidadesConhecidas++;
+                    fp++;
                 }
                 listaDesconhecidos.remove(i);
             }

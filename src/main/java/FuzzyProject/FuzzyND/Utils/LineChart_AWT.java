@@ -1,5 +1,6 @@
 package FuzzyProject.FuzzyND.Utils;
 
+import FuzzyProject.FuzzyND.Models.MedidasClassicas;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -8,14 +9,28 @@ import org.jfree.ui.RefineryUtilities;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import java.util.List;
+
 public class LineChart_AWT extends ApplicationFrame {
 
-    public LineChart_AWT( String applicationTitle , String chartTitle ) {
+    public LineChart_AWT(String applicationTitle , String chartTitle, List<MedidasClassicas> medidasClassicas, String campo) {
         super(applicationTitle);
+        DefaultCategoryDataset dataset;
+        String label = "";
+        if(campo.equals("mnew")) {
+            dataset = createDatasetToMnew(medidasClassicas);
+            label = "Mnew";
+        } else if (campo.equals("fnew")) {
+            dataset = createDatasetToFNew(medidasClassicas);
+            label = "Fnew";
+        } else {
+            dataset = createDatasetToErr(medidasClassicas);
+            label = "Err";
+        }
         JFreeChart lineChart = ChartFactory.createLineChart(
                 chartTitle,
-                "Years","Number of Schools",
-                createDataset(),
+                "Momentos de avaliação (em milhares)",label,
+                dataset,
                 PlotOrientation.VERTICAL,
                 true,true,false);
 
@@ -24,24 +39,27 @@ public class LineChart_AWT extends ApplicationFrame {
         setContentPane( chartPanel );
     }
 
-    private DefaultCategoryDataset createDataset( ) {
+    private DefaultCategoryDataset createDatasetToErr(List<MedidasClassicas> medidasClassicas) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
-        dataset.addValue( 15 , "schools" , "1970" );
-        dataset.addValue( 30 , "schools" , "1980" );
-        dataset.addValue( 60 , "schools" ,  "1990" );
-        dataset.addValue( 120 , "schools" , "2000" );
-        dataset.addValue( 240 , "schools" , "2010" );
-        dataset.addValue( 300 , "schools" , "2014" );
+        for(int i=0; i<medidasClassicas.size(); i++) {
+            dataset.addValue(medidasClassicas.get(i).getErr(), "err", Integer.toString(medidasClassicas.get(i).getIndice()));
+        }
         return dataset;
     }
 
-    public static void main( String[ ] args ) {
-        LineChart_AWT chart = new LineChart_AWT(
-                "School Vs Years" ,
-                "Numer of Schools vs years");
+    private DefaultCategoryDataset createDatasetToMnew(List<MedidasClassicas> medidasClassicas) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+        for(int i=0; i<medidasClassicas.size(); i++) {
+            dataset.addValue(medidasClassicas.get(i).getMnew(), "mnew", Integer.toString(medidasClassicas.get(i).getIndice()));
+        }
+        return dataset;
+    }
 
-        chart.pack( );
-        RefineryUtilities.centerFrameOnScreen( chart );
-        chart.setVisible( true );
+    private DefaultCategoryDataset createDatasetToFNew(List<MedidasClassicas> medidasClassicas) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+        for(int i=0; i<medidasClassicas.size(); i++) {
+            dataset.addValue(medidasClassicas.get(i).getFnew(), "fnew", Integer.toString(medidasClassicas.get(i).getIndice()));
+        }
+        return dataset;
     }
 }
