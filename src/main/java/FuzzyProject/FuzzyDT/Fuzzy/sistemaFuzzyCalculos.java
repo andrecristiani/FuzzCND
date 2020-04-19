@@ -189,6 +189,9 @@ public class sistemaFuzzyCalculos {
 
         FuzzyProject.FuzzyND.Models.Exemplo ex = new FuzzyProject.FuzzyND.Models.Exemplo(exemplo);
         indice = this.max(compat, numRegrasSFC);
+//        if(!dt.rotulosDasRegras.contains(regrasSFC[indice][numVariaveisEntrada - 1])) {
+            dt.rotulosDasRegras.add(regrasSFC[indice][numVariaveisEntrada - 1]);
+//        }
         dt.elementosPorRegraFuzzyCMeans.get(indice).add(ex);
         return regrasSFC[indice][numVariaveisEntrada - 1];
     }
@@ -437,9 +440,9 @@ public class sistemaFuzzyCalculos {
         indice = this.max(compat, numRegrasSFC);
 //        dt.elementosPorRegraFuzzyCMeans.get(indice).add(ex);
         for(int i=0; i< dt.sfMicPorRegra.get(indice).size(); i++) {
-            if(dt.sfMicPorRegra.get(indice).get(i).verificaSeExemploPertenceAoGrupo(padrao)) {
-                return regrasSFC[indice][numVariaveisEntrada - 1];
-            }
+//            if(dt.sfMicPorRegra.get(indice).get(i).verificaSeExemploPertenceAoGrupo(padrao)) {
+//                return regrasSFC[indice][numVariaveisEntrada - 1];
+//            }
         }
         return "desconhecido";
     }

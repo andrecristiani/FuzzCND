@@ -1,7 +1,6 @@
 package FuzzyProject.FuzzyND.Models;
 
 import java.util.Vector;
-import java.util.function.DoubleBinaryOperator;
 
 import static FuzzyProject.FuzzyND.Utils.MedidasDeDistancia.calculaDistanciaEuclidiana;
 
@@ -13,6 +12,7 @@ public class SFMiC {
     private double[] centroide;
     private int t;
     private double raio;
+    private String rotulo;
 
     public SFMiC(double M, double[] CF1, double SSD, int t, int n) {
         this.M = M;
@@ -99,6 +99,14 @@ public class SFMiC {
         this.raio = raio;
     }
 
+    public String getRotulo() {
+        return rotulo;
+    }
+
+    public void setRotulo(String rotulo) {
+        this.rotulo = rotulo;
+    }
+
     public void adicionaNovoPonto(double[] exemplo, double pertinencia, double distancia, double fuzzificacao) {
         this.M += pertinencia;
         this.n++;
@@ -124,5 +132,9 @@ public class SFMiC {
             return true;
         }
         return false;
+    }
+
+    public double getDispersao() {
+        return Math.sqrt((this.SSD/this.n));
     }
 }

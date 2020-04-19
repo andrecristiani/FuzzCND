@@ -10,9 +10,9 @@ public class FaseOffline {
         return comite;
     }
 
-    public ComiteArvores inicializarFuzzyCMeans(String dataset, String caminho, String taxaPoda, int numCjtos, int tComite, int tChunk, int K, double fuzzificacao) throws Exception {
+    public ComiteArvores inicializarFuzzyCMeans(String dataset, String caminho, String taxaPoda, int numCjtos, int tComite, int tChunk, int K, double fuzzificacao, double alpha, double betha) throws Exception {
         ComiteArvores comite = new ComiteArvores(dataset, caminho, taxaPoda, numCjtos, tComite);
-        comite.treinaComiteInicialFuzzyCMeans(tChunk, K, fuzzificacao);
+        comite.treinaComiteInicialFuzzyCMeans(tChunk, K, fuzzificacao, alpha, betha);
         return comite;
     }
 }

@@ -13,6 +13,7 @@ import FuzzyProject.FuzzyDT.Fuzzy.*;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.SFMiC;
+import FuzzyProject.FuzzyND.Models.SPFMiC;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
@@ -804,7 +805,7 @@ public class FDT {
         }
     }
 
-    public void criaGruposEmNosFolhasFuzzyCMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K, double fuzzificacao) throws Exception {
+    public void criaGruposEmNosFolhasFuzzyCMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K, double fuzzificacao, double alpha, double theta) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         ManipulaArquivos mA = new ManipulaArquivos();
         treinamento = new float[dt.numObjetos][dt.nVE];
@@ -816,9 +817,10 @@ public class FDT {
             }
             sFC.sistemaFuzzyCalculosTreinamentoFuzzyCMeans(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, vec, dt.particao, dt);
         }
-
+        System.out.println("Numero de regras: " + dt.numRegrasAD);
         for(int i=0; i<dt.numRegrasAD; i++) {
             List<Exemplo> exemplos = dt.elementosPorRegraFuzzyCMeans.get(i);
+
             if(exemplos.size() > 0) {
                 double divisao = (double) exemplos.size()/tChunk;
                 int Ki = (int) (divisao * K);
@@ -828,8 +830,7 @@ public class FDT {
 
                 FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(Ki, fuzzificacao);
                 fuzzyClusterer.cluster(exemplos);
-
-                List<SFMiC> sfMiCS = this.separaExemplosPorGrupoClassificadoFuzzyCMeans(exemplos, fuzzyClusterer, fuzzificacao);
+                List<SPFMiC> sfMiCS = this.separaExemplosPorGrupoClassificadoFuzzyCMeans(exemplos, fuzzyClusterer, fuzzificacao, dt.rotulosDasRegras.get(i), alpha, theta);
                 dt.sfMicPorRegra.get(i).addAll(sfMiCS);
             }
         }
@@ -843,7 +844,7 @@ public class FDT {
         for(int i=0; i<numGrupos; i++) {
             MicroGrupo mg = new MicroGrupo(dt);
             mg.N = (float) numElementosGrupo[i];
-            mg.centroidKmeans = centroidesKmeans.get(i).toDoubleArray();
+//            mg.centroidKmeans = centroidesKmeans.get(i).toDoubleArray();
             microGrupos.add(mg);
             centroides[i] = centroidesKmeans.get(i).toDoubleArray();
         }
@@ -853,9 +854,10 @@ public class FDT {
                 microGrupos.get(rotulosExemplos[i]).LS[k] += Float.parseFloat(exemplos.get(i).get(k).toString());
                 microGrupos.get(rotulosExemplos[i]).SS[k] += (float) Math.pow((Double.parseDouble(exemplos.get(i).get(k).toString())), 2);
             }
-            double distPontoAoCentoride = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplos.get(i), centroides[rotulosExemplos[i]]);
-            if(distPontoAoCentoride > microGrupos.get(rotulosExemplos[i]).raio) {
-                microGrupos.get(rotulosExemplos[i]).raio = distPontoAoCentoride;
+            double distPontoAoCentroide = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplos.get(i), centroides[rotulosExemplos[i]]);
+            microGrupos.get(rotulosExemplos[i]).somaDistancias += distPontoAoCentroide;
+            if(distPontoAoCentroide > microGrupos.get(rotulosExemplos[i]).raio) {
+                microGrupos.get(rotulosExemplos[i]).raio = distPontoAoCentroide;
             }
         }
 
@@ -868,32 +870,36 @@ public class FDT {
         return microGruposAux;
     }
 
-    public List<SFMiC> separaExemplosPorGrupoClassificadoFuzzyCMeans(List<Exemplo> exemplos, FuzzyKMeansClusterer fuzzyClusterer, double fuzzificacao) {
-        List<SFMiC> sfMiCS = new ArrayList<SFMiC>();
+    public List<SPFMiC> separaExemplosPorGrupoClassificadoFuzzyCMeans(List<Exemplo> exemplos, FuzzyKMeansClusterer fuzzyClusterer, double fuzzificacao, String rotulo, double alpha, double theta) {
+        List<SPFMiC> sfMiCS = new ArrayList<SPFMiC>();
         double[][] matriz = fuzzyClusterer.getMembershipMatrix().getData();
         List<CentroidCluster> centroides = fuzzyClusterer.getClusters();
         for(int j=0; j<centroides.size(); j++) {
-            SFMiC sfMiC = null;
+            SPFMiC sfMiC = null;
+            double SSD = 0;
             for(int k=0; k<exemplos.size(); k++) {
                 int indiceMaior = this.getIndiceDoMaiorValor(matriz[k]);
                 if(indiceMaior == j) {
                     if (sfMiC == null) {
-                        sfMiC = new SFMiC(exemplos.get(k).getPoint());
+                        sfMiC = new SPFMiC(centroides.get(j).getCenter().getPoint(),
+                                centroides.get(j).getPoints().size(),
+                                alpha,
+                                theta);
+
+                        sfMiC.setRotulo(rotulo);
                     } else {
-                        double valorPertinencia = matriz[k][indiceMaior];
+                        double valorPertinencia = matriz[k][j];
                         double[] ex = exemplos.get(k).getPoint();
                         double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(sfMiC.getCentroide(), ex);
-                        double raio = MedidasDeDistancia.calculaDistanciaEuclidiana(centroides.get(indiceMaior).getCenter().getPoint(), ex);
-                        if(raio > sfMiC.getRaio()) {
-                            sfMiC.setRaio(raio);
-                        }
-                        sfMiC.adicionaNovoPonto(ex, valorPertinencia, distancia, fuzzificacao);
+                        SSD += Math.pow(valorPertinencia, fuzzificacao) * Math.pow(distancia, 2);
                     }
                 }
             }
-            sfMiCS.add(sfMiC);
+            if(sfMiC != null) {
+                sfMiC.setSSDe(SSD);
+                sfMiCS.add(sfMiC);
+            }
         }
-
         return sfMiCS;
     }
 

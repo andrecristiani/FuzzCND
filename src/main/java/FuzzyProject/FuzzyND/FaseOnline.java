@@ -3,6 +3,7 @@ package FuzzyProject.FuzzyND;
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
 import FuzzyProject.FuzzyND.Models.*;
 import FuzzyProject.FuzzyND.Utils.Avaliacao;
+import FuzzyProject.FuzzyND.Utils.FuncoesDeClassificacao;
 import FuzzyProject.FuzzyND.Utils.LineChart_AWT;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
@@ -50,7 +51,8 @@ public class FaseOnline {
         this.pesoMinimoGrupo = pesoMinimoGrupo;
     }
 
-    public void inicializar(String caminho, String dataset, ComiteArvores comite, int latencia, int T) {
+    public void inicializarKMeans(String caminho, String dataset, ComiteArvores comite, int latencia, int T) {
+        comite.m = this.m;
         DataSource source;
         Instances data;
         this.novidadesClassificadas = 0;
@@ -66,12 +68,12 @@ public class FaseOnline {
             for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
-                String rotulo = comite.classificaExemploAgrupamentoExterno(exemplo.getPoint());
+                String rotulo = comite.classificaExemploAgrupamentoExternoKMeans(exemplo.getPoint());
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
                     this.memTempDesconhecidos.add(exemplo);
                     if(this.memTempDesconhecidos.size() >= T) {
-                        this.memTempDesconhecidos = this.detectaNovidadesBinario(this.memTempDesconhecidos, kCurto, comite);
+                        this.memTempDesconhecidos = this.detectaNovidadesBinarioKmeans(this.memTempDesconhecidos, kCurto, comite);
                     }
                 } else {
                     exemplo.setRotuloClassificado(rotulo);
@@ -100,7 +102,7 @@ public class FaseOnline {
                 if(h == 999) {
                     h=0;
                     MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
-                    System.out.println("FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
+                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
                     desempenho.add(mc);
                     fp = 0;
                     fn = 0;
@@ -112,6 +114,104 @@ public class FaseOnline {
 //            System.out.println("Um " + um + " exemplos");
 //            System.out.println("Dois " + dois + " exemplos");
 //            System.out.println("Tres " + tres + " exemplos");
+            System.err.println("Errou " + fe + " exemplos");
+            System.err.println("Desconhecidos = " + desconhecido);
+            System.out.println("Novidades classificadas = " + novidadesClassificadas);
+            System.err.println("Novidades que eram conhecidas = " + fp);
+            System.err.println("Classificações que eram novidades = " + fn);
+
+            LineChart_AWT chart = new LineChart_AWT(
+                    "Avaliação Fnew" ,
+                    "", this.desempenho, "fnew");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+
+            chart = new LineChart_AWT(
+                    "Avaliação Mnew" ,
+                    "", this.desempenho, "mnew");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+
+            chart = new LineChart_AWT(
+                    "Avaliação Err" ,
+                    "", this.desempenho, "err");
+
+            chart.pack( );
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
+
+    public void inicializarFuzzyCMeans(String caminho, String dataset, ComiteArvores comite, int latencia, int T, double phi, double todasTipMax, double adaptadorTheta) {
+        comite.m = this.m;
+        comite.n = this.n;
+        comite.K = this.K;
+        comite.todasTipMax = todasTipMax;
+        comite.adaptadorTheta = adaptadorTheta;
+        DataSource source;
+        Instances data;
+        this.novidadesClassificadas = 0;
+        this.fp = 0;
+        this.fn = 0;
+        try {
+            source = new DataSource(caminho + dataset + "-instances.arff");
+            data = source.getDataSet();
+            int acertou = 0;
+            int fe = 0;
+            int desconhecido = 0;
+            int kCurto = 4;
+            for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
+                Instance ins = data.get(i);
+                Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
+                String rotulo = comite.classificaExemploAgrupamentoExternoFuzzyCMeans(exemplo.getPoint());
+                if(rotulo.equals("desconhecido")) {
+                    desconhecido++;
+                    this.memTempDesconhecidos.add(exemplo);
+                    if(this.memTempDesconhecidos.size() >= T) {
+                        this.memTempDesconhecidos = this.detectaNovidadesBinarioFuzzyCMeans(this.memTempDesconhecidos, kCurto, comite, phi);
+                    }
+                } else {
+                    exemplo.setRotuloClassificado(rotulo);
+                }
+                if(rotulo.equals(exemplo.getRotuloVerdadeiro())) {
+                    acertou++;
+                } else {
+                    if(comite.rotulosConhecidos.contains(exemplo.getRotuloVerdadeiro())) {
+                        fe++;
+                    } else {
+                        this.fn++;
+                    }
+                }
+                this.exemplosEsperandoTempo.add(exemplo);
+                if(j >= latencia) {
+                    Exemplo exemploRotulado = this.exemplosEsperandoTempo.get(0);
+                    this.exemplosEsperandoTempo.remove(0);
+                    this.memTempRotulados.add(exemploRotulado);
+
+                    if(this.memTempRotulados.size() >= tChunk) {
+                        comite.treinaNovaArvoreFuzzyCMeans(memTempRotulados, tChunk, K, fuzzificacao, alpha, betha);
+                        this.memTempRotulados.clear();
+                    }
+                }
+
+                if(h == 999) {
+                    System.err.println("Entrou");
+                    h=0;
+                    MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
+                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
+                    desempenho.add(mc);
+                    fp = 0;
+                    fn = 0;
+                    fe = 0;
+                }
+            }
+            System.out.println("Acertou " + acertou + " exemplos");
             System.err.println("Errou " + fe + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
             System.out.println("Novidades classificadas = " + novidadesClassificadas);
@@ -205,7 +305,7 @@ public class FaseOnline {
         }
     }
 
-    private List<Exemplo> detectaNovidadesBinario(List<Exemplo> listaDesconhecidos, int kCurto, ComiteArvores comite) {
+    private List<Exemplo> detectaNovidadesBinarioKmeans(List<Exemplo> listaDesconhecidos, int kCurto, ComiteArvores comite) {
         FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos, kCurto);
         List<CentroidCluster> centroides = clusters.getClusters();
         List<Double> silhuetas = this.calculaSilhuetaFuzzy2(clusters, listaDesconhecidos);
@@ -221,6 +321,57 @@ public class FaseOnline {
         for(int i=0; i<listaDesconhecidos.size(); i++) {
             if(silhuetasValidas.contains(this.getIndiceDoMaiorValor(matrizPertinencia[i]))) {
                 listaDesconhecidos.get(i).setRotuloClassificado("Novidade");
+                novidadesClassificadas++;
+                if(comite.rotulosConhecidos.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
+                    fp++;
+                }
+                listaDesconhecidos.remove(i);
+            }
+        }
+
+        return listaDesconhecidos;
+    }
+
+    private List<Exemplo> detectaNovidadesBinarioFuzzyCMeans(List<Exemplo> listaDesconhecidos, int kCurto, ComiteArvores comite, double phi) {
+        FuzzyKMeansClusterer clusters = this.fuzzyCMeans(listaDesconhecidos, kCurto);
+        List<CentroidCluster> centroides = clusters.getClusters();
+        List<Double> silhuetas = this.calculaSilhuetaFuzzy2(clusters, listaDesconhecidos);
+        List<Integer> silhuetasValidas = new ArrayList<>();
+        double[][] matrizPertinencia = clusters.getMembershipMatrix().getData();
+
+        for(int i=0; i<silhuetas.size(); i++) {
+            if(silhuetas.get(i) > 0 && centroides.get(i).getPoints().size() >= pesoMinimoGrupo) {
+                silhuetasValidas.add(i);
+            }
+        }
+
+        List<SPFMiC> sfMiCS = FuncoesDeClassificacao.separaExemplosPorGrupoClassificado(listaDesconhecidos, clusters, this.fuzzificacao, alpha, betha);
+        List<SPFMiC> sfmicsConhecidos = comite.getTodosSFMiCs();
+        List<Double> frs = new ArrayList<>();
+
+        for(int i=0; i<sfMiCS.size(); i++) {
+            frs.clear();
+            for(int j=0; j<sfmicsConhecidos.size(); j++) {
+                double di = sfmicsConhecidos.get(j).getDispersao();
+                double dj = sfMiCS.get(i).getDispersao();
+                double dist = (di + dj) / MedidasDeDistancia.calculaDistanciaEuclidiana(sfmicsConhecidos.get(j).getCentroide(), sfMiCS.get(i).getCentroide());
+                frs.add((di + dj) / dist);
+            }
+
+            Double maxVal = Collections.max(frs);
+            int indexMax = frs.indexOf(maxVal);
+
+            if(maxVal > phi) {
+                sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
+            } else {
+                sfMiCS.get(i).setRotulo("Novidade");
+            }
+        }
+
+        for(int i=0; i<listaDesconhecidos.size(); i++) {
+            int cluster = this.getIndiceDoMaiorValor(matrizPertinencia[i]);
+            if(silhuetasValidas.contains(cluster)) {
+                listaDesconhecidos.get(i).setRotuloClassificado(sfMiCS.get(cluster).getRotulo());
                 novidadesClassificadas++;
                 if(comite.rotulosConhecidos.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
                     fp++;

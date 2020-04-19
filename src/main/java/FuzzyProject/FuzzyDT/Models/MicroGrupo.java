@@ -8,7 +8,7 @@ public class MicroGrupo {
     public float SS[];
     public float N;
     public double[] centroidKmeans;
-    public double mediaDistancias;
+    public double somaDistancias;
     public double raio;
 
     public MicroGrupo(DecisionTree dt) {
@@ -20,7 +20,7 @@ public class MicroGrupo {
             this.SS[i] = 0;
         }
         this.N = 0;
-        this.mediaDistancias = 0;
+        this.somaDistancias = 0;
         this.raio = 0;
     }
 
@@ -54,5 +54,9 @@ public class MicroGrupo {
             return true;
         }
         return false;
+    }
+
+    public double getDistanciaMedia() {
+        return this.somaDistancias/N;
     }
 }
