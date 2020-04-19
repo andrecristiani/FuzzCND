@@ -21,6 +21,7 @@ public class DecisionTree {
     public String caminho;
     public String dataset;
     public int numClassificador;
+    public int t;
     public String taxaPoda;
     public String arvoreJ48;
     public String[][] particao;
@@ -35,12 +36,13 @@ public class DecisionTree {
     public List<List<SPFMiC>> sfMicPorRegra;
     public List<String> rotulosDasRegras;
 
-    public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda) {
+    public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda, int tempo) {
         this.caminho = caminho;
         this.dataset = dataset;
         this.numClassificador = numClassificador;
         this.taxaPoda = taxaPoda;
         this.inicializada = 0;
+        this.t = tempo;
     }
 
     public void inicializaValores() {

@@ -817,7 +817,7 @@ public class FDT {
             }
             sFC.sistemaFuzzyCalculosTreinamentoFuzzyCMeans(dt.numAtributos, dt.regrasAD, dt.numRegrasAD, vec, dt.particao, dt);
         }
-        System.out.println("Numero de regras: " + dt.numRegrasAD);
+
         for(int i=0; i<dt.numRegrasAD; i++) {
             List<Exemplo> exemplos = dt.elementosPorRegraFuzzyCMeans.get(i);
 

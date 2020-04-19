@@ -3,9 +3,7 @@ package FuzzyProject.FuzzyDT.Models;
 import FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
-import FuzzyProject.FuzzyND.Models.SFMiC;
 import FuzzyProject.FuzzyND.Models.SPFMiC;
-import FuzzyProject.FuzzyND.Utils.FuncoesDeClassificacao;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 
 import java.util.*;
@@ -41,10 +39,10 @@ public class ComiteArvores {
         this.tamanhoMaximo = tamanhoMaximo;
     }
 
-    public void treinaComiteInicialKMeans(int tChunk, int K) throws Exception {
-        int qtdClassificadores = ca.main(this.dataset, this, tChunk);
-        for(int i=0; i<qtdClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
+    public void treinaComiteInicialKMeans(int tChunk, int K, int tempo) throws Exception {
+        ResultadoMA rMA = ca.main(this.dataset, this, tChunk);
+        for(int i=0; i< rMA.numClassificadores; i++) {
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, tempo);
             dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
@@ -55,10 +53,10 @@ public class ComiteArvores {
         }
     }
 
-    public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao, double alpha, double theta) throws Exception {
-        int qtdClassificadores = ca.main(this.dataset, this, tChunk);
-        for(int i=0; i<qtdClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda);
+    public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
+        ResultadoMA rMA = ca.main(this.dataset, this, tChunk);
+        for(int i=0; i< rMA.numClassificadores; i++) {
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, tempo);
             dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
@@ -103,7 +101,7 @@ public class ComiteArvores {
     }
 
     public String classificaExemploAgrupamentoExternoFuzzyCMeans(double[] exemplo) {
-        if(this.calculaFoutlierPelaPertinencia(exemplo)) {
+        if(this.calculaFoutlierPelaTipicidade(exemplo)) {
             return "desconhecido";
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
@@ -117,20 +115,23 @@ public class ComiteArvores {
             }
 
             for (int i = 0; i < modelos.size(); i++) {
-                String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(0), v);
+                String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(i), v);
                 numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
             }
 
             int valorMaior = -1;
             String indiceMaior = null;
 
+            String teste = "";
             for(int i=0; i<numeroVotos.size(); i++) {
                 String rotulo = rotulosConhecidos.get(i);
+                teste += "Rótulo: " + rotulo + " qtd: " + numeroVotos.get(rotulo) + " |---| ";
                 if(valorMaior < numeroVotos.get(rotulo)) {
                     valorMaior = numeroVotos.get(rotulo);
                     indiceMaior = rotulo;
                 }
             }
+            System.out.println(teste);
             return indiceMaior;
         }
     }
@@ -217,35 +218,35 @@ public class ComiteArvores {
         }
     }
 
-    public void treinaNovaArvore(List<Exemplo> exemplosRotulados, int tChunk, int K) throws Exception {
+    public void treinaNovaArvore(List<Exemplo> exemplosRotulados, int tChunk, int K, int tempo) throws Exception {
         if(this.modelos.size() >= tamanhoMaximo) {
             this.removeClassificadorComMenorDesempenho(exemplosRotulados);
         }
-        int nClassificador = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
-        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, nClassificador, this.taxaPoda);
-        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + nClassificador + ".txt");
+        ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
+        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
+        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + resultadoMA.numClassificadores + ".txt");
         dt.numAtributos = this.numAtributos;
         dt.atributos = this.atributos;
-        fdt.geraFuzzyDT(this.dataset + nClassificador, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhasKMeans(this.dataset+nClassificador, this.caminho, dt, tChunk, K);
-        ma.apagaArqsTemporarios(dataset + nClassificador, caminho);
+        fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
+        fdt.criaGruposEmNosFolhasKMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K);
+        ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
         this.modelos.add(dt);
         dt.elementosPorRegraKMeans.clear();
     }
 
-    public void treinaNovaArvoreFuzzyCMeans(List<Exemplo> exemplosRotulados, int tChunk, int K, double fuzzificacao, double alpha, double theta) throws Exception {
+    public void treinaNovaArvoreFuzzyCMeans(List<Exemplo> exemplosRotulados, int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
 
         if(this.modelos.size() >= tamanhoMaximo) {
             this.removeClassificadorComMenorDesempenho(exemplosRotulados);
         }
-        int nClassificador = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
-        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, nClassificador, this.taxaPoda);
-        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + nClassificador + ".txt");
+        ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
+        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
+        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + resultadoMA.numClassificadores + ".txt");
         dt.numAtributos = this.numAtributos;
         dt.atributos = this.atributos;
-        fdt.geraFuzzyDT(this.dataset + nClassificador, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+nClassificador, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta);
-        ma.apagaArqsTemporarios(dataset + nClassificador, caminho);
+        fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
+        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta);
+        ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
         this.modelos.add(dt);
         dt.elementosPorRegraKMeans.clear();
     }
@@ -284,17 +285,14 @@ public class ComiteArvores {
         return true;
     }
 
-    public boolean calculaFoutlierPelaPertinencia(double[] exemplo) {
+    public boolean calculaFoutlierPelaTipicidade(double[] exemplo) {
         List<SPFMiC> todosSFMiCs = this.getTodosSFMiCs();
-//        List<Double> pertinencias = new ArrayList<>();
         List<Double> tipicidades = new ArrayList<>();
         for(int i=0; i<todosSFMiCs.size(); i++) {
-//            pertinencias.add(FuncoesDeClassificacao.calculoPertinencia(exemplo, todosSFMiCs, i, this.m));
             tipicidades.add(todosSFMiCs.get(i).calculaTipicidade(exemplo, this.n, this.K));
         }
 
         Double maxVal = Collections.max(tipicidades);
-//        int indexMax = tipicidades.indexOf(maxVal);
         if(maxVal >= (this.todasTipMax - this.adaptadorTheta)) {
             return false;
         }

@@ -2,6 +2,7 @@ package FuzzyProject;
 
 import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.FaseOffline;
 import FuzzyProject.FuzzyND.FaseOnline;
 

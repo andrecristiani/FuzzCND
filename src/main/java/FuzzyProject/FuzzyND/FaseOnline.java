@@ -35,6 +35,8 @@ public class FaseOnline {
     public int novidadesClassificadas;
     public int fp;
     public int fn;
+    public int fpGlobal;
+    public int fnGlobal;
     public int nInstances = 90000;
     public int nc = 28169;
 
@@ -94,7 +96,7 @@ public class FaseOnline {
                     this.memTempRotulados.add(exemploRotulado);
 
                     if(this.memTempRotulados.size() >= tChunk) {
-                        comite.treinaNovaArvore(memTempRotulados, tChunk, K);
+                        comite.treinaNovaArvore(memTempRotulados, tChunk, K, i);
                         this.memTempRotulados.clear();
                     }
                 }
@@ -110,10 +112,6 @@ public class FaseOnline {
                 }
             }
             System.out.println("Acertou " + acertou + " exemplos");
-//            System.out.println("Zero " + zero + " exemplos");
-//            System.out.println("Um " + um + " exemplos");
-//            System.out.println("Dois " + dois + " exemplos");
-//            System.out.println("Tres " + tres + " exemplos");
             System.err.println("Errou " + fe + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
             System.out.println("Novidades classificadas = " + novidadesClassificadas);
@@ -159,17 +157,25 @@ public class FaseOnline {
         this.novidadesClassificadas = 0;
         this.fp = 0;
         this.fn = 0;
+        this.fnGlobal = 0;
+        this.fpGlobal = 0;
         try {
             source = new DataSource(caminho + dataset + "-instances.arff");
             data = source.getDataSet();
             int acertou = 0;
             int fe = 0;
+            int feGlobal = 0;
             int desconhecido = 0;
             int kCurto = 4;
             for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
+                if(i==30000) {
+                    System.out.println("U");
+                }
+                System.err.println(i);
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
                 String rotulo = comite.classificaExemploAgrupamentoExternoFuzzyCMeans(exemplo.getPoint());
+                System.out.println("Rótulo verdadeiro: " + exemplo.getRotuloVerdadeiro());
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
                     this.memTempDesconhecidos.add(exemplo);
@@ -184,8 +190,10 @@ public class FaseOnline {
                 } else {
                     if(comite.rotulosConhecidos.contains(exemplo.getRotuloVerdadeiro())) {
                         fe++;
+                        feGlobal++;
                     } else {
                         this.fn++;
+                        this.fnGlobal++;
                     }
                 }
                 this.exemplosEsperandoTempo.add(exemplo);
@@ -195,13 +203,12 @@ public class FaseOnline {
                     this.memTempRotulados.add(exemploRotulado);
 
                     if(this.memTempRotulados.size() >= tChunk) {
-                        comite.treinaNovaArvoreFuzzyCMeans(memTempRotulados, tChunk, K, fuzzificacao, alpha, betha);
+                        comite.treinaNovaArvoreFuzzyCMeans(memTempRotulados, tChunk, K, fuzzificacao, alpha, betha, i);
                         this.memTempRotulados.clear();
                     }
                 }
 
                 if(h == 999) {
-                    System.err.println("Entrou");
                     h=0;
                     MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
                     System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
@@ -212,11 +219,11 @@ public class FaseOnline {
                 }
             }
             System.out.println("Acertou " + acertou + " exemplos");
-            System.err.println("Errou " + fe + " exemplos");
+            System.err.println("Errou " + feGlobal + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
             System.out.println("Novidades classificadas = " + novidadesClassificadas);
-            System.err.println("Novidades que eram conhecidas = " + fp);
-            System.err.println("Classificações que eram novidades = " + fn);
+            System.err.println("Novidades que eram conhecidas = " + fpGlobal);
+            System.err.println("Classificações que eram novidades = " + fnGlobal);
 
             LineChart_AWT chart = new LineChart_AWT(
                     "Avaliação Fnew" ,
@@ -375,6 +382,7 @@ public class FaseOnline {
                 novidadesClassificadas++;
                 if(comite.rotulosConhecidos.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
                     fp++;
+                    fpGlobal++;
                 }
                 listaDesconhecidos.remove(i);
             }

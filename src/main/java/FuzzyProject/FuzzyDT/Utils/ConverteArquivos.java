@@ -1,7 +1,7 @@
 package FuzzyProject.FuzzyDT.Utils;
 
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
-import FuzzyProject.FuzzyDT.Models.DecisionTree;
+import FuzzyProject.FuzzyDT.Models.ResultadoMA;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 
 import java.io.BufferedReader;
@@ -30,7 +30,7 @@ public class ConverteArquivos {
         numAtribs = 0;
     }
 
-    public int main(String arquivo, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
+    public ResultadoMA main(String arquivo, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
         boolean numAtributos = false;
         if (numAtribs != 0) {
             numAtributos = true;
@@ -187,6 +187,8 @@ public class ConverteArquivos {
             numClassificadores = (int) Math.round((double)numExemplos/tChunk);
         }
 
+        ResultadoMA rMa = new ResultadoMA(numClassificadores);
+
         str = null;
 
         FileWriter writer;
@@ -254,6 +256,7 @@ public class ConverteArquivos {
                         if(!comite.rotulosConhecidos.contains(classe)) {
                             comite.rotulosConhecidos.add(classe);
                         }
+                        rMa.rotulos.get(countClassificadores).add(classe);
                         classesConcatenadas = classesConcatenadas + " " + classe;
                     }
 
@@ -303,10 +306,11 @@ public class ConverteArquivos {
 //            System.err.println(var24);
 //            System.exit(1);
 //        }
-        return numClassificadores;
+        return rMa;
     }
 
-    public int mainParaExemplosRotulados(String arquivo, List<Exemplo> exemplosRotulados, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
+    public ResultadoMA mainParaExemplosRotulados(String arquivo, List<Exemplo> exemplosRotulados, ComiteArvores comite, int tChunk) throws FileNotFoundException, IOException {
+        ResultadoMA resultadoMA = new ResultadoMA();
         FileWriter writer;
         BufferedWriter buf_writer;
         FileWriter writerNames;
@@ -346,6 +350,7 @@ public class ConverteArquivos {
             if(!comite.rotulosConhecidos.contains(classe)) {
                 comite.rotulosConhecidos.add(classe);
             }
+            resultadoMA.rotulos.get(0).add(classe);
             classesConcatenadas = classesConcatenadas + " " + classe;
         }
 
@@ -356,8 +361,8 @@ public class ConverteArquivos {
         comite.numeroClassificadores.add(countClassificadores);
         buf_writer.close();
         buf_writerNames.close();
-
-        return countClassificadores;
+        resultadoMA.numClassificadores = countClassificadores;
+        return resultadoMA;
     }
 }
 
