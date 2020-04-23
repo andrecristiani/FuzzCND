@@ -805,7 +805,7 @@ public class FDT {
         }
     }
 
-    public void criaGruposEmNosFolhasFuzzyCMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K, double fuzzificacao, double alpha, double theta) throws Exception {
+    public void criaGruposEmNosFolhasFuzzyCMeans(String dataset, String caminho, DecisionTree dt, int tChunk, int K, double fuzzificacao, double alpha, double theta, ComiteArvores comite) throws Exception {
         sistemaFuzzyCalculos sFC = new sistemaFuzzyCalculos();
         ManipulaArquivos mA = new ManipulaArquivos();
         treinamento = new float[dt.numObjetos][dt.nVE];
@@ -830,7 +830,7 @@ public class FDT {
 
                 FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(Ki, fuzzificacao);
                 fuzzyClusterer.cluster(exemplos);
-                List<SPFMiC> sfMiCS = this.separaExemplosPorGrupoClassificadoFuzzyCMeans(exemplos, fuzzyClusterer, fuzzificacao, dt.rotulosDasRegras.get(i), alpha, theta);
+                List<SPFMiC> sfMiCS = this.separaExemplosPorGrupoClassificadoFuzzyCMeans(exemplos, fuzzyClusterer, fuzzificacao, dt.rotulosDasRegras.get(i), alpha, theta, comite);
                 dt.sfMicPorRegra.get(i).addAll(sfMiCS);
             }
         }
@@ -870,7 +870,7 @@ public class FDT {
         return microGruposAux;
     }
 
-    public List<SPFMiC> separaExemplosPorGrupoClassificadoFuzzyCMeans(List<Exemplo> exemplos, FuzzyKMeansClusterer fuzzyClusterer, double fuzzificacao, String rotulo, double alpha, double theta) {
+    public List<SPFMiC> separaExemplosPorGrupoClassificadoFuzzyCMeans(List<Exemplo> exemplos, FuzzyKMeansClusterer fuzzyClusterer, double fuzzificacao, String rotulo, double alpha, double theta, ComiteArvores comite) {
         List<SPFMiC> sfMiCS = new ArrayList<SPFMiC>();
         double[][] matriz = fuzzyClusterer.getMembershipMatrix().getData();
         List<CentroidCluster> centroides = fuzzyClusterer.getClusters();
@@ -896,8 +896,13 @@ public class FDT {
                 }
             }
             if(sfMiC != null) {
-                sfMiC.setSSDe(SSD);
-                sfMiCS.add(sfMiC);
+                if(sfMiC.getN() >= 3) {
+                    sfMiC.setSSDe(SSD);
+                    sfMiCS.add(sfMiC);
+                    if(!comite.rotulosSPFMiCs.contains(rotulo)) {
+                        comite.rotulosSPFMiCs.add(rotulo);
+                    }
+                }
             }
         }
         return sfMiCS;

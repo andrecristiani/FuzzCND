@@ -19,13 +19,13 @@ public class FuzzyDecisionTree {
         caminho = current + "/" + dataset + "/";
         int tComite = 6;
         int tChunk = 2000;
-        int K = 50;
+        int K = 12;
         int tDesconhecidos = 50;
-        double phi = 0.5;
+        double phi = 0.1;
         double alpha = 1;
         double betha = 1;
         double todasTipMax = 0.95;
-        double adaptadorTheta = 0.90;
+        double adaptadorTheta = 0.26;
 
         FaseOffline faseOffline = new FaseOffline();
         ComiteArvores comite = faseOffline.inicializarFuzzyCMeans(dataset, caminho, taxaPoda, numCjtos, tComite, tChunk, K, 2, alpha, betha);

@@ -1,6 +1,9 @@
 package FuzzyProject.FuzzyND.Utils;
 
+import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MedidasClassicas;
+
+import java.util.List;
 
 public class Avaliacao {
 
@@ -14,5 +17,9 @@ public class Avaliacao {
         md.setErr(err);
         md.setIndice(i);
         return md;
+    }
+
+    public static void  calculaMedidasFariaEtAl(List<Exemplo> exemplos) {
+
     }
 }

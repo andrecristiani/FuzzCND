@@ -6,11 +6,13 @@ public class Exemplo implements Clusterable {
     private double[] ponto;
     private String rotuloVerdadeiro;
     private String rotuloClassificado;
+    private boolean desconhecido;
 
     public Exemplo(double[] ponto) {
         this.ponto = ponto;
         this.rotuloVerdadeiro = null;
         this.rotuloClassificado = null;
+        this.desconhecido = false;
     }
 
     public Exemplo(double[] ponto, boolean comRotulo) {
@@ -46,11 +48,27 @@ public class Exemplo implements Clusterable {
     }
 
     public String getRotuloClassificado() {
-        return this.rotuloVerdadeiro;
+        return this.rotuloClassificado;
     }
 
     public void setRotuloClassificado(String rotuloClassificado) {
         this.rotuloClassificado = rotuloClassificado;
+    }
+
+    public double[] getPonto() {
+        return ponto;
+    }
+
+    public void setPonto(double[] ponto) {
+        this.ponto = ponto;
+    }
+
+    public boolean isDesconhecido() {
+        return desconhecido;
+    }
+
+    public void setDesconhecido() {
+        this.desconhecido = true;
     }
 
     public double getPontoPorPosicao(int i) {

@@ -4,6 +4,7 @@ import FuzzyProject.FuzzyDT.Utils.ConverteArquivos;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.SPFMiC;
+import FuzzyProject.FuzzyND.Models.TipicidadeMaxima;
 import FuzzyProject.FuzzyND.Utils.MedidasDeDistancia;
 
 import java.util.*;
@@ -19,11 +20,13 @@ public class ComiteArvores {
     public double m;
     public double n;
     public int K;
-    public double todasTipMax = 0;
+//    public double todasTipMax = 0;
+    public TipicidadeMaxima todasTipMax;
     public double adaptadorTheta = 0;
     public List<String> atributos = new ArrayList<>();
     public List<DecisionTree> modelos = new ArrayList<>();
     public List<String> rotulosConhecidos = new ArrayList<>();
+    public List<String> rotulosSPFMiCs = new ArrayList<>();
     public List<Integer> numeroClassificadores = new ArrayList<>();
     public Map<String, Integer> hashmapRotulos = new HashMap<>(); //para converter String para Integer
 
@@ -60,8 +63,9 @@ public class ComiteArvores {
             dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
+            dt.rotulos = rMA.rotulos.get(i);
             fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
-            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta);
+            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
             ma.apagaArqsTemporarios(dataset + i, caminho);
             this.modelos.add(dt);
         }
@@ -114,9 +118,17 @@ public class ComiteArvores {
                 v.add(exemplo[i]);
             }
 
+            String votoMaisNovo = "";
+            int tempoMaisNovo = 0;
+            List<String> votos = new ArrayList<>();
             for (int i = 0; i < modelos.size(); i++) {
                 String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(i), v);
                 numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+                votos.add(rotuloVotado);
+                if(modelos.get(i).t > tempoMaisNovo) {
+                    tempoMaisNovo = modelos.get(i).t;
+                    votoMaisNovo = rotuloVotado;
+                }
             }
 
             int valorMaior = -1;
@@ -131,7 +143,25 @@ public class ComiteArvores {
                     indiceMaior = rotulo;
                 }
             }
-            System.out.println(teste);
+
+//            System.out.println(teste);
+            if(valorMaior == this.modelos.size()) {
+                return indiceMaior;
+            } else {
+                int contadorClasseDesconhecida = 0;
+                int contadorMesmoVotoQueMaisNovo = 0;
+                for(int i=0; i<modelos.size(); i++) {
+                    if(votos.get(i) != votoMaisNovo) {
+                        contadorClasseDesconhecida++;
+                    } else {
+                        contadorMesmoVotoQueMaisNovo++;
+                    }
+
+                    if(contadorClasseDesconhecida == (this.modelos.size() - contadorMesmoVotoQueMaisNovo)) {
+                        return votoMaisNovo;
+                    }
+                }
+            }
             return indiceMaior;
         }
     }
@@ -244,8 +274,9 @@ public class ComiteArvores {
         dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + resultadoMA.numClassificadores + ".txt");
         dt.numAtributos = this.numAtributos;
         dt.atributos = this.atributos;
+        dt.rotulos = resultadoMA.rotulos.get(0);
         fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta);
+        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
         ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
         this.modelos.add(dt);
         dt.elementosPorRegraKMeans.clear();
@@ -293,10 +324,12 @@ public class ComiteArvores {
         }
 
         Double maxVal = Collections.max(tipicidades);
-        if(maxVal >= (this.todasTipMax - this.adaptadorTheta)) {
+        double limiar = (this.todasTipMax.getValorMedio() - this.adaptadorTheta);
+        if(maxVal >= limiar) {
+            this.todasTipMax.addValorTipicidade(maxVal);
             return false;
         }
-
+//        System.err.println("Tipicidade max: " + maxVal);
         return true;
     }
 
