@@ -3,6 +3,7 @@ package FuzzyProject.FuzzyDT.Models;
 import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.SFMiC;
+import FuzzyProject.FuzzyND.Models.SPFMiC;
 import weka.core.FastVector;
 import weka.core.Instances;
 
@@ -20,6 +21,7 @@ public class DecisionTree {
     public String caminho;
     public String dataset;
     public int numClassificador;
+    public int t;
     public String taxaPoda;
     public String arvoreJ48;
     public String[][] particao;
@@ -31,14 +33,16 @@ public class DecisionTree {
     public List<ArrayList<Vector>> elementosPorRegraKMeans;
     public List<ArrayList<Exemplo>> elementosPorRegraFuzzyCMeans;
     public List<List<MicroGrupo>> microGruposPorRegra;
-    public List<List<SFMiC>> sfMicPorRegra;
+    public List<List<SPFMiC>> sfMicPorRegra;
+    public List<String> rotulosDasRegras;
 
-    public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda) {
+    public DecisionTree(String caminho, String dataset, int numClassificador, String taxaPoda, int tempo) {
         this.caminho = caminho;
         this.dataset = dataset;
         this.numClassificador = numClassificador;
         this.taxaPoda = taxaPoda;
         this.inicializada = 0;
+        this.t = tempo;
     }
 
     public void inicializaValores() {
@@ -48,11 +52,12 @@ public class DecisionTree {
         this.numRegrasAD = mA.getNumRegrasAD(this.caminho + "RegrasFC45-" + this.dataset + numClassificador + this.taxaPoda + ".txt");
         this.elementosPorRegraKMeans = new ArrayList<ArrayList<Vector>>();
         this.elementosPorRegraFuzzyCMeans = new ArrayList<ArrayList<Exemplo>>();
+        this.rotulosDasRegras = new ArrayList<>();
         this.microGruposPorRegra = new ArrayList<List<MicroGrupo>>();
-        this.sfMicPorRegra = new ArrayList<List<SFMiC>>();
+        this.sfMicPorRegra = new ArrayList<List<SPFMiC>>();
         for(int i=0; i<=numRegrasAD; i++) {
             this.microGruposPorRegra.add(new ArrayList<MicroGrupo>());
-            this.sfMicPorRegra.add(new ArrayList<SFMiC>());
+            this.sfMicPorRegra.add(new ArrayList<SPFMiC>());
             this.elementosPorRegraKMeans.add(new ArrayList<Vector>());
             this.elementosPorRegraFuzzyCMeans.add(new ArrayList<Exemplo>());
         }

@@ -24,7 +24,7 @@ public class SPFMiC {
         this.theta = theta;
         this.Mm = 1;
         this.Tn = 1;
-        this.SSDe = 1; //TODO: verificar como inicializa essa variável
+        this.SSDe = 0;
         this.t = 0;
         this.rotulo = "Teste";
     }
@@ -135,10 +135,10 @@ public class SPFMiC {
     /***
      * Function used to calculate an attribute used in the typicality function
      */
-    public double calculaTipicidade(Exemplo exemplo, double n, double K) {
+    public double calculaTipicidade(double[] exemplo, double n, double K) {
         double tipicidadeI = this.getTipicidadeI(K);
         return (1 /
-                (1 + Math.pow(((this.theta/tipicidadeI) * MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo.getPoint(), this.centroide)),
+                (1 + Math.pow(((this.theta/tipicidadeI) * MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, this.centroide)),
                         (1/(n-1))
                 )
                 ));
@@ -149,5 +149,9 @@ public class SPFMiC {
      */
     private double getTipicidadeI(double K) {
         return  K * (this.SSDe / this.Mm);
+    }
+
+    public double getDispersao() {
+        return Math.sqrt((this.SSDe/this.N));
     }
 }
