@@ -1,5 +1,6 @@
 package FuzzyProject.FuzzyND.Utils;
 
+import FuzzyProject.FuzzyND.Models.Avaliacao.AcuraciaMedidas;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MedidasClassicas;
 
@@ -19,7 +20,14 @@ public class Avaliacao {
         return md;
     }
 
-    public static void  calculaMedidasFariaEtAl(List<Exemplo> exemplos) {
+    public static void  calculaMedidasFariaEtAl(List<Exemplo> exemplos, int nPoints) {
+        for(int i=0; i<exemplos.size(); i++) {
 
+        }
+    }
+
+    public static AcuraciaMedidas calculaAcuracia(int numAcertos, int numTotalExemplos, int indice) {
+        AcuraciaMedidas acuraciaMedidas = new AcuraciaMedidas(indice, (Double.parseDouble(String.valueOf(numAcertos))/numTotalExemplos)*100);
+        return acuraciaMedidas;
     }
 }

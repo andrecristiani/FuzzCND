@@ -1,5 +1,6 @@
 package FuzzyProject.FuzzyND.Utils;
 
+import FuzzyProject.FuzzyND.Models.Avaliacao.AcuraciaMedidas;
 import FuzzyProject.FuzzyND.Models.MedidasClassicas;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartFactory;
@@ -11,6 +12,7 @@ import org.jfree.ui.ApplicationFrame;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import java.awt.*;
 import java.util.List;
 
 public class LineChart_AWT extends ApplicationFrame {
@@ -36,6 +38,24 @@ public class LineChart_AWT extends ApplicationFrame {
                 PlotOrientation.VERTICAL,
                 true,true,false);
 
+        ChartPanel chartPanel = new ChartPanel( lineChart );
+        chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
+        setContentPane( chartPanel );
+    }
+
+    public LineChart_AWT(String applicationTitle , String chartTitle, List<List<AcuraciaMedidas>> acuracias, List<String> rotuloClassificadores) {
+        super(applicationTitle);
+        XYDataset dataset;
+        dataset = createDatasetAcuracia(acuracias, rotuloClassificadores);
+        String label = "Acurácia";
+        JFreeChart lineChart = ChartFactory.createXYLineChart(
+                "",
+                "Momentos de avaliação (em milhares)",label,
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,true,false);
+
+//        lineChart.setBackgroundPaint(Color.white);
         ChartPanel chartPanel = new ChartPanel( lineChart );
         chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
         setContentPane( chartPanel );
@@ -92,6 +112,25 @@ public class LineChart_AWT extends ApplicationFrame {
             series.add(Double.parseDouble(Integer.toString(medidasClassicas.get(i).getIndice())), medidasClassicas.get(i).getMnew());
         }
         dataset.addSeries(series);
+        return dataset;
+    }
+
+    private XYDataset createDatasetAcuracia(List<List<AcuraciaMedidas>> acuracias, List<String> rotuloClassificadores) {
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        XYSeries series1 = new XYSeries(rotuloClassificadores.get(0));
+        XYSeries series2 = new XYSeries(rotuloClassificadores.get(1));
+        XYSeries series3 = new XYSeries(rotuloClassificadores.get(2));
+        XYSeries series4 = new XYSeries(rotuloClassificadores.get(3));
+        for(int i=0; i<acuracias.get(0).size(); i++) {
+            series1.add(Double.parseDouble(Integer.toString(acuracias.get(0).get(i).getPonto())), acuracias.get(0).get(i).getAcuracia());
+            series2.add(Double.parseDouble(Integer.toString(acuracias.get(1).get(i).getPonto())), acuracias.get(1).get(i).getAcuracia());
+            series3.add(Double.parseDouble(Integer.toString(acuracias.get(2).get(i).getPonto())), acuracias.get(2).get(i).getAcuracia());
+            series4.add(Double.parseDouble(Integer.toString(acuracias.get(3).get(i).getPonto())), acuracias.get(3).get(i).getAcuracia());
+        }
+        dataset.addSeries(series1);
+        dataset.addSeries(series2);
+        dataset.addSeries(series3);
+        dataset.addSeries(series4);
         return dataset;
     }
 }

@@ -20,7 +20,6 @@ public class ComiteArvores {
     public double m;
     public double n;
     public int K;
-//    public double todasTipMax = 0;
     public TipicidadeMaxima todasTipMax;
     public double adaptadorTheta = 0;
     public List<String> atributos = new ArrayList<>();
@@ -109,8 +108,10 @@ public class ComiteArvores {
             return "desconhecido";
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
+            List<String> rotulos = new ArrayList<String>();
             for (int i = 0; i < rotulosConhecidos.size(); i++) {
-                numeroVotos.put(rotulosConhecidos.get(i), 0);
+                numeroVotos.put(String.valueOf(i), 0);
+                rotulos.add(String.valueOf(i));
             }
 
             Vector v = new Vector<>();
@@ -118,11 +119,17 @@ public class ComiteArvores {
                 v.add(exemplo[i]);
             }
 
+            if(this.modelos.size() == 1) {
+                return fdt.classificaExemploSemGruposNosFolhas(modelos.get(0), v);
+            }
+
             String votoMaisNovo = "";
             int tempoMaisNovo = 0;
             List<String> votos = new ArrayList<>();
             for (int i = 0; i < modelos.size(); i++) {
                 String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(i), v);
+//                int t = this.hashmapRotulos.get(rotuloVotado);
+//                int novoValor = numeroVotos.get(rotuloVotado) + 1;
                 numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
                 votos.add(rotuloVotado);
                 if(modelos.get(i).t > tempoMaisNovo) {
@@ -136,15 +143,13 @@ public class ComiteArvores {
 
             String teste = "";
             for(int i=0; i<numeroVotos.size(); i++) {
-                String rotulo = rotulosConhecidos.get(i);
-                teste += "Rótulo: " + rotulo + " qtd: " + numeroVotos.get(rotulo) + " |---| ";
+                String rotulo = rotulos.get(i);
                 if(valorMaior < numeroVotos.get(rotulo)) {
                     valorMaior = numeroVotos.get(rotulo);
                     indiceMaior = rotulo;
                 }
             }
 
-//            System.out.println(teste);
             if(valorMaior == this.modelos.size()) {
                 return indiceMaior;
             } else {
@@ -266,20 +271,24 @@ public class ComiteArvores {
 
     public void treinaNovaArvoreFuzzyCMeans(List<Exemplo> exemplosRotulados, int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
 
-        if(this.modelos.size() >= tamanhoMaximo) {
-            this.removeClassificadorComMenorDesempenho(exemplosRotulados);
+        try {
+            ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
+            dt.numObjetos = ma.getNumExemplos(this.caminho + this.dataset + resultadoMA.numClassificadores + ".txt");
+            dt.numAtributos = this.numAtributos;
+            dt.atributos = this.atributos;
+            dt.rotulos = resultadoMA.rotulos.get(0);
+            fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
+            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset + resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
+            ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
+            if(this.modelos.size() >= tamanhoMaximo) {
+                this.removeClassificadorComMenorDesempenho(exemplosRotulados);
+            }
+            this.modelos.add(dt);
+            dt.elementosPorRegraKMeans.clear();
+        } catch (Exception e) {
+            System.err.println("Impossível treinar árvore com apenas uma classe");
         }
-        ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
-        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
-        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + resultadoMA.numClassificadores + ".txt");
-        dt.numAtributos = this.numAtributos;
-        dt.atributos = this.atributos;
-        dt.rotulos = resultadoMA.rotulos.get(0);
-        fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
-        ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
-        this.modelos.add(dt);
-        dt.elementosPorRegraKMeans.clear();
     }
 
     public boolean calculaFoutlierKmeans(double[] exemplo) {

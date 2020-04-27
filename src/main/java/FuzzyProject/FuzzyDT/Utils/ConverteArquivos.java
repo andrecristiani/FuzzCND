@@ -184,7 +184,7 @@ public class ConverteArquivos {
         if(numExemplos % tChunk == 0) {
             numClassificadores = numExemplos/tChunk;
         } else {
-            numClassificadores = (int) Math.round((double)numExemplos/tChunk);
+            numClassificadores = (int) Math.ceil((double)numExemplos/tChunk);
         }
 
         ResultadoMA rMa = new ResultadoMA(numClassificadores);
@@ -251,12 +251,10 @@ public class ConverteArquivos {
 
                     String classesConcatenadas = new String();
                     classesConcatenadas = classes.get(0).replace(" ","");
+                    comite.rotulosConhecidos.addAll(classes);
+                    rMa.rotulos.get(countClassificadores).addAll(classes);
                     for(int j=1; j<classes.size(); j++) {
                         String classe = classes.get(j).replace(" ", "");
-                        if(!comite.rotulosConhecidos.contains(classe)) {
-                            comite.rotulosConhecidos.add(classe);
-                        }
-                        rMa.rotulos.get(countClassificadores).add(classe);
                         classesConcatenadas = classesConcatenadas + " " + classe;
                     }
 
@@ -349,6 +347,9 @@ public class ConverteArquivos {
             String classe = classes.get(j).replace(" ", "");
             if(!comite.rotulosConhecidos.contains(classe)) {
                 comite.rotulosConhecidos.add(classe);
+            }
+            if(!comite.hashmapRotulos.containsKey(classe)) {
+                comite.hashmapRotulos.put(classe,comite.hashmapRotulos.size());
             }
             resultadoMA.rotulos.get(0).add(classe);
             classesConcatenadas = classesConcatenadas + " " + classe;

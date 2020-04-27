@@ -2,7 +2,6 @@ package FuzzyProject;
 
 import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
-import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.FaseOffline;
 import FuzzyProject.FuzzyND.FaseOnline;
 
@@ -27,11 +26,28 @@ public class FuzzyDecisionTree {
         double todasTipMax = 0.95;
         double adaptadorTheta = 0.26;
 
-        FaseOffline faseOffline = new FaseOffline();
-        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans(dataset, caminho, taxaPoda, numCjtos, tComite, tChunk, K, 2, alpha, betha);
+        //MOA
+//        FaseOffline faseOffline = new FaseOffline();
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("moa", caminho, taxaPoda, 6, 6, 2000, 12, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/moa/", "moa", comite, 50, 40, 0.1, 0.95, 0.26);
 
+//        RBF
+        FaseOffline faseOffline = new FaseOffline();
+        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("rbf", current + "/rbf/", taxaPoda, 6, 6, 2000, 12, 2, 1, 1);
         FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
-        faseOnline.inicializarFuzzyCMeans(caminho, dataset, comite, tDesconhecidos, 40, phi, todasTipMax, adaptadorTheta);
+        faseOnline.inicializarFuzzyCMeans(current + "/rbf/", "rbf", comite, 50, 40, 0.2, 0.72, 0.04);
+
+//        FaseOffline faseOffline = new FaseOffline();
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("rbf", current + "/rbf/", taxaPoda, 3, 6, 2000, 12, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/rbf/", "rbf", comite, 50, 40, 0.1, 0.90, 0.05);
+
+        //forest
+//        FaseOffline faseOffline = new FaseOffline();
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("forest", current + "/forest/", taxaPoda, 3, 6, 2000, 12, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/forest/", "forest", comite, 50, 40, 0.1, 0.90, 0.05);
     }
 }
 
