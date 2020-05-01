@@ -58,7 +58,7 @@ public class ComiteArvores {
     public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
         ResultadoMA rMA = ca.main(this.dataset, this, tChunk);
         for(int i=0; i< rMA.numClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, tempo);
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, i);
             dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
             dt.numAtributos = this.numAtributos;
             dt.atributos = this.atributos;
@@ -338,7 +338,6 @@ public class ComiteArvores {
             this.todasTipMax.addValorTipicidade(maxVal);
             return false;
         }
-//        System.err.println("Tipicidade max: " + maxVal);
         return true;
     }
 

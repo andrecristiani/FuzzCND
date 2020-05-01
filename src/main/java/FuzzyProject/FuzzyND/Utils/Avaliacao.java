@@ -30,4 +30,8 @@ public class Avaliacao {
         AcuraciaMedidas acuraciaMedidas = new AcuraciaMedidas(indice, (Double.parseDouble(String.valueOf(numAcertos))/numTotalExemplos)*100);
         return acuraciaMedidas;
     }
+
+    public static double calculaUnkR(int C, int unkRi, int exCi) {
+        return (1/(double)C) * ((double) unkRi/exCi);
+    }
 }

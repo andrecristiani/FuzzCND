@@ -182,9 +182,9 @@ public class FaseOnline {
             int desconhecido = 0;
             int kCurto = 4;
             for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
-//                if(i==2052) {
-//                    System.out.println("U");
-//                }
+                if(i==45003) {
+                    System.out.println("U");
+                }
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
                 String rotulo = comite.classificaExemploAgrupamentoExternoFuzzyCMeans(exemplo.getPoint());

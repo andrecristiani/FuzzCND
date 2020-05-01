@@ -17,7 +17,7 @@ import java.util.List;
 public class J48Test {
 
     public static void main(String[] args) throws Exception {
-        String dataset = "rbf";
+        String dataset = "forest";
         String caminho = "";
         String current = (new File(".")).getCanonicalPath();
         caminho = current + "/datasets-j48/" + dataset + "/";

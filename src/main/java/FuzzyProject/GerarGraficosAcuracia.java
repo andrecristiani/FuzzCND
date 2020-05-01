@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GerarGraficosAcuracia {
     public static void main(String[] args) throws IOException {
-        String dataset = "rbf";
+        String dataset = "forest";
         String current = (new File(".")).getCanonicalPath();
         String caminho = current + "/datasets-j48/" + dataset + "/"+ dataset + "-meu-predctions.txt";
         String caminho2 = current + "/datasets-j48/" + dataset + "/"+ dataset + "-vfdt-predctions.txt";
@@ -26,22 +26,25 @@ public class GerarGraficosAcuracia {
 //        int numAnalises = 90;
 
         //rbf
-        int numAnalises = 47;
+//        int numAnalises = 47;
+
+        //forest
+        int numAnalises = 570;
         List<AcuraciaMedidas> acuraciaMeu = ManipulaArquivos.carregaAcuracias(caminho, numAnalises);
         acuraciasDosClassificadores.add(acuraciaMeu);
-        rotuloAlgoritmo.add("Meu");
+        rotuloAlgoritmo.add("Our proposal");
 
         List<AcuraciaMedidas> acuraciaVFDT = ManipulaArquivos.carregaAcuracias(caminho2, numAnalises);
         acuraciasDosClassificadores.add(acuraciaVFDT);
-        rotuloAlgoritmo.add("Hoeffding Adaptive Tree");
+        rotuloAlgoritmo.add("HAT");
+
+        List<AcuraciaMedidas> acuraciaEnsembleJ48 = ManipulaArquivos.carregaAcuracias(caminho4, numAnalises);
+        acuraciasDosClassificadores.add(acuraciaEnsembleJ48);
+        rotuloAlgoritmo.add("ADTE");
 
         List<AcuraciaMedidas> acuraciaJ48 = ManipulaArquivos.carregaAcuracias(caminho3, numAnalises);
         acuraciasDosClassificadores.add(acuraciaJ48);
         rotuloAlgoritmo.add("C4.5");
-
-        List<AcuraciaMedidas> acuraciaEnsembleJ48 = ManipulaArquivos.carregaAcuracias(caminho4, numAnalises);
-        acuraciasDosClassificadores.add(acuraciaEnsembleJ48);
-        rotuloAlgoritmo.add("Ensemble de árvores C4.5");
 
         LineChart_AWT chart = new LineChart_AWT(
         "" ,

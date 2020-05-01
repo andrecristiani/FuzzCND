@@ -5,6 +5,12 @@ import FuzzyProject.FuzzyND.Models.MedidasClassicas;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -47,15 +53,45 @@ public class LineChart_AWT extends ApplicationFrame {
         super(applicationTitle);
         XYDataset dataset;
         dataset = createDatasetAcuracia(acuracias, rotuloClassificadores);
-        String label = "Acurácia";
+        String label = "Accuracy";
         JFreeChart lineChart = ChartFactory.createXYLineChart(
                 "",
-                "Momentos de avaliação (em milhares)",label,
+                "Evaluation moments",label,
                 dataset,
                 PlotOrientation.VERTICAL,
                 true,true,false);
 
-//        lineChart.setBackgroundPaint(Color.white);
+
+        XYPlot xyplot = (XYPlot) lineChart.getPlot();
+
+        ValueAxis rangeAxis = xyplot.getRangeAxis();
+        rangeAxis.setRange(0.0, 100);
+
+//        final NumberAxis rangeAxis2 = (NumberAxis) xyplot.getRangeAxis();
+//        rangeAxis2.setTickUnit(new NumberTickUnit(10));
+//
+//        final NumberAxis domainAxis = (NumberAxis) xyplot.getDomainAxis();
+//        //domainAxis.setTickUnit(new NumberTickUnit(100));
+//        domainAxis.setTickUnit(new NumberTickUnit(5));
+
+//        final XYPlot plot = lineChart.getXYPlot();
+//        ValueMarker marker;
+//        marker = new ValueMarker(10000);
+//        marker.setPaint(Color.gray);
+//        marker.setStroke(new BasicStroke(1.0f));
+//        plot.addDomainMarker(marker);
+
+
+        xyplot.setBackgroundPaint(Color.white);
+        xyplot.setDomainGridlinePaint(Color.white);
+        xyplot.setRangeGridlinePaint(Color.white);
+
+        XYItemRenderer r = xyplot.getRenderer();
+        r.setSeriesStroke(0, new BasicStroke(3.0f));
+        r.setSeriesStroke(1, new BasicStroke(3.0f ));
+        r.setSeriesStroke(2, new BasicStroke(3.0f ));
+        r.setSeriesStroke(3, new BasicStroke(3.0f ));
+
         ChartPanel chartPanel = new ChartPanel( lineChart );
         chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
         setContentPane( chartPanel );
@@ -122,10 +158,10 @@ public class LineChart_AWT extends ApplicationFrame {
         XYSeries series3 = new XYSeries(rotuloClassificadores.get(2));
         XYSeries series4 = new XYSeries(rotuloClassificadores.get(3));
         for(int i=0; i<acuracias.get(0).size(); i++) {
-            series1.add(Double.parseDouble(Integer.toString(acuracias.get(0).get(i).getPonto())), acuracias.get(0).get(i).getAcuracia());
-            series2.add(Double.parseDouble(Integer.toString(acuracias.get(1).get(i).getPonto())), acuracias.get(1).get(i).getAcuracia());
-            series3.add(Double.parseDouble(Integer.toString(acuracias.get(2).get(i).getPonto())), acuracias.get(2).get(i).getAcuracia());
-            series4.add(Double.parseDouble(Integer.toString(acuracias.get(3).get(i).getPonto())), acuracias.get(3).get(i).getAcuracia());
+            series1.add(Double.parseDouble(Integer.toString(acuracias.get(0).get(i).getPonto()/1000)), acuracias.get(0).get(i).getAcuracia());
+            series2.add(Double.parseDouble(Integer.toString(acuracias.get(1).get(i).getPonto()/1000)), acuracias.get(1).get(i).getAcuracia());
+            series3.add(Double.parseDouble(Integer.toString(acuracias.get(2).get(i).getPonto()/1000)), acuracias.get(2).get(i).getAcuracia());
+            series4.add(Double.parseDouble(Integer.toString(acuracias.get(3).get(i).getPonto()/1000)), acuracias.get(3).get(i).getAcuracia());
         }
         dataset.addSeries(series1);
         dataset.addSeries(series2);
