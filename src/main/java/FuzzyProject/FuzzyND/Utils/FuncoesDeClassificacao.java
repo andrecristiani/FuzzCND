@@ -41,7 +41,13 @@ public class FuncoesDeClassificacao {
                     }
                 }
             }
-            sfMiC.setSSDe(SSD);
+            if(sfMiC != null) {
+                if(sfMiC.getN() > 1) {
+                    sfMiC.setSSDe(SSD);
+                }
+            } else {
+                sfMiC = new SPFMiC();
+            }
             sfMiCS.add(sfMiC);
         }
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GerarGraficosLatencia {
     public static void main(String[] args) throws IOException {
-        String dataset = "rbf";
+        String dataset = "forest";
         String current = (new File(".")).getCanonicalPath();
         String caminho = current + "/Experimentos/Latencias/" + dataset + "/" + dataset + "-lat100.txt";
         String caminho2 = current + "/Experimentos/Latencias/" + dataset + "/" + dataset + "-lat1000.txt";
@@ -27,10 +27,10 @@ public class GerarGraficosLatencia {
 //        int numAnalises = 90;
 
         //rbf
-        int numAnalises = 47;
+//        int numAnalises = 47;
 
         //forest
-//        int numAnalises = 570;
+        int numAnalises = 570;
         List<AcuraciaMedidas> acuracia100 = ManipulaArquivos.carregaAcuracias(caminho, numAnalises);
         acuraciasDosClassificadores.add(acuracia100);
         rotuloAlgoritmo.add("100");

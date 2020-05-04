@@ -104,12 +104,12 @@ public class ComiteArvores {
     }
 
     public String classificaExemploAgrupamentoExternoFuzzyCMeans(double[] exemplo) {
-        if(this.calculaFoutlierPelaTipicidade(exemplo)) {
+        if(this.calculaFoutlierPelaDispersao(exemplo)) {
             return "desconhecido";
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
             List<String> rotulos = new ArrayList<String>();
-            for (int i = 0; i < rotulosConhecidos.size(); i++) {
+            for (int i = 0; i < hashmapRotulos.size(); i++) {
                 numeroVotos.put(String.valueOf(i), 0);
                 rotulos.add(String.valueOf(i));
             }
@@ -337,6 +337,17 @@ public class ComiteArvores {
         if(maxVal >= limiar) {
             this.todasTipMax.addValorTipicidade(maxVal);
             return false;
+        }
+        return true;
+    }
+
+    public boolean calculaFoutlierPelaDispersao(double[] exemplo) {
+        List<SPFMiC> todosSFMiCs = this.getTodosSFMiCs();
+        for(int i=0; i<todosSFMiCs.size(); i++) {
+            double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, todosSFMiCs.get(i).getCentroide());
+            if(distancia <= todosSFMiCs.get(i).getDispersao()) {
+                return false;
+            }
         }
         return true;
     }

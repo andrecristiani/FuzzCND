@@ -14,6 +14,7 @@ public class SPFMiC {
     private double centroide[];
     private double alpha;
     private double theta;
+    private boolean isNull;
 
     public SPFMiC(double[] centroide, int N, double alpha, double theta) {
         this.CF1pertinencias = centroide;
@@ -27,6 +28,10 @@ public class SPFMiC {
         this.SSDe = 0;
         this.t = 0;
         this.rotulo = "Teste";
+    }
+
+    public SPFMiC() {
+        this.isNull = true;
     }
 
     public double getLSm() {
@@ -99,6 +104,46 @@ public class SPFMiC {
 
     public void setCentroide(double[] centroide) {
         this.centroide = centroide;
+    }
+
+    public double getMm() {
+        return Mm;
+    }
+
+    public void setMm(double mm) {
+        Mm = mm;
+    }
+
+    public double getTn() {
+        return Tn;
+    }
+
+    public void setTn(double tn) {
+        Tn = tn;
+    }
+
+    public double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
+    }
+
+    public double getTheta() {
+        return theta;
+    }
+
+    public void setTheta(double theta) {
+        this.theta = theta;
+    }
+
+    public boolean isNull() {
+        return isNull;
+    }
+
+    public void setNull(boolean aNull) {
+        isNull = aNull;
     }
 
     /***

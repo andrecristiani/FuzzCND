@@ -387,23 +387,25 @@ public class FaseOnline {
         List<Double> frs = new ArrayList<>();
 
         for(int i=0; i<sfMiCS.size(); i++) {
-            frs.clear();
-            for(int j=0; j<sfmicsConhecidos.size(); j++) {
-                double di = sfmicsConhecidos.get(j).getDispersao();
-                double dj = sfMiCS.get(i).getDispersao();
-                double dist = (di + dj) / MedidasDeDistancia.calculaDistanciaEuclidiana(sfmicsConhecidos.get(j).getCentroide(), sfMiCS.get(i).getCentroide());
-                frs.add((di + dj) / dist);
-            }
+            if(!sfMiCS.get(i).isNull()) {
+                frs.clear();
+                for (int j = 0; j < sfmicsConhecidos.size(); j++) {
+                    double di = sfmicsConhecidos.get(j).getDispersao();
+                    double dj = sfMiCS.get(i).getDispersao();
+                    double dist = (di + dj) / MedidasDeDistancia.calculaDistanciaEuclidiana(sfmicsConhecidos.get(j).getCentroide(), sfMiCS.get(i).getCentroide());
+                    frs.add((di + dj) / dist);
+                }
 
-            Double maxVal = Collections.min(frs);
-            int indexMax = frs.indexOf(maxVal);
-            System.err.println("MaxVal: " + maxVal);
-            if(maxVal > phi) {
-                sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
-            } else {
-                sfMiCS.get(i).setRotulo("Novidade");
+                Double maxVal = Collections.min(frs);
+                int indexMax = frs.indexOf(maxVal);
+//                System.err.println("MaxVal: " + maxVal);
+                if (maxVal > phi) {
+                    sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
+                } else {
+                    sfMiCS.get(i).setRotulo("Novidade");
+                }
+//                System.err.println("Novidade: " + sfMiCS.get(i).getRotulo());
             }
-            System.err.println("Novidade: " + sfMiCS.get(i).getRotulo());
         }
 
         for(int i=0; i<listaDesconhecidos.size(); i++) {
