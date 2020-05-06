@@ -2352,7 +2352,6 @@ public class ManipulaArquivos {
                 int a;
                 int numTermos;
                 for(a = 0; a < nVE; ++a) {
-//                    int numTermos = false;
                     if (a == nVE - 1) {
                         numTermos = 0;
                     } else {
@@ -2414,7 +2413,7 @@ public class ManipulaArquivos {
                     }
                     StringTokenizer str = new StringTokenizer(line);
                     linha = "@ATTRIBUTE " + str.nextToken() + "\t{";
-                    if (!line.contains("double") && !line.contains("float") && !line.contains("real") && !line.contains("integer")) {
+                    if (!line.contains("double") && !line.contains("float") && !line.contains("real") && !line.contains("integer") && !line.contains("numeric")) {
                         while(str.hasMoreTokens()) {
                             linha = linha + str.nextToken();
                             if (str.hasMoreTokens()) {

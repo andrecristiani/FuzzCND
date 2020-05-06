@@ -273,37 +273,6 @@ public class ConverteArquivos {
             System.exit(1);
         }
 
-        str = null;
-
-//        try {
-//            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".names");
-//            buf_writer = new BufferedWriter(writer);
-//
-//            for(i = 0; i < numAtribs - 1; ++i) {
-//                if(atribs[i][0].compareTo("Class") == 0 && numAtributos) {
-//                    String aux = "";
-//                    for (int k=0; k<classesDivididas.size(); k++) {
-//                        String classe = classesDivididas.get(k).replace(" ", "");
-//                        aux = aux + classe;
-//                        if(k < classesDivididas.size()-1) {
-//                            aux = aux + " ";
-//                        }
-//                    }
-//                    temp = atribs[i][0] + " " + aux;
-//                    buf_writer.write(temp);
-//                    buf_writer.newLine();
-//                } else {
-//                    temp = atribs[i][0] + " " + atribs[i][1];
-//                    buf_writer.write(temp);
-//                    buf_writer.newLine();
-//                }
-//            }
-//
-//            buf_writer.close();
-//        } catch (IOException var24) {
-//            System.err.println(var24);
-//            System.exit(1);
-//        }
         return rMa;
     }
 

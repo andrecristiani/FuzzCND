@@ -96,7 +96,7 @@ public class Particoes {
 
         for(int a = 0; a < numVarEntrada; ++a) {
             int b;
-            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0) {
+            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0 && metaDados[a][1].compareTo("numeric") != 0) {
                 for(b = 0; metaDados[a][b] != null; ++b) {
                 }
 
@@ -229,7 +229,7 @@ public class Particoes {
 
         for(int a = 0; a < numVarEntrada; ++a) {
             int b;
-            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0) {
+            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0 && metaDados[a][1].compareTo("numeric") != 0) {
                 for(b = 0; metaDados[a][b] != null; ++b) {
                 }
 
@@ -309,7 +309,7 @@ public class Particoes {
 
         for(int a = 0; a < numVarEntrada; ++a) {
             int b;
-            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0) {
+            if (metaDados[a][1].compareTo("real") != 0 && metaDados[a][1].compareTo("float") != 0 && metaDados[a][1].compareTo("double") != 0 && metaDados[a][1].compareTo("integer") != 0 && metaDados[a][1].compareTo("numeric") != 0) {
                 for(b = 0; metaDados[a][b] != null; ++b) {
                 }
 

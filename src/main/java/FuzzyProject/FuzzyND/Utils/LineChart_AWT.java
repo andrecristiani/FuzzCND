@@ -91,6 +91,7 @@ public class LineChart_AWT extends ApplicationFrame {
         r.setSeriesStroke(1, new BasicStroke(3.0f ));
         r.setSeriesStroke(2, new BasicStroke(3.0f ));
         r.setSeriesStroke(3, new BasicStroke(3.0f ));
+        r.setSeriesStroke(4, new BasicStroke(3.0f ));
 
         ChartPanel chartPanel = new ChartPanel( lineChart );
         chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
@@ -157,16 +158,19 @@ public class LineChart_AWT extends ApplicationFrame {
         XYSeries series2 = new XYSeries(rotuloClassificadores.get(1));
         XYSeries series3 = new XYSeries(rotuloClassificadores.get(2));
         XYSeries series4 = new XYSeries(rotuloClassificadores.get(3));
+        XYSeries series5 = new XYSeries(rotuloClassificadores.get(4));
         for(int i=0; i<acuracias.get(0).size(); i++) {
             series1.add(Double.parseDouble(Integer.toString(acuracias.get(0).get(i).getPonto()/1000)), acuracias.get(0).get(i).getAcuracia());
             series2.add(Double.parseDouble(Integer.toString(acuracias.get(1).get(i).getPonto()/1000)), acuracias.get(1).get(i).getAcuracia());
             series3.add(Double.parseDouble(Integer.toString(acuracias.get(2).get(i).getPonto()/1000)), acuracias.get(2).get(i).getAcuracia());
             series4.add(Double.parseDouble(Integer.toString(acuracias.get(3).get(i).getPonto()/1000)), acuracias.get(3).get(i).getAcuracia());
+            series5.add(Double.parseDouble(Integer.toString(acuracias.get(4).get(i).getPonto()/1000)), acuracias.get(4).get(i).getAcuracia());
         }
         dataset.addSeries(series1);
         dataset.addSeries(series2);
         dataset.addSeries(series3);
         dataset.addSeries(series4);
+        dataset.addSeries(series5);
         return dataset;
     }
 }

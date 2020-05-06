@@ -182,7 +182,7 @@ public class FaseOnline {
             int desconhecido = 0;
             int kCurto = 4;
             for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
-                if(i==45003) {
+                if(i==39000) {
                     System.out.println("U");
                 }
                 Instance ins = data.get(i);
@@ -398,13 +398,12 @@ public class FaseOnline {
 
                 Double maxVal = Collections.min(frs);
                 int indexMax = frs.indexOf(maxVal);
-//                System.err.println("MaxVal: " + maxVal);
                 if (maxVal > phi) {
                     sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
                 } else {
+                    System.err.println("MaxVal: " + maxVal);
                     sfMiCS.get(i).setRotulo("Novidade");
                 }
-//                System.err.println("Novidade: " + sfMiCS.get(i).getRotulo());
             }
         }
 
@@ -452,14 +451,15 @@ public class FaseOnline {
                     }
 
                     apj = apj / nExemplos;
-                    double bpj = Collections.min(dqj);
-                    double sj = (bpj - apj) / Math.max(apj, bpj);
-                    double[] maiorESegundaMeiorPertinencia = this.getMaiorESegundoMaiorPertinencia(matriz[j], j);
-                    double upj = maiorESegundaMeiorPertinencia[0];
-                    double uqj = maiorESegundaMeiorPertinencia[1];
-
-                    numerador += Math.pow((upj - uqj), this.alpha) * sj;
-                    denominador += Math.pow((upj - uqj), this.alpha);
+                    if(dqj.size() != 0) {
+                        double bpj = Collections.min(dqj);
+                        double sj = (bpj - apj) / Math.max(apj, bpj);
+                        double[] maiorESegundaMeiorPertinencia = this.getMaiorESegundoMaiorPertinencia(matriz[j], j);
+                        double upj = maiorESegundaMeiorPertinencia[0];
+                        double uqj = maiorESegundaMeiorPertinencia[1];
+                        numerador += Math.pow((upj - uqj), this.alpha) * sj;
+                        denominador += Math.pow((upj - uqj), this.alpha);
+                    }
                 }
             }
             double fs = numerador / denominador;

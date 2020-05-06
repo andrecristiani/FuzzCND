@@ -104,7 +104,7 @@ public class ComiteArvores {
     }
 
     public String classificaExemploAgrupamentoExternoFuzzyCMeans(double[] exemplo) {
-        if(this.calculaFoutlierPelaDispersao(exemplo)) {
+        if(this.calculaFoutlierPelaTipicidade(exemplo)) {
             return "desconhecido";
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
@@ -338,6 +338,7 @@ public class ComiteArvores {
             this.todasTipMax.addValorTipicidade(maxVal);
             return false;
         }
+//        System.err.println("Limiar: " + limiar + "      MaxVal: " + maxVal);
         return true;
     }
 
