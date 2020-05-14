@@ -11,6 +11,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -80,6 +81,56 @@ public class LineChart_AWT extends ApplicationFrame {
 //        marker.setPaint(Color.gray);
 //        marker.setStroke(new BasicStroke(1.0f));
 //        plot.addDomainMarker(marker);
+
+
+        xyplot.setBackgroundPaint(Color.white);
+        xyplot.setDomainGridlinePaint(Color.white);
+        xyplot.setRangeGridlinePaint(Color.white);
+
+        XYItemRenderer r = xyplot.getRenderer();
+        r.setSeriesStroke(0, new BasicStroke(3.0f));
+        r.setSeriesStroke(1, new BasicStroke(3.0f ));
+        r.setSeriesStroke(2, new BasicStroke(3.0f ));
+        r.setSeriesStroke(3, new BasicStroke(3.0f ));
+        r.setSeriesStroke(4, new BasicStroke(3.0f ));
+
+        ChartPanel chartPanel = new ChartPanel( lineChart );
+        chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
+        setContentPane( chartPanel );
+    }
+
+    public LineChart_AWT(String applicationTitle , List<List<Double>> unkR, List<String> rotuloClassificadores) {
+        super(applicationTitle);
+        XYDataset dataset;
+        dataset = createDataseUnkR(unkR, rotuloClassificadores);
+        String label = "UnkR";
+        JFreeChart lineChart = ChartFactory.createXYLineChart(
+                "",
+                "Evaluation moments",label,
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,true,false);
+
+
+        XYPlot xyplot = (XYPlot) lineChart.getPlot();
+
+        ValueAxis rangeAxis = xyplot.getRangeAxis();
+        rangeAxis.setRange(0.0, 40);
+
+        final NumberAxis rangeAxis2 = (NumberAxis) xyplot.getRangeAxis();
+        rangeAxis2.setTickUnit(new NumberTickUnit(10));
+
+        final NumberAxis domainAxis = (NumberAxis) xyplot.getDomainAxis();
+        domainAxis.setTickUnit(new NumberTickUnit(100));
+        domainAxis.setTickUnit(new NumberTickUnit(5));
+
+        final XYPlot plot = lineChart.getXYPlot();
+        ValueMarker marker;
+        //vertical
+        marker = new ValueMarker(25);
+        marker.setPaint(Color.gray);
+        marker.setStroke(new BasicStroke(1.0f));
+        plot.addDomainMarker(marker);
 
 
         xyplot.setBackgroundPaint(Color.white);
@@ -171,6 +222,23 @@ public class LineChart_AWT extends ApplicationFrame {
         dataset.addSeries(series3);
         dataset.addSeries(series4);
         dataset.addSeries(series5);
+        return dataset;
+    }
+
+    private XYDataset createDataseUnkR(List<List<Double>> acuracias, List<String> rotuloClassificadores) {
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        XYSeries series1 = new XYSeries(rotuloClassificadores.get(0));
+        XYSeries series2 = new XYSeries(rotuloClassificadores.get(1));
+        XYSeries series3 = new XYSeries(rotuloClassificadores.get(2));
+        for(int i=0; i<acuracias.get(0).size(); i++) {
+            double valor = acuracias.get(1).get(i)*100;
+            series1.add(i, acuracias.get(0).get(i));
+            series2.add(i, valor);
+            series3.add(i, acuracias.get(2).get(i));
+        }
+        dataset.addSeries(series1);
+        dataset.addSeries(series2);
+        dataset.addSeries(series3);
         return dataset;
     }
 }

@@ -34,7 +34,9 @@ public class FaseOnline {
     public List<Exemplo> exemplosEsperandoTempo = new ArrayList<>();
     public List<MedidasClassicas> desempenho = new ArrayList<>();
     public List<String> linhasMatriz = new ArrayList<>();
-    public List<String> colunasMatriz = new ArrayList<>();
+    public List<Double> listaUnkRate = new ArrayList<>();
+    public Map<String, Integer> unkRi = new HashMap<>(); //para converter String para Integer
+    public Map<String, Integer> exc = new HashMap<>(); //para converter String para Integer
     ModeloNS modeloNS;
     public int novidadesClassificadas;
     public int fp;
@@ -187,12 +189,25 @@ public class FaseOnline {
                 }
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
+                if(exemplo.getRotuloVerdadeiro().equals("17")) {
+                    System.out.println("U");
+                }
+                if(exc.containsKey(exemplo.getRotuloVerdadeiro())) {
+                    exc.replace(exemplo.getRotuloVerdadeiro(), exc.get(exemplo.getRotuloVerdadeiro()) + 1);
+                } else {
+
+                    exc.put(exemplo.getRotuloVerdadeiro(), 1);
+                }
                 String rotulo = comite.classificaExemploAgrupamentoExternoFuzzyCMeans(exemplo.getPoint());
 //                System.out.println("Rótulo verdadeiro: " + exemplo.getRotuloVerdadeiro());
 //                System.out.println("Rótulo votado: " + rotulo);
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
-                    exemplo.setDesconhecido();
+                    if(unkRi.containsKey(exemplo.getRotuloVerdadeiro())) {
+                        unkRi.replace(exemplo.getRotuloVerdadeiro(), unkRi.get(exemplo.getRotuloVerdadeiro()) + 1);
+                    } else {
+                        unkRi.put(exemplo.getRotuloVerdadeiro(),1);
+                    }
                     this.memTempDesconhecidos.add(exemplo);
                     if(this.memTempDesconhecidos.size() >= T) {
                         this.memTempDesconhecidos = this.detectaNovidadesBinarioFuzzyCMeans(this.memTempDesconhecidos, kCurto, comite, phi);
@@ -234,9 +249,13 @@ public class FaseOnline {
                 if(h == 1000) {
                     h=0;
                     MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
-                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
+                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe +"   ||   Desconhecidos: " + desconhecido);
                     desempenho.add(mc);
                     acuracias.add(Avaliacao.calculaAcuracia(acertos, exemplosClassificados, i));
+                    listaUnkRate.add(Avaliacao.calculaUnkR(this.unkRi, this.exc));
+                    unkRi.clear();
+                    exc.clear();
+                    desconhecido = 0;
                     fp = 0;
                     fn = 0;
                     fe = 0;
@@ -246,6 +265,7 @@ public class FaseOnline {
             }
             acuracias.add(Avaliacao.calculaAcuracia(acertos, exemplosClassificados, data.size()));
             ManipulaArquivos.salvaPredicoes(acuracias, dataset);
+            ManipulaArquivos.salvaUnkR(listaUnkRate, dataset);
             System.out.println("Acertou " + acertou + " exemplos");
             System.err.println("Errou " + feGlobal + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
@@ -398,10 +418,10 @@ public class FaseOnline {
 
                 Double maxVal = Collections.min(frs);
                 int indexMax = frs.indexOf(maxVal);
+//                System.err.println("maxVal: " + maxVal);
                 if (maxVal > phi) {
                     sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
                 } else {
-                    System.err.println("MaxVal: " + maxVal);
                     sfMiCS.get(i).setRotulo("Novidade");
                 }
             }

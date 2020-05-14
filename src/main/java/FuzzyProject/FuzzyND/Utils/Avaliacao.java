@@ -4,7 +4,9 @@ import FuzzyProject.FuzzyND.Models.Avaliacao.AcuraciaMedidas;
 import FuzzyProject.FuzzyND.Models.Exemplo;
 import FuzzyProject.FuzzyND.Models.MedidasClassicas;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Avaliacao {
 
@@ -31,7 +33,15 @@ public class Avaliacao {
         return acuraciaMedidas;
     }
 
-    public static double calculaUnkR(int C, int unkRi, int exCi) {
-        return (1/(double)C) * ((double) unkRi/exCi);
+    public static double calculaUnkR(Map<String, Integer> unki, Map<String, Integer> exci) {
+        List<String> rotulos = new ArrayList<>();
+        rotulos.addAll(unki.keySet());
+        double unkR = 0;
+        for(int i=0; i< unki.size(); i++) {
+            double unk = unki.get(rotulos.get(i));
+            double exc = exci.get(rotulos.get(i));
+            unkR += (unk/exc);
+        }
+        return (unkR/ exci.size()) * 100;
     }
 }

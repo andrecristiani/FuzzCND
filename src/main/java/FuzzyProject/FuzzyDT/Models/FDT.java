@@ -828,6 +828,9 @@ public class FDT {
                     Ki = 1;
                 }
 
+//                System.out.println("N exemplos: " + exemplos.size());
+//                System.out.println("Ki: " + Ki);
+
                 FuzzyKMeansClusterer fuzzyClusterer = new FuzzyKMeansClusterer(Ki, fuzzificacao);
                 fuzzyClusterer.cluster(exemplos);
                 List<SPFMiC> sfMiCS = this.separaExemplosPorGrupoClassificadoFuzzyCMeans(exemplos, fuzzyClusterer, fuzzificacao, dt.rotulosDasRegras.get(i), alpha, theta, comite);
@@ -885,18 +888,21 @@ public class FDT {
                                 centroides.get(j).getPoints().size(),
                                 alpha,
                                 theta);
-
                         sfMiC.setRotulo(rotulo);
+                        double valorPertinencia = matriz[k][j];
+                        sfMiC.addPointToMm(valorPertinencia);
                     } else {
                         double valorPertinencia = matriz[k][j];
                         double[] ex = exemplos.get(k).getPoint();
                         double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(sfMiC.getCentroide(), ex);
-                        SSD += Math.pow(valorPertinencia, fuzzificacao) * Math.pow(distancia, 2);
+//                        SSD += valorPertinencia * Math.pow(distancia, 2);
+                        SSD += distancia * Math.pow(valorPertinencia, 2);
+                        sfMiC.addPointToMm(valorPertinencia);
                     }
                 }
             }
             if(sfMiC != null) {
-                if(sfMiC.getN() >= 3) {
+                if(sfMiC.getN() >= 5) {
                     sfMiC.setSSDe(SSD);
                     sfMiCS.add(sfMiC);
                     if(!comite.rotulosSPFMiCs.contains(rotulo)) {

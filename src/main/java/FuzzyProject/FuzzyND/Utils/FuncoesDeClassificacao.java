@@ -33,11 +33,15 @@ public class FuncoesDeClassificacao {
                                            centroides.get(indiceMaior).getPoints().size(),
                                            alpha,
                                            theta);
+                        double valorPertinencia = matriz[k][indiceMaior];
+                        sfMiC.addPointToMm(valorPertinencia);
                     } else {
                         double valorPertinencia = matriz[k][indiceMaior];
                         double[] ex = exemplos.get(k).getPoint();
                         double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(sfMiC.getCentroide(), ex);
-                        SSD += Math.pow(valorPertinencia, fuzzificacao) * Math.pow(distancia, 2);
+//                        SSD += valorPertinencia * Math.pow(distancia, 2);
+                        SSD += distancia * Math.pow(valorPertinencia, 2);
+                        sfMiC.addPointToMm(valorPertinencia);
                     }
                 }
             }

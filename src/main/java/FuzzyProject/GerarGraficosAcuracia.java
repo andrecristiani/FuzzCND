@@ -12,37 +12,42 @@ import java.util.List;
 
 public class GerarGraficosAcuracia {
     public static void main(String[] args) throws IOException {
-        String dataset = "forest";
+        String dataset = "moa";
         String current = (new File(".")).getCanonicalPath();
-        String caminho = current + "/datasets-j48/" + dataset + "/"+ dataset + "-meu-predctions.txt";
-        String caminho2 = current + "/datasets-j48/" + dataset + "/"+ dataset + "-vfdt-predctions.txt";
-        String caminho3 = current + "/datasets-j48/" + dataset + "/"+ dataset + "-j48-predctions.txt";
-        String caminho4 = current + "/datasets-j48/" + dataset + "/"+ dataset + "-ensemblej48-predctions.txt";
+        String caminhoMeu = current + "/datasets-j48/" + dataset + "/"+ dataset + "-meu-predctions.txt";
+        String caminhoHat = current + "/datasets-j48/" + dataset + "/"+ dataset + "-hat-predctions.txt";
+        String caminhoArf = current + "/datasets-j48/" + dataset + "/"+ dataset + "-arf-predctions.txt";
+        String caminhoJ48 = current + "/datasets-j48/" + dataset + "/"+ dataset + "-j48-predctions.txt";
+        String caminhoEnsemble = current + "/datasets-j48/" + dataset + "/"+ dataset + "-ensemblej48-predctions.txt";
 
         List<List<AcuraciaMedidas>> acuraciasDosClassificadores = new ArrayList<>();
         List<String> rotuloAlgoritmo = new ArrayList<>();
 
         //moa
-//        int numAnalises = 90;
+        int numAnalises = 90;
 
         //rbf
 //        int numAnalises = 47;
 
         //forest
-        int numAnalises = 570;
-        List<AcuraciaMedidas> acuraciaMeu = ManipulaArquivos.carregaAcuracias(caminho, numAnalises);
+//        int numAnalises = 570;
+        List<AcuraciaMedidas> acuraciaMeu = ManipulaArquivos.carregaAcuracias(caminhoMeu, numAnalises);
         acuraciasDosClassificadores.add(acuraciaMeu);
-        rotuloAlgoritmo.add("Our proposal");
+        rotuloAlgoritmo.add("FuzzCND");
 
-        List<AcuraciaMedidas> acuraciaVFDT = ManipulaArquivos.carregaAcuracias(caminho2, numAnalises);
+        List<AcuraciaMedidas> acuraciaVFDT = ManipulaArquivos.carregaAcuracias(caminhoHat, numAnalises);
         acuraciasDosClassificadores.add(acuraciaVFDT);
         rotuloAlgoritmo.add("HAT");
 
-        List<AcuraciaMedidas> acuraciaEnsembleJ48 = ManipulaArquivos.carregaAcuracias(caminho4, numAnalises);
+        List<AcuraciaMedidas> acuraciaARF = ManipulaArquivos.carregaAcuracias(caminhoArf, numAnalises);
+        acuraciasDosClassificadores.add(acuraciaVFDT);
+        rotuloAlgoritmo.add("ARF");
+
+        List<AcuraciaMedidas> acuraciaEnsembleJ48 = ManipulaArquivos.carregaAcuracias(caminhoEnsemble, numAnalises);
         acuraciasDosClassificadores.add(acuraciaEnsembleJ48);
         rotuloAlgoritmo.add("ADTE");
 
-        List<AcuraciaMedidas> acuraciaJ48 = ManipulaArquivos.carregaAcuracias(caminho3, numAnalises);
+        List<AcuraciaMedidas> acuraciaJ48 = ManipulaArquivos.carregaAcuracias(caminhoJ48, numAnalises);
         acuraciasDosClassificadores.add(acuraciaJ48);
         rotuloAlgoritmo.add("C4.5");
 

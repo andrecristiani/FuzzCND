@@ -11,7 +11,7 @@ import java.io.IOException;
 public class FuzzyDecisionTree {
     public static void main(String[] args) throws IOException, CombinatoricException, Exception {
         int numCjtos = 6;
-        String dataset = "kddn";
+        String dataset = "moa";
         String taxaPoda = "25";
         String caminho = "";
         String current = (new File(".")).getCanonicalPath();
@@ -29,25 +29,36 @@ public class FuzzyDecisionTree {
         //MOA
 //        FaseOffline faseOffline = new FaseOffline();
 //        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("moa", caminho, taxaPoda, 6, 6, 2000, 12, 2, 1, 1);
-//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
-//        faseOnline.inicializarFuzzyCMeans(current + "/moa/", "moa", comite, 2000, 40, 0.3, 0.95, 0.26);
+//        FaseOnline faseOnline = new FaseOnline(2,2, K, 12, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/moa/", "moa", comite, 100000, 40, 0.3, 0.95, 0.30);
 
 //        RBF
 //        FaseOffline faseOffline = new FaseOffline();
 //        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("rbf", current + "/rbf/", taxaPoda, 6, 6, 2000, 12, 2, 1, 1);
 //        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
-//        faseOnline.inicializarFuzzyCMeans(current + "/rbf/", "rbf", comite, 100, 40, 0.2, 0.72, 0.04);
+//        faseOnline.inicializarFuzzyCMeans(current + "/rbf/", "rbf", comite, 100000, 40, 0.2, 0.95, 0.34);
 
 //        FaseOffline faseOffline = new FaseOffline();
 //        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("rbf", current + "/rbf/", taxaPoda, 3, 6, 2000, 12, 2, 1, 1);
 //        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
 //        faseOnline.inicializarFuzzyCMeans(current + "/rbf/", "rbf", comite, 50, 40, 0.1, 0.90, 0.05);
 
+        //SyncEDC
+        FaseOffline faseOffline = new FaseOffline();
+        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("synedc", current + "/synedc/", taxaPoda, 6, 6, 5000, 50, 2, 1, 1);
+        FaseOnline faseOnline = new FaseOnline(2,2, 50, 2, 2, 1,1, 5, 5000);
+        faseOnline.inicializarFuzzyCMeans(current + "/synedc/", "synedc", comite, 2000, 40, 0.085, 0.40, 0.14);
+
         //forest
 //        FaseOffline faseOffline = new FaseOffline();
-//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("forest", current + "/forest/", taxaPoda, 3, 6, 2000, 12, 2, 1, 1);
-//        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
-//        faseOnline.inicializarFuzzyCMeans(current + "/forest/", "forest", comite, 100, 40, 0.1, 0.70, 0.05);
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("forest", current + "/forest/", taxaPoda, 3, 6, 2000, 24, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, 24, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/forest/", "forest", comite, 2000, 40, 0.1, 0.95, 0.50);
+
+//        FaseOffline faseOffline = new FaseOffline();
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("covtype", current + "/covtype/", taxaPoda, 3, 8, 5000, 50, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, 50, 2, 2, 1,1, 5, 5000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/covtype/", "covtype", comite, 2000, 40, 0.1, 0.95, 0.35);
 
         //        KDD
 //        FaseOffline faseOffline = new FaseOffline();
@@ -55,10 +66,10 @@ public class FuzzyDecisionTree {
 //        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
 //        faseOnline.inicializarFuzzyCMeans(current + "/kdd/", "kdd", comite, 2000, 40, 0.2, 0.99, 0.0);
 
-        FaseOffline faseOffline = new FaseOffline();
-        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("kddn", current + "/kddn/", taxaPoda, 6, 6, 2000, 12, 2, 1, 1);
-        FaseOnline faseOnline = new FaseOnline(2,2, K, 2, 2, 1,1, 5, 2000);
-        faseOnline.inicializarFuzzyCMeans(current + "/kddn/", "kddn", comite, 2000, 40, 0.2, 0.99, 0.0);
+//        FaseOffline faseOffline = new FaseOffline();
+//        ComiteArvores comite = faseOffline.inicializarFuzzyCMeans("kddn", current + "/kddn/", taxaPoda, 6, 6, 2000, 24, 2, 1, 1);
+//        FaseOnline faseOnline = new FaseOnline(2,2, 24, 2, 2, 1,1, 5, 2000);
+//        faseOnline.inicializarFuzzyCMeans(current + "/kddn/", "kddn", comite, 2000, 40, 0.2, 0.99, 0.50);
     }
 }
 

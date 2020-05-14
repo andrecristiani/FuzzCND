@@ -58,15 +58,19 @@ public class ComiteArvores {
     public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
         ResultadoMA rMA = ca.main(this.dataset, this, tChunk);
         for(int i=0; i< rMA.numClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, i);
-            dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
-            dt.numAtributos = this.numAtributos;
-            dt.atributos = this.atributos;
-            dt.rotulos = rMA.rotulos.get(i);
-            fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
-            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
-            ma.apagaArqsTemporarios(dataset + i, caminho);
-            this.modelos.add(dt);
+            try {
+                DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, i);
+                dt.numObjetos = ma.getNumExemplos(this.caminho + this.dataset + i + ".txt");
+                dt.numAtributos = this.numAtributos;
+                dt.atributos = this.atributos;
+                dt.rotulos = rMA.rotulos.get(i);
+                fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
+                fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset + i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
+                ma.apagaArqsTemporarios(dataset + i, caminho);
+                this.modelos.add(dt);
+            } catch (Exception e) {
+                System.err.println("Impossível treinar árvore com apenas uma classe");
+            }
         }
     }
 
@@ -109,10 +113,10 @@ public class ComiteArvores {
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
             List<String> rotulos = new ArrayList<String>();
-            for (int i = 0; i < hashmapRotulos.size(); i++) {
-                numeroVotos.put(String.valueOf(i), 0);
-                rotulos.add(String.valueOf(i));
-            }
+//            for (int i = 0; i < hashmapRotulos.size(); i++) {
+//                numeroVotos.put(String.valueOf(i), 0);
+//                rotulos.add(String.valueOf(i));
+//            }
 
             Vector v = new Vector<>();
             for (int i = 0; i < exemplo.length; i++) {
@@ -130,7 +134,11 @@ public class ComiteArvores {
                 String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(i), v);
 //                int t = this.hashmapRotulos.get(rotuloVotado);
 //                int novoValor = numeroVotos.get(rotuloVotado) + 1;
-                numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+                if(numeroVotos.containsKey(rotuloVotado)) {
+                    numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+                } else {
+                    numeroVotos.put(rotuloVotado, 1);
+                }
                 votos.add(rotuloVotado);
                 if(modelos.get(i).t > tempoMaisNovo) {
                     tempoMaisNovo = modelos.get(i).t;
@@ -141,7 +149,7 @@ public class ComiteArvores {
             int valorMaior = -1;
             String indiceMaior = null;
 
-            String teste = "";
+            rotulos.addAll(numeroVotos.keySet());
             for(int i=0; i<numeroVotos.size(); i++) {
                 String rotulo = rotulos.get(i);
                 if(valorMaior < numeroVotos.get(rotulo)) {
@@ -334,11 +342,11 @@ public class ComiteArvores {
 
         Double maxVal = Collections.max(tipicidades);
         double limiar = (this.todasTipMax.getValorMedio() - this.adaptadorTheta);
+//        System.err.println("Limiar: " + limiar + "      MaxVal: " + maxVal);
         if(maxVal >= limiar) {
             this.todasTipMax.addValorTipicidade(maxVal);
             return false;
         }
-//        System.err.println("Limiar: " + limiar + "      MaxVal: " + maxVal);
         return true;
     }
 
