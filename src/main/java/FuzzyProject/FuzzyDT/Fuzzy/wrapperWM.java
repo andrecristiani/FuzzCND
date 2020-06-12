@@ -1286,7 +1286,7 @@ public class wrapperWM {
         int[] tipoAtribs = new int[numVariaveisEntrada - 1];
 
         for(int m = 0; m < numVariaveisEntrada - 1; ++m) {
-            if (metaDados[m][1].compareTo("double") != 0 && metaDados[m][1].compareTo("real") != 0 && metaDados[m][1].compareTo("integer") != 0) {
+            if (metaDados[m][1].compareTo("double") != 0 && metaDados[m][1].compareTo("real") != 0 && metaDados[m][1].compareTo("integer") != 0 && metaDados[m][1].compareTo("numeric") != 0) {
                 int temp = 0;
 
                 for(int n = 1; n < 100; ++n) {

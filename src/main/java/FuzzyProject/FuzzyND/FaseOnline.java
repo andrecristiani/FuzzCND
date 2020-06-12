@@ -1,7 +1,9 @@
 package FuzzyProject.FuzzyND;
 
 import FuzzyProject.FuzzyDT.Models.ComiteArvores;
+import FuzzyProject.FuzzyDT.Utils.ManipulaArquivos;
 import FuzzyProject.FuzzyND.Models.*;
+import FuzzyProject.FuzzyND.Models.Avaliacao.AcuraciaMedidas;
 import FuzzyProject.FuzzyND.Utils.Avaliacao;
 import FuzzyProject.FuzzyND.Utils.FuncoesDeClassificacao;
 import FuzzyProject.FuzzyND.Utils.LineChart_AWT;
@@ -31,12 +33,18 @@ public class FaseOnline {
     public List<Exemplo> memTempDesconhecidos = new ArrayList<>();
     public List<Exemplo> exemplosEsperandoTempo = new ArrayList<>();
     public List<MedidasClassicas> desempenho = new ArrayList<>();
+    public List<String> linhasMatriz = new ArrayList<>();
+    public List<Double> listaUnkRate = new ArrayList<>();
+    public Map<String, Integer> unkRi = new HashMap<>(); //para converter String para Integer
+    public Map<String, Integer> exc = new HashMap<>(); //para converter String para Integer
     ModeloNS modeloNS;
     public int novidadesClassificadas;
     public int fp;
     public int fn;
     int fe = 0;
     int feGlobal = 0;
+    int acertos = 0;
+    int exemplosClassificados = 0;
     public int fpGlobal;
     public int fnGlobal;
     public int nInstances = 90000;
@@ -71,7 +79,7 @@ public class FaseOnline {
             int fe = 0;
             int desconhecido = 0;
             int kCurto = 4;
-            for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
+            for(int i=1, j=1, h=1; i<data.size(); i++, j++, h++) {
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
                 String rotulo = comite.classificaExemploAgrupamentoExternoKMeans(exemplo.getPoint());
@@ -86,6 +94,8 @@ public class FaseOnline {
                 }
                 if(rotulo.equals(exemplo.getRotuloVerdadeiro())) {
                     acertou++;
+                    int index = linhasMatriz.indexOf(rotulo);
+
                     exemplosParaAvaliacao.add(exemplo);
                 } else {
                     if(comite.rotulosSPFMiCs.contains(exemplo.getRotuloVerdadeiro())) {
@@ -157,6 +167,7 @@ public class FaseOnline {
         comite.m = this.m;
         comite.n = this.n;
         comite.K = this.K;
+        List<AcuraciaMedidas> acuracias = new ArrayList<>();
         comite.todasTipMax = new TipicidadeMaxima(todasTipMax);
         comite.adaptadorTheta = adaptadorTheta;
         DataSource source;
@@ -173,26 +184,42 @@ public class FaseOnline {
             int desconhecido = 0;
             int kCurto = 4;
             for(int i=0, j=0, h=0; i<data.size(); i++, j++, h++) {
-                if(i==61000) {
+                if(i==39000) {
                     System.out.println("U");
                 }
-//                System.err.println(i);
                 Instance ins = data.get(i);
                 Exemplo exemplo = new Exemplo(ins.toDoubleArray(), true);
+                if(exemplo.getRotuloVerdadeiro().equals("17")) {
+                    System.out.println("U");
+                }
+                if(exc.containsKey(exemplo.getRotuloVerdadeiro())) {
+                    exc.replace(exemplo.getRotuloVerdadeiro(), exc.get(exemplo.getRotuloVerdadeiro()) + 1);
+                } else {
+
+                    exc.put(exemplo.getRotuloVerdadeiro(), 1);
+                }
                 String rotulo = comite.classificaExemploAgrupamentoExternoFuzzyCMeans(exemplo.getPoint());
 //                System.out.println("Rótulo verdadeiro: " + exemplo.getRotuloVerdadeiro());
 //                System.out.println("Rótulo votado: " + rotulo);
                 if(rotulo.equals("desconhecido")) {
                     desconhecido++;
-                    exemplo.setDesconhecido();
+                    if(unkRi.containsKey(exemplo.getRotuloVerdadeiro())) {
+                        unkRi.replace(exemplo.getRotuloVerdadeiro(), unkRi.get(exemplo.getRotuloVerdadeiro()) + 1);
+                    } else {
+                        unkRi.put(exemplo.getRotuloVerdadeiro(),1);
+                    }
                     this.memTempDesconhecidos.add(exemplo);
                     if(this.memTempDesconhecidos.size() >= T) {
                         this.memTempDesconhecidos = this.detectaNovidadesBinarioFuzzyCMeans(this.memTempDesconhecidos, kCurto, comite, phi);
                     }
                 } else {
+                    exemplosClassificados++;
                     exemplo.setRotuloClassificado(rotulo);
                     if (rotulo.equals(exemplo.getRotuloVerdadeiro())) {
                         acertou++;
+                        acertos++;
+                        int linha = linhasMatriz.indexOf(rotulo);
+                        int coluna = linhasMatriz.indexOf(rotulo);
                         exemplosParaAvaliacao.add(exemplo);
                     } else {
                         if (comite.rotulosSPFMiCs.contains(exemplo.getRotuloVerdadeiro())) {
@@ -222,13 +249,23 @@ public class FaseOnline {
                 if(h == 1000) {
                     h=0;
                     MedidasClassicas mc = Avaliacao.calculaMedidasClassicas(fp, fn, fe, nInstances, nc, i);
-                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe);
+                    System.out.println("I: " + i +" || FP: " + fp + "|| FN: " + fn + "|| FE: " + fe +"   ||   Desconhecidos: " + desconhecido);
                     desempenho.add(mc);
+                    acuracias.add(Avaliacao.calculaAcuracia(acertos, exemplosClassificados, i));
+                    listaUnkRate.add(Avaliacao.calculaUnkR(this.unkRi, this.exc));
+                    unkRi.clear();
+                    exc.clear();
+                    desconhecido = 0;
                     fp = 0;
                     fn = 0;
                     fe = 0;
+                    exemplosClassificados = 0;
+                    acertos = 0;
                 }
             }
+            acuracias.add(Avaliacao.calculaAcuracia(acertos, exemplosClassificados, data.size()));
+            ManipulaArquivos.salvaPredicoes(acuracias, dataset);
+            ManipulaArquivos.salvaUnkR(listaUnkRate, dataset);
             System.out.println("Acertou " + acertou + " exemplos");
             System.err.println("Errou " + feGlobal + " exemplos");
             System.err.println("Desconhecidos = " + desconhecido);
@@ -340,7 +377,8 @@ public class FaseOnline {
         for(int i=0; i<listaDesconhecidos.size(); i++) {
             if(silhuetasValidas.contains(this.getIndiceDoMaiorValor(matrizPertinencia[i]))) {
                 listaDesconhecidos.get(i).setRotuloClassificado("Novidade");
-                novidadesClassificadas++;
+                this.novidadesClassificadas++;
+                this.exemplosClassificados++;
                 if(comite.rotulosSPFMiCs.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
                     fp++;
                 }
@@ -369,23 +407,24 @@ public class FaseOnline {
         List<Double> frs = new ArrayList<>();
 
         for(int i=0; i<sfMiCS.size(); i++) {
-            frs.clear();
-            for(int j=0; j<sfmicsConhecidos.size(); j++) {
-                double di = sfmicsConhecidos.get(j).getDispersao();
-                double dj = sfMiCS.get(i).getDispersao();
-                double dist = (di + dj) / MedidasDeDistancia.calculaDistanciaEuclidiana(sfmicsConhecidos.get(j).getCentroide(), sfMiCS.get(i).getCentroide());
-                frs.add((di + dj) / dist);
-            }
+            if(!sfMiCS.get(i).isNull()) {
+                frs.clear();
+                for (int j = 0; j < sfmicsConhecidos.size(); j++) {
+                    double di = sfmicsConhecidos.get(j).getDispersao();
+                    double dj = sfMiCS.get(i).getDispersao();
+                    double dist = (di + dj) / MedidasDeDistancia.calculaDistanciaEuclidiana(sfmicsConhecidos.get(j).getCentroide(), sfMiCS.get(i).getCentroide());
+                    frs.add((di + dj) / dist);
+                }
 
-            Double maxVal = Collections.min(frs);
-            int indexMax = frs.indexOf(maxVal);
-
-            if(maxVal < phi) {
-                sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
-            } else {
-                sfMiCS.get(i).setRotulo("Novidade");
+                Double maxVal = Collections.min(frs);
+                int indexMax = frs.indexOf(maxVal);
+//                System.err.println("maxVal: " + maxVal);
+                if (maxVal > phi) {
+                    sfMiCS.get(i).setRotulo(sfmicsConhecidos.get(indexMax).getRotulo());
+                } else {
+                    sfMiCS.get(i).setRotulo("Novidade");
+                }
             }
-            System.err.println("Novidade: " + sfMiCS.get(i).getRotulo());
         }
 
         for(int i=0; i<listaDesconhecidos.size(); i++) {
@@ -393,17 +432,16 @@ public class FaseOnline {
             if(silhuetasValidas.contains(cluster)) {
                 listaDesconhecidos.get(i).setRotuloClassificado(sfMiCS.get(cluster).getRotulo());
                 novidadesClassificadas++;
+                exemplosClassificados++;
                 exemplosParaAvaliacao.add(listaDesconhecidos.get(i));
-                boolean teste = comite.rotulosSPFMiCs.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro()) && listaDesconhecidos.get(i).getRotuloClassificado().equals("Novidade");
                 if(comite.rotulosSPFMiCs.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro()) && listaDesconhecidos.get(i).getRotuloClassificado().equals("Novidade")) {
-                    System.err.println("Rótulo verdadeiro: " + listaDesconhecidos.get(i).getRotuloVerdadeiro() + "||| Rótulo classificado: " + listaDesconhecidos.get(i).getRotuloClassificado());
                     fp++;
                     fpGlobal++;
-                }
-
-                if(comite.rotulosSPFMiCs.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro()) && !listaDesconhecidos.get(i).getRotuloClassificado().equals(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
+                }else if(comite.rotulosSPFMiCs.contains(listaDesconhecidos.get(i).getRotuloVerdadeiro()) && !listaDesconhecidos.get(i).getRotuloClassificado().equals(listaDesconhecidos.get(i).getRotuloVerdadeiro())) {
                     fe++;
                     feGlobal++;
+                } else {
+                    acertos++;
                 }
                 listaDesconhecidos.remove(i);
             }
@@ -433,14 +471,15 @@ public class FaseOnline {
                     }
 
                     apj = apj / nExemplos;
-                    double bpj = Collections.min(dqj);
-                    double sj = (bpj - apj) / Math.max(apj, bpj);
-                    double[] maiorESegundaMeiorPertinencia = this.getMaiorESegundoMaiorPertinencia(matriz[j], j);
-                    double upj = maiorESegundaMeiorPertinencia[0];
-                    double uqj = maiorESegundaMeiorPertinencia[1];
-
-                    numerador += Math.pow((upj - uqj), this.alpha) * sj;
-                    denominador += Math.pow((upj - uqj), this.alpha);
+                    if(dqj.size() != 0) {
+                        double bpj = Collections.min(dqj);
+                        double sj = (bpj - apj) / Math.max(apj, bpj);
+                        double[] maiorESegundaMeiorPertinencia = this.getMaiorESegundoMaiorPertinencia(matriz[j], j);
+                        double upj = maiorESegundaMeiorPertinencia[0];
+                        double uqj = maiorESegundaMeiorPertinencia[1];
+                        numerador += Math.pow((upj - uqj), this.alpha) * sj;
+                        denominador += Math.pow((upj - uqj), this.alpha);
+                    }
                 }
             }
             double fs = numerador / denominador;

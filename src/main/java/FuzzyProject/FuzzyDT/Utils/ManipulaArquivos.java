@@ -3,6 +3,7 @@ package FuzzyProject.FuzzyDT.Utils;
 import FuzzyProject.FuzzyDT.Fuzzy.CombinatoricException;
 import FuzzyProject.FuzzyDT.Fuzzy.Particoes;
 import FuzzyProject.FuzzyDT.Fuzzy.wrapperWM;
+import FuzzyProject.FuzzyND.Models.Avaliacao.AcuraciaMedidas;
 
 import java.awt.Component;
 import java.io.BufferedReader;
@@ -16,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -2352,7 +2352,6 @@ public class ManipulaArquivos {
                 int a;
                 int numTermos;
                 for(a = 0; a < nVE; ++a) {
-//                    int numTermos = false;
                     if (a == nVE - 1) {
                         numTermos = 0;
                     } else {
@@ -2414,7 +2413,7 @@ public class ManipulaArquivos {
                     }
                     StringTokenizer str = new StringTokenizer(line);
                     linha = "@ATTRIBUTE " + str.nextToken() + "\t{";
-                    if (!line.contains("double") && !line.contains("float") && !line.contains("real") && !line.contains("integer")) {
+                    if (!line.contains("double") && !line.contains("float") && !line.contains("real") && !line.contains("integer") && !line.contains("numeric")) {
                         while(str.hasMoreTokens()) {
                             linha = linha + str.nextToken();
                             if (str.hasMoreTokens()) {
@@ -3645,6 +3644,101 @@ public class ManipulaArquivos {
         } catch (Exception var5) {
         }
 
+    }
+
+    public static void salvaPredicoes(List<AcuraciaMedidas> acuracias, String arquivo) throws IOException {
+        FileWriter writer;
+        BufferedWriter buf_writer;
+        String current = (new File(".")).getCanonicalPath();
+        writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + "-FuzzyCND2000predctions" + ".txt");
+        buf_writer = new BufferedWriter(writer);
+
+        for(int i = 0; i<acuracias.size(); i++) {
+            String ex = acuracias.get(i).getPonto()+ "," + acuracias.get(i).getAcuracia();
+            buf_writer.write(ex);
+            buf_writer.newLine();
+        }
+
+        buf_writer.close();
+    }
+
+    public static void salvaUnkR(List<Double> unkRate, String arquivo) throws IOException {
+        FileWriter writer;
+        BufferedWriter buf_writer;
+        String current = (new File(".")).getCanonicalPath();
+        writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + "-FuzzyCNDUnkR" + ".txt");
+        buf_writer = new BufferedWriter(writer);
+
+        for(int i = 0; i<unkRate.size(); i++) {
+            String ex = unkRate.get(i).toString();
+            buf_writer.write(ex);
+            buf_writer.newLine();
+        }
+
+        buf_writer.close();
+    }
+
+    public static List<AcuraciaMedidas> carregaAcuracias(String caminho, int numAnalises) {
+        BufferedReader inReader = null;
+        List<String> teste = new ArrayList<>();
+        try {
+            inReader = new BufferedReader(new FileReader(caminho));
+        } catch (FileNotFoundException var11) {
+            System.err.println("carregaParticao - Não foi possível abrir o arquivo: " + caminho);
+            System.exit(1);
+        }
+
+        try {
+            String line = null;
+            StringTokenizer str = null;
+            List<AcuraciaMedidas> acuracias = new ArrayList<>();
+            for(int i=0; i<numAnalises; i++) {
+                line = inReader.readLine();
+                str = new StringTokenizer(line);
+                String temp = str.nextToken();
+                String[] lixo = temp.split(",");
+                if(Double.parseDouble(lixo[1]) > 100.0) {
+                    System.err.println("Acurácia maior que 100");
+                }
+                System.out.println();
+                acuracias.add(new AcuraciaMedidas(Integer.parseInt(lixo[0].replace(".0", "")), Double.parseDouble(lixo[1])));
+            };
+            inReader.close();
+            return acuracias;
+        } catch (IOException var9) {
+            System.err.println(var9.getMessage());
+        }
+        return null;
+    }
+
+    public static List<Double> carregaUnkR(String caminho, int numAnalises) {
+        BufferedReader inReader = null;
+        List<String> teste = new ArrayList<>();
+        try {
+            inReader = new BufferedReader(new FileReader(caminho));
+        } catch (FileNotFoundException var11) {
+            System.err.println("carregaParticao - Não foi possível abrir o arquivo: " + caminho);
+            System.exit(1);
+        }
+
+        try {
+            String line = null;
+            StringTokenizer str = null;
+            List<Double> acuracias = new ArrayList<>();
+            for(int i=0; i<numAnalises; i++) {
+                line = inReader.readLine();
+                str = new StringTokenizer(line);
+                String temp = str.nextToken();
+                String[] lixo = temp.split(",");
+                System.out.println();
+                acuracias.add(Double.parseDouble(lixo[0]));
+            };
+            inReader.close();
+            return acuracias;
+        } catch (IOException var9) {
+            System.err.println(var9.getMessage());
+        }
+        return null;
     }
 }
 

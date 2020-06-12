@@ -14,6 +14,7 @@ public class SPFMiC {
     private double centroide[];
     private double alpha;
     private double theta;
+    private boolean isNull;
 
     public SPFMiC(double[] centroide, int N, double alpha, double theta) {
         this.CF1pertinencias = centroide;
@@ -22,11 +23,15 @@ public class SPFMiC {
         this.N = N;
         this.alpha = alpha;
         this.theta = theta;
-        this.Mm = 1;
+        this.Mm = 0;
         this.Tn = 1;
         this.SSDe = 0;
         this.t = 0;
         this.rotulo = "Teste";
+    }
+
+    public SPFMiC() {
+        this.isNull = true;
     }
 
     public double getLSm() {
@@ -101,6 +106,50 @@ public class SPFMiC {
         this.centroide = centroide;
     }
 
+    public double getMm() {
+        return Mm;
+    }
+
+    public void setMm(double mm) {
+        Mm = mm;
+    }
+
+    public double getTn() {
+        return Tn;
+    }
+
+    public void setTn(double tn) {
+        Tn = tn;
+    }
+
+    public double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
+    }
+
+    public double getTheta() {
+        return theta;
+    }
+
+    public void setTheta(double theta) {
+        this.theta = theta;
+    }
+
+    public boolean isNull() {
+        return isNull;
+    }
+
+    public void setNull(boolean aNull) {
+        isNull = aNull;
+    }
+
+    public void addPointToMm(double pertinencia) {
+        this.Mm += Math.pow(pertinencia, 2);
+    }
+
     /***
      * Updates the center position.
      */
@@ -137,8 +186,11 @@ public class SPFMiC {
      */
     public double calculaTipicidade(double[] exemplo, double n, double K) {
         double tipicidadeI = this.getTipicidadeI(K);
+//        System.out.println("Gama: " + tipicidadeI);
+        double dist = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, this.centroide);
+//        System.out.println("Dist: " + dist);
         return (1 /
-                (1 + Math.pow(((this.theta/tipicidadeI) * MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, this.centroide)),
+                (1 + Math.pow(((this.theta/tipicidadeI) * dist),
                         (1/(n-1))
                 )
                 ));
@@ -148,7 +200,7 @@ public class SPFMiC {
      * Function used to calculate an attribute used in the typicality function
      */
     private double getTipicidadeI(double K) {
-        return  K * (this.SSDe / this.Mm);
+        return  (this.SSDe / this.Mm);
     }
 
     public double getDispersao() {

@@ -20,7 +20,6 @@ public class ComiteArvores {
     public double m;
     public double n;
     public int K;
-//    public double todasTipMax = 0;
     public TipicidadeMaxima todasTipMax;
     public double adaptadorTheta = 0;
     public List<String> atributos = new ArrayList<>();
@@ -59,15 +58,19 @@ public class ComiteArvores {
     public void treinaComiteInicialFuzzyCMeans(int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
         ResultadoMA rMA = ca.main(this.dataset, this, tChunk);
         for(int i=0; i< rMA.numClassificadores; i++) {
-            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, tempo);
-            dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + i + ".txt");
-            dt.numAtributos = this.numAtributos;
-            dt.atributos = this.atributos;
-            dt.rotulos = rMA.rotulos.get(i);
-            fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
-            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
-            ma.apagaArqsTemporarios(dataset + i, caminho);
-            this.modelos.add(dt);
+            try {
+                DecisionTree dt = new DecisionTree(this.caminho, this.dataset, i, this.taxaPoda, i);
+                dt.numObjetos = ma.getNumExemplos(this.caminho + this.dataset + i + ".txt");
+                dt.numAtributos = this.numAtributos;
+                dt.atributos = this.atributos;
+                dt.rotulos = rMA.rotulos.get(i);
+                fdt.geraFuzzyDT(this.dataset + i, this.taxaPoda, this.numCjtos, this.caminho, dt);
+                fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset + i, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
+                ma.apagaArqsTemporarios(dataset + i, caminho);
+                this.modelos.add(dt);
+            } catch (Exception e) {
+                System.err.println("Impossível treinar árvore com apenas uma classe");
+            }
         }
     }
 
@@ -109,13 +112,19 @@ public class ComiteArvores {
             return "desconhecido";
         } else {
             Map<String, Integer> numeroVotos = new HashMap<>();
-            for (int i = 0; i < rotulosConhecidos.size(); i++) {
-                numeroVotos.put(rotulosConhecidos.get(i), 0);
-            }
+            List<String> rotulos = new ArrayList<String>();
+//            for (int i = 0; i < hashmapRotulos.size(); i++) {
+//                numeroVotos.put(String.valueOf(i), 0);
+//                rotulos.add(String.valueOf(i));
+//            }
 
             Vector v = new Vector<>();
             for (int i = 0; i < exemplo.length; i++) {
                 v.add(exemplo[i]);
+            }
+
+            if(this.modelos.size() == 1) {
+                return fdt.classificaExemploSemGruposNosFolhas(modelos.get(0), v);
             }
 
             String votoMaisNovo = "";
@@ -123,7 +132,13 @@ public class ComiteArvores {
             List<String> votos = new ArrayList<>();
             for (int i = 0; i < modelos.size(); i++) {
                 String rotuloVotado = fdt.classificaExemploSemGruposNosFolhas(modelos.get(i), v);
-                numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+//                int t = this.hashmapRotulos.get(rotuloVotado);
+//                int novoValor = numeroVotos.get(rotuloVotado) + 1;
+                if(numeroVotos.containsKey(rotuloVotado)) {
+                    numeroVotos.replace(rotuloVotado, numeroVotos.get(rotuloVotado) + 1);
+                } else {
+                    numeroVotos.put(rotuloVotado, 1);
+                }
                 votos.add(rotuloVotado);
                 if(modelos.get(i).t > tempoMaisNovo) {
                     tempoMaisNovo = modelos.get(i).t;
@@ -134,17 +149,15 @@ public class ComiteArvores {
             int valorMaior = -1;
             String indiceMaior = null;
 
-            String teste = "";
+            rotulos.addAll(numeroVotos.keySet());
             for(int i=0; i<numeroVotos.size(); i++) {
-                String rotulo = rotulosConhecidos.get(i);
-                teste += "Rótulo: " + rotulo + " qtd: " + numeroVotos.get(rotulo) + " |---| ";
+                String rotulo = rotulos.get(i);
                 if(valorMaior < numeroVotos.get(rotulo)) {
                     valorMaior = numeroVotos.get(rotulo);
                     indiceMaior = rotulo;
                 }
             }
 
-//            System.out.println(teste);
             if(valorMaior == this.modelos.size()) {
                 return indiceMaior;
             } else {
@@ -266,20 +279,24 @@ public class ComiteArvores {
 
     public void treinaNovaArvoreFuzzyCMeans(List<Exemplo> exemplosRotulados, int tChunk, int K, double fuzzificacao, double alpha, double theta, int tempo) throws Exception {
 
-        if(this.modelos.size() >= tamanhoMaximo) {
-            this.removeClassificadorComMenorDesempenho(exemplosRotulados);
+        try {
+            ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
+            DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
+            dt.numObjetos = ma.getNumExemplos(this.caminho + this.dataset + resultadoMA.numClassificadores + ".txt");
+            dt.numAtributos = this.numAtributos;
+            dt.atributos = this.atributos;
+            dt.rotulos = resultadoMA.rotulos.get(0);
+            fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
+            fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset + resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
+            ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
+            if(this.modelos.size() >= tamanhoMaximo) {
+                this.removeClassificadorComMenorDesempenho(exemplosRotulados);
+            }
+            this.modelos.add(dt);
+            dt.elementosPorRegraKMeans.clear();
+        } catch (Exception e) {
+            System.err.println("Impossível treinar árvore com apenas uma classe");
         }
-        ResultadoMA resultadoMA = ca.mainParaExemplosRotulados(this.dataset, exemplosRotulados, this, tChunk);
-        DecisionTree dt = new DecisionTree(this.caminho, this.dataset, resultadoMA.numClassificadores, this.taxaPoda, tempo);
-        dt.numObjetos = ma.getNumExemplos(this.caminho+this.dataset + resultadoMA.numClassificadores + ".txt");
-        dt.numAtributos = this.numAtributos;
-        dt.atributos = this.atributos;
-        dt.rotulos = resultadoMA.rotulos.get(0);
-        fdt.geraFuzzyDT(this.dataset + resultadoMA.numClassificadores, this.taxaPoda, this.numCjtos, this.caminho, dt);
-        fdt.criaGruposEmNosFolhasFuzzyCMeans(this.dataset+resultadoMA.numClassificadores, this.caminho, dt, tChunk, K, fuzzificacao, alpha, theta, this);
-        ma.apagaArqsTemporarios(dataset + resultadoMA.numClassificadores, caminho);
-        this.modelos.add(dt);
-        dt.elementosPorRegraKMeans.clear();
     }
 
     public boolean calculaFoutlierKmeans(double[] exemplo) {
@@ -325,11 +342,22 @@ public class ComiteArvores {
 
         Double maxVal = Collections.max(tipicidades);
         double limiar = (this.todasTipMax.getValorMedio() - this.adaptadorTheta);
+//        System.err.println("Limiar: " + limiar + "      MaxVal: " + maxVal);
         if(maxVal >= limiar) {
             this.todasTipMax.addValorTipicidade(maxVal);
             return false;
         }
-//        System.err.println("Tipicidade max: " + maxVal);
+        return true;
+    }
+
+    public boolean calculaFoutlierPelaDispersao(double[] exemplo) {
+        List<SPFMiC> todosSFMiCs = this.getTodosSFMiCs();
+        for(int i=0; i<todosSFMiCs.size(); i++) {
+            double distancia = MedidasDeDistancia.calculaDistanciaEuclidiana(exemplo, todosSFMiCs.get(i).getCentroide());
+            if(distancia <= todosSFMiCs.get(i).getDispersao()) {
+                return false;
+            }
+        }
         return true;
     }
 

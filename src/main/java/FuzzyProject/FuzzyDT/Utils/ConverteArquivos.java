@@ -184,7 +184,7 @@ public class ConverteArquivos {
         if(numExemplos % tChunk == 0) {
             numClassificadores = numExemplos/tChunk;
         } else {
-            numClassificadores = (int) Math.round((double)numExemplos/tChunk);
+            numClassificadores = (int) Math.ceil((double)numExemplos/tChunk);
         }
 
         ResultadoMA rMa = new ResultadoMA(numClassificadores);
@@ -251,12 +251,10 @@ public class ConverteArquivos {
 
                     String classesConcatenadas = new String();
                     classesConcatenadas = classes.get(0).replace(" ","");
+                    comite.rotulosConhecidos.addAll(classes);
+                    rMa.rotulos.get(countClassificadores).addAll(classes);
                     for(int j=1; j<classes.size(); j++) {
                         String classe = classes.get(j).replace(" ", "");
-                        if(!comite.rotulosConhecidos.contains(classe)) {
-                            comite.rotulosConhecidos.add(classe);
-                        }
-                        rMa.rotulos.get(countClassificadores).add(classe);
                         classesConcatenadas = classesConcatenadas + " " + classe;
                     }
 
@@ -275,37 +273,6 @@ public class ConverteArquivos {
             System.exit(1);
         }
 
-        str = null;
-
-//        try {
-//            writer = new FileWriter(current + "/" + arquivo + "/" + arquivo + numClassificador + ".names");
-//            buf_writer = new BufferedWriter(writer);
-//
-//            for(i = 0; i < numAtribs - 1; ++i) {
-//                if(atribs[i][0].compareTo("Class") == 0 && numAtributos) {
-//                    String aux = "";
-//                    for (int k=0; k<classesDivididas.size(); k++) {
-//                        String classe = classesDivididas.get(k).replace(" ", "");
-//                        aux = aux + classe;
-//                        if(k < classesDivididas.size()-1) {
-//                            aux = aux + " ";
-//                        }
-//                    }
-//                    temp = atribs[i][0] + " " + aux;
-//                    buf_writer.write(temp);
-//                    buf_writer.newLine();
-//                } else {
-//                    temp = atribs[i][0] + " " + atribs[i][1];
-//                    buf_writer.write(temp);
-//                    buf_writer.newLine();
-//                }
-//            }
-//
-//            buf_writer.close();
-//        } catch (IOException var24) {
-//            System.err.println(var24);
-//            System.exit(1);
-//        }
         return rMa;
     }
 
@@ -349,6 +316,9 @@ public class ConverteArquivos {
             String classe = classes.get(j).replace(" ", "");
             if(!comite.rotulosConhecidos.contains(classe)) {
                 comite.rotulosConhecidos.add(classe);
+            }
+            if(!comite.hashmapRotulos.containsKey(classe)) {
+                comite.hashmapRotulos.put(classe,comite.hashmapRotulos.size());
             }
             resultadoMA.rotulos.get(0).add(classe);
             classesConcatenadas = classesConcatenadas + " " + classe;
